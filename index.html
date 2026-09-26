@@ -1,1339 +1,1003 @@
 <!DOCTYPE html>
-<html lang="id">
+<html lang="id" class="dark">
 <head>
-<meta charset="UTF-8">
-<meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>Lock In OSN</title>
-
-<!-- Google Fonts -->
-<link rel="preconnect" href="https://fonts.googleapis.com">
-<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-<link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@500;600;700;800&family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
-
-<!-- Tailwind CSS via CDN -->
-<script src="https://cdn.tailwindcss.com"></script>
-<script>
-  tailwind.config = {
-    theme: {
-      extend: {
-        fontFamily: {
-          display: ['"Plus Jakarta Sans"', 'sans-serif'],
-          body: ['Inter', 'sans-serif'],
-        },
-        colors: {
-          maroon: { DEFAULT: '#8B0000', dark: '#5c0000', light: '#991B1B' },
-          navy: { DEFAULT: '#0F172A', light: '#1E3A8A' },
-          slateink: '#1E293B',
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Lock In OSN - Platform Belajar & Streak Siswa OSN</title>
+    
+    <!-- Tailwind CSS -->
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script>
+        tailwind.config = {
+            darkMode: 'class',
+            theme: {
+                extend: {
+                    colors: {
+                        osn: {
+                            bg: '#0B0F19',
+                            card: '#151C2C',
+                            border: '#2A354D',
+                            red: '#DC2626',
+                            redDark: '#991B1B',
+                            blue: '#2563EB',
+                            blueDark: '#1E40AF',
+                            accent: '#F59E0B'
+                        }
+                    },
+                    fontFamily: {
+                        sans: ['Inter', 'sans-serif']
+                    }
+                }
+            }
         }
-      }
-    }
-  }
-</script>
+    </script>
+    
+    <!-- Google Fonts & Font Awesome Icons -->
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
 
-<style>
-  :root{
-    --maroon:#8B0000;
-    --maroon-light:#991B1B;
-    --navy:#0F172A;
-    --navy-light:#1E3A8A;
-    --bg:#F1F5F9;
-    --gray:#64748B;
-    --ink:#1E293B;
-  }
-  *{ box-sizing:border-box; }
-  html,body{ height:100%; }
-  body{
-    font-family:'Inter', sans-serif;
-    background:var(--bg);
-    color:var(--ink);
-  }
-  .font-display{ font-family:'Plus Jakarta Sans', sans-serif; }
+    <!-- Firebase Compat SDKs (v10) for seamlessly working script integration -->
+    <script src="https://www.gstatic.com/firebasejs/10.12.0/firebase-app-compat.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/10.12.0/firebase-auth-compat.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/10.12.0/firebase-firestore-compat.js"></script>
 
-  ::-webkit-scrollbar{ width:8px; height:8px; }
-  ::-webkit-scrollbar-track{ background:transparent; }
-  ::-webkit-scrollbar-thumb{ background:#CBD5E1; border-radius:8px; }
-  ::-webkit-scrollbar-thumb:hover{ background:#94A3B8; }
+    <style>
+        body {
+            font-family: 'Inter', sans-serif;
+            background-color: #0B0F19;
+            color: #F3F4F6;
+        }
+        
+        /* Custom Scrollbar */
+        ::-webkit-scrollbar {
+            width: 8px;
+            height: 8px;
+        }
+        ::-webkit-scrollbar-track {
+            background: #0B0F19;
+        }
+        ::-webkit-scrollbar-thumb {
+            background: #2A354D;
+            border-radius: 4px;
+        }
+        ::-webkit-scrollbar-thumb:hover {
+            background: #3B82F6;
+        }
 
-  .hidden{ display:none !important; }
+        .glass-panel {
+            background: rgba(21, 28, 44, 0.75);
+            backdrop-filter: blur(12px);
+            border: 1px solid rgba(42, 53, 77, 0.6);
+        }
 
-  /* Sidebar nav item */
-  .nav-item{
-    display:flex; align-items:center; gap:.75rem;
-    padding:.7rem 1rem; border-radius:.6rem;
-    color:#CBD5E1; font-weight:500; font-size:.925rem;
-    cursor:pointer; transition:background .15s, color .15s;
-    border-left:3px solid transparent;
-  }
-  .nav-item:hover{ background:rgba(255,255,255,.06); color:#fff; }
-  .nav-item.active{
-    background:rgba(139,0,0,.35);
-    color:#fff;
-    border-left:3px solid #DC2626;
-  }
+        .gradient-red-btn {
+            background: linear-gradient(135deg, #DC2626 0%, #991B1B 100%);
+            transition: all 0.2s ease-in-out;
+        }
+        .gradient-red-btn:hover {
+            background: linear-gradient(135deg, #EF4444 0%, #B91C1C 100%);
+            box-shadow: 0 4px 15px rgba(220, 38, 38, 0.4);
+        }
 
-  /* Auth card */
-  .auth-bg{
-    background:
-      radial-gradient(circle at 15% 20%, rgba(139,0,0,.55), transparent 45%),
-      radial-gradient(circle at 85% 80%, rgba(30,58,138,.55), transparent 45%),
-      var(--navy);
-  }
-
-  /* Flame / streak visuals */
-  .flame-wrap{ position:relative; width:96px; height:120px; margin:0 auto; }
-  .flame{
-    position:absolute; left:50%; bottom:0; transform:translateX(-50%);
-    width:70px; height:90px;
-    background: radial-gradient(ellipse at 50% 100%, #FDE68A 0%, #F59E0B 35%, var(--maroon) 75%, var(--maroon-light) 100%);
-    border-radius: 50% 50% 50% 50% / 60% 60% 40% 40%;
-    animation: flicker 1.8s ease-in-out infinite;
-    filter: drop-shadow(0 4px 10px rgba(139,0,0,.4));
-  }
-  .flame.dim{
-    background: radial-gradient(ellipse at 50% 100%, #E2E8F0 0%, #CBD5E1 45%, #94A3B8 100%);
-    animation:none;
-    filter:none;
-  }
-  @keyframes flicker{
-    0%,100%{ transform:translateX(-50%) scale(1) rotate(0deg); }
-    30%{ transform:translateX(-50%) scale(1.04,0.97) rotate(-2deg); }
-    60%{ transform:translateX(-50%) scale(0.97,1.05) rotate(2deg); }
-  }
-  .trophy-pop{ animation:pop .5s ease; }
-  @keyframes pop{
-    0%{ transform:scale(.6); opacity:0; }
-    60%{ transform:scale(1.15); opacity:1; }
-    100%{ transform:scale(1); }
-  }
-
-  /* Chat bubble */
-  .bubble-me{
-    background:var(--maroon);
-    color:#fff;
-    border-radius:14px 14px 3px 14px;
-  }
-  .bubble-them{
-    background:#fff;
-    color:var(--ink);
-    border:1px solid #E2E8F0;
-    border-radius:14px 14px 14px 3px;
-  }
-
-  .card{
-    background:#fff;
-    border:1px solid #E2E8F0;
-    border-radius:.9rem;
-  }
-
-  .btn-primary{
-    background:var(--maroon);
-    color:#fff;
-    font-weight:600;
-    border-radius:.6rem;
-    padding:.6rem 1.1rem;
-    transition:background .15s;
-  }
-  .btn-primary:hover{ background:var(--maroon-light); }
-  .btn-secondary{
-    background:var(--navy);
-    color:#fff;
-    font-weight:600;
-    border-radius:.6rem;
-    padding:.6rem 1.1rem;
-    transition:background .15s;
-  }
-  .btn-secondary:hover{ background:var(--navy-light); }
-  .btn-outline{
-    border:1.5px solid #CBD5E1;
-    color:var(--ink);
-    font-weight:600;
-    border-radius:.6rem;
-    padding:.55rem 1rem;
-    transition:border-color .15s, background .15s;
-  }
-  .btn-outline:hover{ border-color:var(--maroon); background:#FEF2F2; }
-
-  .input{
-    width:100%;
-    border:1.5px solid #E2E8F0;
-    border-radius:.6rem;
-    padding:.6rem .8rem;
-    font-size:.9rem;
-    background:#fff;
-    outline:none;
-    transition:border-color .15s;
-  }
-  .input:focus{ border-color:var(--maroon); }
-
-  .tab-chip{
-    padding:.45rem .9rem; border-radius:999px; font-size:.85rem; font-weight:600;
-    border:1.5px solid #E2E8F0; color:var(--gray); cursor:pointer; white-space:nowrap;
-    transition:all .15s;
-  }
-  .tab-chip.active{
-    background:var(--navy); color:#fff; border-color:var(--navy);
-  }
-
-  .toast{
-    position:fixed; top:1rem; right:1rem; z-index:100;
-    background:var(--navy); color:#fff; padding:.75rem 1.1rem; border-radius:.6rem;
-    font-size:.85rem; font-weight:500; box-shadow:0 8px 24px rgba(15,23,42,.25);
-    animation:slidein .25s ease;
-  }
-  @keyframes slidein{ from{ transform:translateX(20px); opacity:0;} to{transform:translateX(0);opacity:1;} }
-
-  @media (prefers-reduced-motion: reduce){
-    .flame, .trophy-pop, .toast{ animation:none !important; }
-  }
-
-  .modal-backdrop{
-    position:fixed; inset:0; background:rgba(15,23,42,.55);
-    display:flex; align-items:center; justify-content:center; z-index:60; padding:1rem;
-  }
-
-  #sidebar{ transition:transform .25s ease; }
-  @media (max-width: 767px){
-    #sidebar{ position:fixed; top:0; left:0; height:100%; z-index:50; transform:translateX(-100%); width:78%; max-width:280px; }
-    #sidebar.open{ transform:translateX(0); }
-  }
-</style>
+        .active-tab {
+            border-bottom: 2px solid #DC2626;
+            color: #FFFFFF;
+        }
+    </style>
 </head>
+<body class="min-h-screen flex flex-col justify-between selection:bg-red-600 selection:text-white">
 
-<body class="font-body">
+    <!-- Toast Notification Container -->
+    <div id="toast-container" class="fixed top-5 right-5 z-50 flex flex-col gap-2 max-w-sm w-full pointer-events-none"></div>
 
-<!-- ======================= AUTH SCREEN ======================= -->
-<div id="authScreen" class="auth-bg min-h-screen flex items-center justify-center px-4">
-  <div class="w-full max-w-md">
-    <div class="text-center mb-7">
-      <div class="inline-flex items-center gap-2 mb-3">
-        <div class="w-11 h-11 rounded-xl bg-maroon flex items-center justify-center font-display font-extrabold text-white text-lg">L</div>
-        <span class="font-display font-extrabold text-2xl text-white">Lock In <span class="text-red-400">OSN</span></span>
-      </div>
-      <p class="text-slate-300 text-sm">Tempat anak-anak OSN saling terhubung, belajar, dan konsisten setiap hari.</p>
-    </div>
+    <!-- AUTH SCREEN (Shown when user logged out) -->
+    <div id="auth-screen" class="min-h-screen flex items-center justify-center p-4 relative overflow-hidden">
+        <!-- Background Elements -->
+        <div class="absolute top-[-10%] left-[-10%] w-96 h-96 bg-red-900/20 rounded-full blur-3xl pointer-events-none"></div>
+        <div class="absolute bottom-[-10%] right-[-10%] w-96 h-96 bg-blue-900/20 rounded-full blur-3xl pointer-events-none"></div>
 
-    <div class="bg-white rounded-2xl shadow-2xl p-7">
-      <!-- toggle -->
-      <div class="grid grid-cols-2 gap-2 mb-6 bg-slate-100 rounded-xl p-1">
-        <button id="tabLoginBtn" class="py-2 rounded-lg font-semibold text-sm bg-navy text-white transition">Masuk</button>
-        <button id="tabSignupBtn" class="py-2 rounded-lg font-semibold text-sm text-slate-500 transition">Daftar</button>
-      </div>
-
-      <!-- LOGIN FORM -->
-      <form id="loginForm" class="space-y-3">
-        <div>
-          <label class="text-xs font-semibold text-slate-500">Email</label>
-          <input type="email" id="loginEmail" required class="input mt-1" placeholder="nama@email.com">
-        </div>
-        <div>
-          <label class="text-xs font-semibold text-slate-500">Kata Sandi</label>
-          <input type="password" id="loginPassword" required class="input mt-1" placeholder="••••••••">
-        </div>
-        <p id="loginError" class="text-xs text-maroon hidden"></p>
-        <button type="submit" class="btn-primary w-full mt-2">Masuk ke Dashboard</button>
-      </form>
-
-      <!-- SIGNUP FORM -->
-      <form id="signupForm" class="space-y-3 hidden">
-        <div>
-          <label class="text-xs font-semibold text-slate-500">Nama Lengkap</label>
-          <input type="text" id="signupFullName" required class="input mt-1" placeholder="Nama kamu">
-        </div>
-        <div>
-          <label class="text-xs font-semibold text-slate-500">Username</label>
-          <input type="text" id="signupUsername" required pattern="[a-zA-Z0-9_]{3,20}" class="input mt-1" placeholder="tanpa spasi, unik">
-        </div>
-        <div>
-          <label class="text-xs font-semibold text-slate-500">Email</label>
-          <input type="email" id="signupEmail" required class="input mt-1" placeholder="nama@email.com">
-        </div>
-        <div>
-          <label class="text-xs font-semibold text-slate-500">Kata Sandi</label>
-          <input type="password" id="signupPassword" required minlength="6" class="input mt-1" placeholder="Minimal 6 karakter">
-        </div>
-        <div>
-          <label class="text-xs font-semibold text-slate-500">Bidang OSN</label>
-          <select id="signupField" class="input mt-1">
-            <option>Matematika</option><option>Fisika</option><option>Kimia</option>
-            <option>Biologi</option><option>Geografi</option><option>Ekonomi</option>
-            <option>Kebumian</option><option>Astronomi</option><option>Informatika</option>
-            <option>AI (OSN AI)</option>
-          </select>
-        </div>
-        <p id="signupError" class="text-xs text-maroon hidden"></p>
-        <button type="submit" class="btn-primary w-full mt-2">Buat Akun</button>
-      </form>
-    </div>
-  </div>
-</div>
-
-<!-- ======================= APP SCREEN ======================= -->
-<div id="appScreen" class="hidden min-h-screen flex">
-
-  <!-- Overlay untuk mobile sidebar -->
-  <div id="sidebarOverlay" class="hidden fixed inset-0 bg-black/40 z-40"></div>
-
-  <!-- SIDEBAR -->
-  <aside id="sidebar" class="bg-navy w-64 shrink-0 flex flex-col py-5 px-3">
-    <div class="flex items-center gap-2 px-2 mb-6">
-      <div class="w-9 h-9 rounded-lg bg-maroon flex items-center justify-center font-display font-extrabold text-white">L</div>
-      <span class="font-display font-bold text-white text-lg">Lock In <span class="text-red-400">OSN</span></span>
-    </div>
-
-    <nav class="flex-1 space-y-1">
-      <div class="nav-item active" data-section="profile">
-        <span>👤</span><span>Profil</span>
-      </div>
-      <div class="nav-item" data-section="friends">
-        <span>🤝</span><span>Teman</span>
-        <span id="friendReqBadge" class="hidden ml-auto bg-red-500 text-white text-[10px] font-bold rounded-full px-1.5 py-0.5"></span>
-      </div>
-      <div class="nav-item" data-section="chat">
-        <span>💬</span><span>Chat</span>
-      </div>
-      <div class="nav-item" data-section="streak">
-        <span>🔥</span><span>Streak Belajar</span>
-      </div>
-      <div class="nav-item" data-section="resources">
-        <span>📚</span><span>Hub Resource</span>
-      </div>
-    </nav>
-
-    <div class="border-t border-white/10 pt-3 px-2">
-      <div class="flex items-center gap-2 mb-3">
-        <img id="sideAvatar" src="" class="w-9 h-9 rounded-full object-cover bg-slate-600" alt="">
-        <div class="min-w-0">
-          <p id="sideName" class="text-white text-sm font-semibold truncate">-</p>
-          <p id="sideUsername" class="text-slate-400 text-xs truncate">@-</p>
-        </div>
-      </div>
-      <button id="logoutBtn" class="w-full text-xs font-semibold text-slate-300 hover:text-white border border-white/15 rounded-lg py-2">Keluar</button>
-    </div>
-  </aside>
-
-  <!-- MAIN -->
-  <main class="flex-1 min-w-0 flex flex-col">
-    <!-- topbar mobile -->
-    <div class="md:hidden flex items-center justify-between bg-white border-b border-slate-200 px-4 py-3">
-      <button id="hamburgerBtn" class="text-xl">☰</button>
-      <span class="font-display font-bold text-navy">Lock In OSN</span>
-      <span class="w-6"></span>
-    </div>
-
-    <div class="flex-1 overflow-y-auto p-4 md:p-8" id="contentArea">
-
-      <!-- ============ PROFILE SECTION ============ -->
-      <section id="sec-profile" class="space-y-6">
-        <div class="card overflow-hidden">
-          <div class="h-32 md:h-44 bg-slate-200 relative">
-            <img id="profileBannerImg" src="" class="w-full h-full object-cover hidden" alt="banner">
-            <div id="profileBannerFallback" class="w-full h-full bg-gradient-to-r from-navy to-maroon"></div>
-          </div>
-          <div class="px-5 pb-5">
-            <div class="flex flex-col sm:flex-row sm:items-end sm:justify-between gap-3 -mt-10">
-              <div class="flex items-end gap-3">
-                <img id="profileAvatarImg" src="" class="w-20 h-20 rounded-2xl object-cover border-4 border-white bg-slate-300" alt="avatar">
-                <div class="pb-1">
-                  <h2 id="profileFullName" class="font-display font-bold text-lg text-slate-800">-</h2>
-                  <p id="profileUsername" class="text-sm text-gray-500">@-</p>
+        <div class="w-full max-w-md glass-panel p-8 rounded-2xl shadow-2xl relative z-10 border border-osn-border">
+            <!-- Brand Header -->
+            <div class="text-center mb-8">
+                <div class="inline-flex items-center justify-center w-16 h-16 rounded-2xl bg-gradient-to-br from-red-600 to-blue-700 text-white text-3xl font-extrabold mb-3 shadow-lg shadow-red-900/30">
+                    <i class="fa-solid fa-fire"></i>
                 </div>
-              </div>
-              <button id="editProfileBtn" class="btn-outline text-sm">Edit Profil</button>
+                <h1 class="text-3xl font-black tracking-tight text-white">LOCK IN <span class="text-red-500">OSN</span></h1>
+                <p class="text-gray-400 text-sm mt-1">Komunitas Belajar, Ambisi & Streak Calon Medalis</p>
             </div>
-            <div class="mt-4 flex flex-wrap gap-2">
-              <span id="profileFieldChip" class="tab-chip active !cursor-default">-</span>
-              <span id="profileStatusChip" class="tab-chip !cursor-default border-maroon text-maroon">Sedang belajar: -</span>
+
+            <!-- Tab Switcher -->
+            <div class="flex border-b border-osn-border mb-6">
+                <button id="tab-login-btn" onclick="switchAuthTab('login')" class="flex-1 py-3 text-center font-semibold text-sm transition-colors text-red-500 border-b-2 border-red-500">
+                    <i class="fa-solid fa-right-to-bracket mr-2"></i>Masuk
+                </button>
+                <button id="tab-register-btn" onclick="switchAuthTab('register')" class="flex-1 py-3 text-center font-semibold text-sm transition-colors text-gray-400 hover:text-white">
+                    <i class="fa-solid fa-user-plus mr-2"></i>Daftar Akun
+                </button>
             </div>
-            <p id="profileBio" class="text-sm text-slate-600 mt-3">-</p>
-          </div>
+
+            <!-- LOGIN FORM -->
+            <form id="login-form" onsubmit="handleLogin(event)" class="space-y-4">
+                <div>
+                    <label class="block text-xs font-semibold uppercase text-gray-400 mb-1">Email</label>
+                    <div class="relative">
+                        <span class="absolute inset-y-0 left-0 flex items-center pl-3 text-gray-500"><i class="fa-solid fa-envelope"></i></span>
+                        <input type="email" id="login-email" required class="w-full pl-10 pr-4 py-3 bg-osn-bg border border-osn-border rounded-xl focus:outline-none focus:border-red-500 text-sm text-white placeholder-gray-500" placeholder="nama@email.com">
+                    </div>
+                </div>
+                <div>
+                    <label class="block text-xs font-semibold uppercase text-gray-400 mb-1">Kata Sandi</label>
+                    <div class="relative">
+                        <span class="absolute inset-y-0 left-0 flex items-center pl-3 text-gray-500"><i class="fa-solid fa-lock"></i></span>
+                        <input type="password" id="login-password" required class="w-full pl-10 pr-4 py-3 bg-osn-bg border border-osn-border rounded-xl focus:outline-none focus:border-red-500 text-sm text-white placeholder-gray-500" placeholder="••••••••">
+                    </div>
+                </div>
+                <button type="submit" class="w-full py-3.5 px-4 gradient-red-btn text-white font-bold rounded-xl shadow-lg flex items-center justify-center gap-2 mt-2">
+                    <span>Masuk ke Dashboard</span>
+                    <i class="fa-solid fa-arrow-right"></i>
+                </button>
+            </form>
+
+            <!-- REGISTER FORM -->
+            <form id="register-form" onsubmit="handleRegister(event)" class="space-y-4 hidden">
+                <div>
+                    <label class="block text-xs font-semibold uppercase text-gray-400 mb-1">Nama Lengkap / Panggilan</label>
+                    <div class="relative">
+                        <span class="absolute inset-y-0 left-0 flex items-center pl-3 text-gray-500"><i class="fa-solid fa-user"></i></span>
+                        <input type="text" id="reg-name" required class="w-full pl-10 pr-4 py-3 bg-osn-bg border border-osn-border rounded-xl focus:outline-none focus:border-red-500 text-sm text-white placeholder-gray-500" placeholder="Contoh: Budi Medalis">
+                    </div>
+                </div>
+                <div>
+                    <label class="block text-xs font-semibold uppercase text-gray-400 mb-1">Email</label>
+                    <div class="relative">
+                        <span class="absolute inset-y-0 left-0 flex items-center pl-3 text-gray-500"><i class="fa-solid fa-envelope"></i></span>
+                        <input type="email" id="reg-email" required class="w-full pl-10 pr-4 py-3 bg-osn-bg border border-osn-border rounded-xl focus:outline-none focus:border-red-500 text-sm text-white placeholder-gray-500" placeholder="nama@email.com">
+                    </div>
+                </div>
+                <div>
+                    <label class="block text-xs font-semibold uppercase text-gray-400 mb-1">Target Bidang OSN</label>
+                    <div class="relative">
+                        <span class="absolute inset-y-0 left-0 flex items-center pl-3 text-gray-500"><i class="fa-solid fa-microscope"></i></span>
+                        <select id="reg-subject" required class="w-full pl-10 pr-4 py-3 bg-osn-bg border border-osn-border rounded-xl focus:outline-none focus:border-red-500 text-sm text-white">
+                            <option value="Matematika">Matematika</option>
+                            <option value="Fisika">Fisika</option>
+                            <option value="Kimia">Kimia</option>
+                            <option value="Biologi">Biologi</option>
+                            <option value="Informatika / Komputer">Informatika / Komputer</option>
+                            <option value="Astronomi">Astronomi</option>
+                            <option value="Ekonomi">Ekonomi</option>
+                            <option value="Kebumian">Kebumian</option>
+                            <option value="Geografi">Geografi</option>
+                            <option value="Kecerdasan Buatan (AI)">Kecerdasan Buatan (AI)</option>
+                        </select>
+                    </div>
+                </div>
+                <div>
+                    <label class="block text-xs font-semibold uppercase text-gray-400 mb-1">Kata Sandi</label>
+                    <div class="relative">
+                        <span class="absolute inset-y-0 left-0 flex items-center pl-3 text-gray-500"><i class="fa-solid fa-lock"></i></span>
+                        <input type="password" id="reg-password" minlength="6" required class="w-full pl-10 pr-4 py-3 bg-osn-bg border border-osn-border rounded-xl focus:outline-none focus:border-red-500 text-sm text-white placeholder-gray-500" placeholder="Minimal 6 karakter">
+                    </div>
+                </div>
+                <button type="submit" class="w-full py-3.5 px-4 gradient-red-btn text-white font-bold rounded-xl shadow-lg flex items-center justify-center gap-2 mt-2">
+                    <span>Buat Akun Sekarang</span>
+                    <i class="fa-solid fa-user-check"></i>
+                </button>
+            </form>
+
+            <div class="mt-6 text-center text-xs text-gray-500">
+                <p>Fitur Demo Offline aktif secara otomatis jika Firebase belum dikonfigurasi.</p>
+            </div>
         </div>
-
-        <div class="card p-5">
-          <h3 class="font-display font-bold text-slate-800 mb-3">Cari Profil Publik Pengguna</h3>
-          <p class="text-sm text-gray-500 mb-3">Gunakan menu <b>Teman</b> untuk mencari & melihat profil publik pengguna lain berdasarkan username.</p>
-        </div>
-      </section>
-
-      <!-- EDIT PROFILE MODAL -->
-      <div id="editProfileModal" class="modal-backdrop hidden">
-        <div class="bg-white rounded-2xl max-w-lg w-full p-6 max-h-[90vh] overflow-y-auto">
-          <div class="flex items-center justify-between mb-4">
-            <h3 class="font-display font-bold text-lg">Edit Profil</h3>
-            <button class="modal-close text-gray-400 hover:text-slate-700 text-xl">&times;</button>
-          </div>
-          <form id="editProfileForm" class="space-y-3">
-            <div>
-              <label class="text-xs font-semibold text-slate-500">Nama Lengkap</label>
-              <input type="text" id="editFullName" required class="input mt-1">
-            </div>
-            <div>
-              <label class="text-xs font-semibold text-slate-500">Username</label>
-              <input type="text" id="editUsername" required pattern="[a-zA-Z0-9_]{3,20}" class="input mt-1">
-            </div>
-            <div class="grid grid-cols-2 gap-3">
-              <div>
-                <label class="text-xs font-semibold text-slate-500">Foto Profil (URL)</label>
-                <input type="url" id="editPhotoURL" class="input mt-1" placeholder="https://...">
-              </div>
-              <div>
-                <label class="text-xs font-semibold text-slate-500">atau Upload</label>
-                <input type="file" id="editPhotoFile" accept="image/*" class="input mt-1 text-xs">
-              </div>
-            </div>
-            <div class="grid grid-cols-2 gap-3">
-              <div>
-                <label class="text-xs font-semibold text-slate-500">Banner (URL)</label>
-                <input type="url" id="editBannerURL" class="input mt-1" placeholder="https://...">
-              </div>
-              <div>
-                <label class="text-xs font-semibold text-slate-500">atau Upload</label>
-                <input type="file" id="editBannerFile" accept="image/*" class="input mt-1 text-xs">
-              </div>
-            </div>
-            <div>
-              <label class="text-xs font-semibold text-slate-500">Bidang OSN</label>
-              <select id="editField" class="input mt-1">
-                <option>Matematika</option><option>Fisika</option><option>Kimia</option>
-                <option>Biologi</option><option>Geografi</option><option>Ekonomi</option>
-                <option>Kebumian</option><option>Astronomi</option><option>Informatika</option>
-                <option>AI (OSN AI)</option>
-              </select>
-            </div>
-            <div>
-              <label class="text-xs font-semibold text-slate-500">Bio Singkat</label>
-              <textarea id="editBio" rows="2" class="input mt-1" placeholder="Ceritakan sedikit tentang dirimu"></textarea>
-            </div>
-            <div>
-              <label class="text-xs font-semibold text-slate-500">Hari ini sedang belajar materi</label>
-              <input type="text" id="editStatus" class="input mt-1" placeholder="cth: Turunan & Integral">
-            </div>
-            <p id="editProfileError" class="text-xs text-maroon hidden"></p>
-            <button type="submit" class="btn-primary w-full">Simpan Perubahan</button>
-          </form>
-        </div>
-      </div>
-
-      <!-- ============ FRIENDS SECTION ============ -->
-      <section id="sec-friends" class="hidden space-y-6">
-        <div class="card p-5">
-          <h3 class="font-display font-bold text-slate-800 mb-3">Cari Pengguna</h3>
-          <div class="flex gap-2">
-            <input type="text" id="searchUsernameInput" class="input" placeholder="Cari berdasarkan username...">
-            <button id="searchUserBtn" class="btn-secondary shrink-0">Cari</button>
-          </div>
-          <div id="searchResults" class="mt-4 space-y-2"></div>
-        </div>
-
-        <div class="card p-5">
-          <h3 class="font-display font-bold text-slate-800 mb-3">Permintaan Pertemanan Masuk</h3>
-          <div id="incomingRequests" class="space-y-2">
-            <p class="text-sm text-gray-400">Belum ada permintaan.</p>
-          </div>
-        </div>
-
-        <div class="card p-5">
-          <h3 class="font-display font-bold text-slate-800 mb-3">Daftar Teman</h3>
-          <div id="friendsList" class="grid sm:grid-cols-2 gap-3">
-            <p class="text-sm text-gray-400">Belum ada teman terhubung.</p>
-          </div>
-        </div>
-      </section>
-
-      <!-- PUBLIC PROFILE MODAL -->
-      <div id="publicProfileModal" class="modal-backdrop hidden">
-        <div class="bg-white rounded-2xl max-w-md w-full overflow-hidden">
-          <div class="h-24 bg-gradient-to-r from-navy to-maroon relative">
-            <button class="modal-close absolute top-2 right-2 text-white/80 hover:text-white text-xl">&times;</button>
-          </div>
-          <div class="px-5 pb-5 -mt-8">
-            <img id="ppAvatar" src="" class="w-16 h-16 rounded-2xl object-cover border-4 border-white bg-slate-300">
-            <h3 id="ppName" class="font-display font-bold text-lg mt-2">-</h3>
-            <p id="ppUsername" class="text-sm text-gray-500">@-</p>
-            <span id="ppField" class="tab-chip active !cursor-default inline-block mt-2">-</span>
-            <p id="ppBio" class="text-sm text-slate-600 mt-2">-</p>
-            <p id="ppStatus" class="text-xs text-maroon mt-1 font-medium">-</p>
-            <button id="ppAddFriendBtn" class="btn-primary w-full mt-4">Tambah Teman</button>
-          </div>
-        </div>
-      </div>
-
-      <!-- ============ CHAT SECTION ============ -->
-      <section id="sec-chat" class="hidden">
-        <div class="card h-[75vh] flex overflow-hidden">
-          <!-- chat list -->
-          <div class="w-full sm:w-64 border-r border-slate-200 flex flex-col shrink-0" id="chatListPane">
-            <div class="p-3 flex gap-2 border-b border-slate-200">
-              <button data-chattab="direct" class="tab-chip active flex-1">Personal</button>
-              <button data-chattab="group" class="tab-chip flex-1">Grup Publik</button>
-            </div>
-            <div id="chatListItems" class="flex-1 overflow-y-auto p-2 space-y-1"></div>
-          </div>
-          <!-- chat window -->
-          <div class="flex-1 min-w-0 flex-col" id="chatWindowPane">
-            <div id="chatEmptyState" class="flex-1 h-full flex items-center justify-center text-center text-gray-400 text-sm px-6 flex-col gap-2">
-              <span class="text-3xl">💬</span>
-              <span>Pilih teman atau grup publik untuk mulai mengobrol.</span>
-            </div>
-            <div id="chatActive" class="hidden h-full flex-col">
-              <div class="p-3 border-b border-slate-200 flex items-center gap-2">
-                <button id="backToListBtn" class="sm:hidden text-lg">←</button>
-                <img id="chatHeaderAvatar" src="" class="w-8 h-8 rounded-full object-cover bg-slate-300">
-                <span id="chatHeaderName" class="font-semibold text-sm text-slate-800">-</span>
-              </div>
-              <div id="chatMessages" class="flex-1 overflow-y-auto p-4 space-y-3"></div>
-              <form id="chatSendForm" class="p-3 border-t border-slate-200 flex gap-2">
-                <input type="text" id="chatInput" class="input" placeholder="Tulis pesan..." autocomplete="off">
-                <button type="submit" class="btn-primary shrink-0">Kirim</button>
-              </form>
-            </div>
-          </div>
-        </div>
-      </section>
-
-      <!-- ============ STREAK SECTION ============ -->
-      <section id="sec-streak" class="hidden space-y-6">
-        <div class="card p-6 text-center">
-          <h3 class="font-display font-bold text-slate-800 mb-1">Streak Belajar Pribadi</h3>
-          <p class="text-sm text-gray-500 mb-4">Konsisten belajar setiap hari untuk menjaga api tetap menyala.</p>
-          <div class="flame-wrap" id="personalFlameWrap">
-            <div class="flame" id="personalFlame"></div>
-          </div>
-          <p class="font-display font-extrabold text-4xl text-slate-800 mt-2" id="personalStreakCount">0</p>
-          <p class="text-sm text-gray-500 mb-4">hari berturut-turut</p>
-          <button id="checkinBtn" class="btn-primary px-8">Check-in Belajar Hari Ini</button>
-          <p id="checkinDoneMsg" class="text-xs text-green-600 font-medium mt-2 hidden">✅ Sudah check-in hari ini, pertahankan!</p>
-        </div>
-
-        <div class="card p-5">
-          <h3 class="font-display font-bold text-slate-800 mb-3">Streak Bersama Teman</h3>
-          <p class="text-xs text-gray-500 mb-3">Streak akan bertambah bila kamu & temanmu sama-sama check-in di hari yang sama.</p>
-          <div id="friendStreakList" class="space-y-2">
-            <p class="text-sm text-gray-400">Belum ada streak bersama teman.</p>
-          </div>
-        </div>
-      </section>
-
-      <!-- ============ RESOURCES SECTION ============ -->
-      <section id="sec-resources" class="hidden space-y-5">
-        <div class="flex items-center justify-between flex-wrap gap-3">
-          <h3 class="font-display font-bold text-slate-800 text-lg">Hub Resource Belajar</h3>
-          <button id="addResourceBtn" class="btn-primary text-sm">+ Tambah Resource</button>
-        </div>
-
-        <div id="subjectTabs" class="flex gap-2 overflow-x-auto pb-2"></div>
-
-        <div id="resourceList" class="grid sm:grid-cols-2 lg:grid-cols-3 gap-4"></div>
-      </section>
-
-      <!-- ADD RESOURCE MODAL -->
-      <div id="addResourceModal" class="modal-backdrop hidden">
-        <div class="bg-white rounded-2xl max-w-md w-full p-6">
-          <div class="flex items-center justify-between mb-4">
-            <h3 class="font-display font-bold text-lg">Tambah Resource</h3>
-            <button class="modal-close text-gray-400 hover:text-slate-700 text-xl">&times;</button>
-          </div>
-          <form id="addResourceForm" class="space-y-3">
-            <div>
-              <label class="text-xs font-semibold text-slate-500">Mata Pelajaran</label>
-              <select id="resSubject" class="input mt-1"></select>
-            </div>
-            <div>
-              <label class="text-xs font-semibold text-slate-500">Judul</label>
-              <input type="text" id="resTitle" required class="input mt-1">
-            </div>
-            <div>
-              <label class="text-xs font-semibold text-slate-500">Deskripsi</label>
-              <textarea id="resDesc" rows="2" class="input mt-1"></textarea>
-            </div>
-            <div>
-              <label class="text-xs font-semibold text-slate-500">Tautan (Drive/Video/Catatan)</label>
-              <input type="url" id="resUrl" required class="input mt-1" placeholder="https://...">
-            </div>
-            <p id="addResourceError" class="text-xs text-maroon hidden"></p>
-            <button type="submit" class="btn-primary w-full">Simpan Resource</button>
-          </form>
-        </div>
-      </div>
-
     </div>
-  </main>
-</div>
 
-<div id="toastContainer"></div>
+    <!-- MAIN DASHBOARD SCREEN (Shown when user logged in) -->
+    <div id="main-dashboard" class="min-h-screen flex flex-col md:flex-row hidden">
+        
+        <!-- SIDEBAR NAVIGATION -->
+        <aside class="w-full md:w-64 bg-osn-card border-r border-osn-border flex flex-col justify-between p-4 flex-shrink-0">
+            <div>
+                <!-- App Title -->
+                <div class="flex items-center gap-3 px-3 py-3 mb-6 border-b border-osn-border/50">
+                    <div class="w-10 h-10 rounded-xl bg-gradient-to-br from-red-600 to-blue-600 flex items-center justify-center text-white text-xl font-black shadow-md">
+                        <i class="fa-solid fa-fire"></i>
+                    </div>
+                    <div>
+                        <h2 class="font-extrabold text-white text-lg leading-none">LOCK IN <span class="text-red-500">OSN</span></h2>
+                        <span class="text-[10px] text-gray-400 uppercase tracking-widest font-semibold">National Edition</span>
+                    </div>
+                </div>
 
-<script type="module">
-/* ======================================================================
-   FIREBASE CONFIG — ganti dengan konfigurasi project Firebase kamu
-   ====================================================================== */
-const firebaseConfig = {
-  apiKey: "AIzaSyDe9WhvdNVyVgHKCwZ09pBtaN7-o67429U",
-  authDomain: "lock-in-osn.firebaseapp.com",
-  projectId: "lock-in-osn",
-  storageBucket: "lock-in-osn.firebasestorage.app",
-  messagingSenderId: "986878305012",
-  appId: "1:986878305012:web:47c872c202a1a3333574a1",
-  measurementId: "G-G2ZLVJ4EPM"
-};
+                <!-- User Profile Mini Box -->
+                <div class="bg-osn-bg/70 p-3 rounded-xl border border-osn-border mb-6 flex items-center gap-3">
+                    <img id="user-avatar" src="https://api.dicebear.com/7.x/bottts/svg?seed=OSNUser" class="w-11 h-11 rounded-lg bg-osn-card border border-osn-border" alt="Avatar">
+                    <div class="overflow-hidden">
+                        <h4 id="user-name" class="font-bold text-sm text-white truncate">Pejuang OSN</h4>
+                        <div class="flex items-center gap-2 mt-0.5">
+                            <span id="user-subject-badge" class="text-[10px] bg-blue-900/60 text-blue-300 px-2 py-0.5 rounded-full font-medium truncate">Matematika</span>
+                            <span class="text-[11px] text-amber-400 font-bold flex items-center gap-1">
+                                <i class="fa-solid fa-fire"></i><span id="sidebar-streak-count">0</span>
+                            </span>
+                        </div>
+                    </div>
+                </div>
 
-import { initializeApp } from "https://www.gstatic.com/firebasejs/10.13.0/firebase-app.js";
-import {
-  getAuth, createUserWithEmailAndPassword, signInWithEmailAndPassword,
-  signOut, onAuthStateChanged, updateProfile
-} from "https://www.gstatic.com/firebasejs/10.13.0/firebase-auth.js";
-import {
-  getFirestore, doc, setDoc, getDoc, updateDoc, collection, addDoc,
-  query, where, getDocs, onSnapshot, serverTimestamp, orderBy,
-  runTransaction, deleteDoc, limit
-} from "https://www.gstatic.com/firebasejs/10.13.0/firebase-firestore.js";
-import {
-  getStorage, ref, uploadBytes, getDownloadURL
-} from "https://www.gstatic.com/firebasejs/10.13.0/firebase-storage.js";
+                <!-- Nav Menu Buttons -->
+                <nav class="space-y-1.5">
+                    <button onclick="navigateTo('overview')" id="nav-overview" class="w-full flex items-center gap-3 px-4 py-3 rounded-xl text-sm font-semibold transition-colors bg-red-600 text-white shadow-md">
+                        <i class="fa-solid fa-chart-line w-5 text-center"></i>
+                        <span>Overview</span>
+                    </button>
+                    <button onclick="navigateTo('resources')" id="nav-resources" class="w-full flex items-center gap-3 px-4 py-3 rounded-xl text-sm font-semibold text-gray-400 hover:text-white hover:bg-osn-bg transition-colors">
+                        <i class="fa-solid fa-book-bookmark w-5 text-center"></i>
+                        <span>Resource Belajar</span>
+                    </button>
+                    <button onclick="navigateTo('streak')" id="nav-streak" class="w-full flex items-center gap-3 px-4 py-3 rounded-xl text-sm font-semibold text-gray-400 hover:text-white hover:bg-osn-bg transition-colors">
+                        <i class="fa-solid fa-fire-flame-curved w-5 text-center text-amber-500"></i>
+                        <span>Streak Hub</span>
+                    </button>
+                    <button onclick="navigateTo('chat')" id="nav-chat" class="w-full flex items-center gap-3 px-4 py-3 rounded-xl text-sm font-semibold text-gray-400 hover:text-white hover:bg-osn-bg transition-colors">
+                        <i class="fa-solid fa-comments w-5 text-center"></i>
+                        <span>Komunitas & Chat</span>
+                    </button>
+                    <button onclick="navigateTo('profile')" id="nav-profile" class="w-full flex items-center gap-3 px-4 py-3 rounded-xl text-sm font-semibold text-gray-400 hover:text-white hover:bg-osn-bg transition-colors">
+                        <i class="fa-solid fa-user-gear w-5 text-center"></i>
+                        <span>Pengaturan Profil</span>
+                    </button>
+                </nav>
+            </div>
 
-const app = initializeApp(firebaseConfig);
-const auth = getAuth(app);
-const db = getFirestore(app);
-const storage = getStorage(app);
+            <!-- Logout Section -->
+            <div class="pt-4 border-t border-osn-border mt-6">
+                <button onclick="handleLogout()" class="w-full flex items-center gap-3 px-4 py-3 rounded-xl text-sm font-semibold text-gray-400 hover:text-red-400 hover:bg-red-950/30 transition-colors">
+                    <i class="fa-solid fa-arrow-right-from-bracket w-5 text-center"></i>
+                    <span>Keluar Akun</span>
+                </button>
+            </div>
+        </aside>
 
-/* ======================================================================
-   STATE & KONSTANTA
-   ====================================================================== */
-const SUBJECTS = ["Matematika","Fisika","Kimia","Biologi","Geografi","Ekonomi","Kebumian","Astronomi","Informatika","AI (OSN AI)"];
-const PUBLIC_CHAT_ID = "public-osn-group";
+        <!-- MAIN CONTENT AREA -->
+        <main class="flex-1 p-4 md:p-8 overflow-y-auto max-w-7xl mx-auto w-full">
+            
+            <!-- SECTION 1: OVERVIEW -->
+            <section id="section-overview" class="space-y-6">
+                <!-- Header Banner -->
+                <div class="relative overflow-hidden rounded-2xl bg-gradient-to-r from-red-900/60 via-osn-card to-blue-900/60 p-6 md:p-8 border border-osn-border">
+                    <div class="relative z-10 max-w-2xl">
+                        <span class="px-3 py-1 bg-red-600/30 border border-red-500/40 text-red-300 text-xs font-bold rounded-full uppercase tracking-wider">
+                            Daily Motivation
+                        </span>
+                        <h2 class="text-2xl md:text-3xl font-extrabold text-white mt-3 leading-tight">
+                            "Konsistensi dikalahkan oleh keraguan, tapi dibangun oleh disiplin setiap hari."
+                        </h2>
+                        <p class="text-gray-300 text-sm mt-2">
+                            Targetkan medali Emas OSN. Selesaikan soal latihan hari ini dan amankan streak milikmu!
+                        </p>
+                        <div class="mt-5 flex flex-wrap items-center gap-3">
+                            <button onclick="triggerCheckIn()" class="gradient-red-btn px-5 py-2.5 rounded-xl font-bold text-sm text-white flex items-center gap-2 shadow-lg">
+                                <i class="fa-solid fa-fire text-amber-300"></i> Lock In & Check-in Hari Ini
+                            </button>
+                            <button onclick="navigateTo('resources')" class="px-5 py-2.5 bg-osn-bg/80 border border-osn-border rounded-xl font-bold text-sm text-gray-200 hover:text-white hover:bg-osn-bg transition-colors">
+                                <i class="fa-solid fa-magnifying-glass mr-1"></i> Cari Soal & Modul
+                            </button>
+                        </div>
+                    </div>
+                </div>
 
-let currentUser = null;      // firebase auth user
-let currentProfile = null;   // firestore users/{uid} data
-let activeChatId = null;
-let activeChatUnsub = null;
-let friendsCache = [];
-let activeSubjectFilter = "Semua";
-let unsubIncoming = null, unsubFriends = null, unsubChatList = null;
+                <!-- Stats Grid -->
+                <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
+                    <div class="bg-osn-card p-5 rounded-2xl border border-osn-border flex items-center gap-4">
+                        <div class="w-12 h-12 rounded-xl bg-amber-500/10 border border-amber-500/30 text-amber-500 flex items-center justify-center text-2xl font-bold">
+                            <i class="fa-solid fa-fire"></i>
+                        </div>
+                        <div>
+                            <p class="text-xs text-gray-400 font-semibold uppercase">Streak Aktif</p>
+                            <h3 id="dash-streak-val" class="text-2xl font-black text-white">0 Hari</h3>
+                        </div>
+                    </div>
 
-/* ======================================================================
-   HELPERS
-   ====================================================================== */
-function $(sel){ return document.querySelector(sel); }
-function $all(sel){ return document.querySelectorAll(sel); }
-function showToast(msg, isError=false){
-  const el = document.createElement('div');
-  el.className = 'toast';
-  if(isError) el.style.background = '#8B0000';
-  el.textContent = msg;
-  $('#toastContainer').appendChild(el);
-  setTimeout(()=> el.remove(), 3200);
-}
-function todayStr(){
-  const d = new Date();
-  return `${d.getFullYear()}-${String(d.getMonth()+1).padStart(2,'0')}-${String(d.getDate()).padStart(2,'0')}`;
-}
-function pairId(a,b){ return [a,b].sort().join('_'); }
-function initialsAvatar(name){
-  const seed = encodeURIComponent(name || 'U');
-  return `https://api.dicebear.com/7.x/initials/svg?seed=${seed}&backgroundColor=1e3a8a,991b1b,0f172a&fontSize=38`;
-}
-function fmtTime(ts){
-  if(!ts) return '';
-  const d = ts.toDate ? ts.toDate() : new Date(ts);
-  return d.toLocaleString('id-ID', {day:'2-digit', month:'short', hour:'2-digit', minute:'2-digit'});
-}
-async function uploadImage(file, path){
-  const r = ref(storage, path);
-  await uploadBytes(r, file);
-  return await getDownloadURL(r);
-}
+                    <div class="bg-osn-card p-5 rounded-2xl border border-osn-border flex items-center gap-4">
+                        <div class="w-12 h-12 rounded-xl bg-blue-500/10 border border-blue-500/30 text-blue-500 flex items-center justify-center text-2xl font-bold">
+                            <i class="fa-solid fa-book-open"></i>
+                        </div>
+                        <div>
+                            <p class="text-xs text-gray-400 font-semibold uppercase">Target Bidang</p>
+                            <h3 id="dash-subject-val" class="text-lg font-bold text-white truncate max-w-[130px]">Matematika</h3>
+                        </div>
+                    </div>
 
-/* ======================================================================
-   AUTH: TOGGLE LOGIN / SIGNUP FORM
-   ====================================================================== */
-$('#tabLoginBtn').addEventListener('click', ()=>{
-  $('#tabLoginBtn').classList.add('bg-navy','text-white'); $('#tabLoginBtn').classList.remove('text-slate-500');
-  $('#tabSignupBtn').classList.remove('bg-navy','text-white'); $('#tabSignupBtn').classList.add('text-slate-500');
-  $('#loginForm').classList.remove('hidden'); $('#signupForm').classList.add('hidden');
-});
-$('#tabSignupBtn').addEventListener('click', ()=>{
-  $('#tabSignupBtn').classList.add('bg-navy','text-white'); $('#tabSignupBtn').classList.remove('text-slate-500');
-  $('#tabLoginBtn').classList.remove('bg-navy','text-white'); $('#tabLoginBtn').classList.add('text-slate-500');
-  $('#signupForm').classList.remove('hidden'); $('#loginForm').classList.add('hidden');
-});
+                    <div class="bg-osn-card p-5 rounded-2xl border border-osn-border flex items-center gap-4">
+                        <div class="w-12 h-12 rounded-xl bg-green-500/10 border border-green-500/30 text-green-500 flex items-center justify-center text-2xl font-bold">
+                            <i class="fa-solid fa-check-double"></i>
+                        </div>
+                        <div>
+                            <p class="text-xs text-gray-400 font-semibold uppercase">Total Check-In</p>
+                            <h3 id="dash-total-checkins" class="text-2xl font-black text-white">0 Kali</h3>
+                        </div>
+                    </div>
 
-/* ======================================================================
-   AUTH: SIGNUP
-   ====================================================================== */
-$('#signupForm').addEventListener('submit', async (e)=>{
-  e.preventDefault();
-  const errEl = $('#signupError'); errEl.classList.add('hidden');
-  const fullName = $('#signupFullName').value.trim();
-  const username = $('#signupUsername').value.trim();
-  const usernameLower = username.toLowerCase();
-  const email = $('#signupEmail').value.trim();
-  const password = $('#signupPassword').value;
-  const field = $('#signupField').value;
+                    <div class="bg-osn-card p-5 rounded-2xl border border-osn-border flex items-center gap-4">
+                        <div class="w-12 h-12 rounded-xl bg-purple-500/10 border border-purple-500/30 text-purple-500 flex items-center justify-center text-2xl font-bold">
+                            <i class="fa-solid fa-users"></i>
+                        </div>
+                        <div>
+                            <p class="text-xs text-gray-400 font-semibold uppercase">Komunitas Belajar</p>
+                            <h3 class="text-2xl font-black text-white">10 Bidang</h3>
+                        </div>
+                    </div>
+                </div>
 
-  try{
-    // cek username unik
-    const unameSnap = await getDoc(doc(db, 'usernames', usernameLower));
-    if(unameSnap.exists()){
-      errEl.textContent = 'Username sudah dipakai, coba yang lain.';
-      errEl.classList.remove('hidden');
-      return;
-    }
-    const cred = await createUserWithEmailAndPassword(auth, email, password);
-    const uid = cred.user.uid;
-    const photoURL = initialsAvatar(fullName);
+                <!-- Recent Activity & Subject Fast Links -->
+                <div class="grid grid-cols-1 lg:grid-cols-3 gap-6">
+                    <div class="lg:col-span-2 bg-osn-card p-6 rounded-2xl border border-osn-border">
+                        <h3 class="font-bold text-lg text-white mb-4 flex items-center gap-2">
+                            <i class="fa-solid fa-clock-rotate-left text-red-500"></i> Riwayat Check-in Belajar
+                        </h3>
+                        <div id="checkin-history-list" class="space-y-3">
+                            <p class="text-gray-400 text-sm italic py-4 text-center">Belum ada aktivitas check-in. Klik "Lock In & Check-in Hari Ini" untuk memulai!</p>
+                        </div>
+                    </div>
 
-    await setDoc(doc(db,'users',uid), {
-      fullName, username, usernameLower, email,
-      photoURL, bannerURL: "",
-      field, bio: "", statusToday: "",
-      createdAt: serverTimestamp()
-    });
-    await setDoc(doc(db,'usernames',usernameLower), { uid });
-    await setDoc(doc(db,'streaks',uid), { count:0, longest:0, lastCheckIn: "" });
+                    <div class="bg-osn-card p-6 rounded-2xl border border-osn-border flex flex-col justify-between">
+                        <div>
+                            <h3 class="font-bold text-lg text-white mb-3 flex items-center gap-2">
+                                <i class="fa-solid fa-bullseye text-blue-500"></i> Bidang OSN Populer
+                            </h3>
+                            <div class="space-y-2">
+                                <a href="#" onclick="filterResourceBySubject('Matematika'); navigateTo('resources');" class="flex items-center justify-between p-2.5 rounded-xl bg-osn-bg hover:border-osn-border border border-transparent text-sm font-medium text-gray-300 hover:text-white">
+                                    <span><i class="fa-solid fa-calculator text-red-400 mr-2"></i> Matematika</span>
+                                    <i class="fa-solid fa-chevron-right text-xs text-gray-500"></i>
+                                </a>
+                                <a href="#" onclick="filterResourceBySubject('Informatika / Komputer'); navigateTo('resources');" class="flex items-center justify-between p-2.5 rounded-xl bg-osn-bg hover:border-osn-border border border-transparent text-sm font-medium text-gray-300 hover:text-white">
+                                    <span><i class="fa-solid fa-code text-blue-400 mr-2"></i> Informatika</span>
+                                    <i class="fa-solid fa-chevron-right text-xs text-gray-500"></i>
+                                </a>
+                                <a href="#" onclick="filterResourceBySubject('Kecerdasan Buatan (AI)'); navigateTo('resources');" class="flex items-center justify-between p-2.5 rounded-xl bg-osn-bg hover:border-osn-border border border-transparent text-sm font-medium text-gray-300 hover:text-white">
+                                    <span><i class="fa-solid fa-robot text-purple-400 mr-2"></i> AI & Data Science</span>
+                                    <i class="fa-solid fa-chevron-right text-xs text-gray-500"></i>
+                                </a>
+                                <a href="#" onclick="filterResourceBySubject('Fisika'); navigateTo('resources');" class="flex items-center justify-between p-2.5 rounded-xl bg-osn-bg hover:border-osn-border border border-transparent text-sm font-medium text-gray-300 hover:text-white">
+                                    <span><i class="fa-solid fa-atom text-amber-400 mr-2"></i> Fisika</span>
+                                    <i class="fa-solid fa-chevron-right text-xs text-gray-500"></i>
+                                </a>
+                            </div>
+                        </div>
+                        <div class="mt-6 pt-4 border-t border-osn-border text-center">
+                            <button onclick="navigateTo('resources')" class="text-xs text-red-400 font-bold hover:underline">Lihat Semua 10 Bidang &rarr;</button>
+                        </div>
+                    </div>
+                </div>
+            </section>
 
-    showToast('Akun berhasil dibuat! Selamat bergabung 🎉');
-  }catch(err){
-    errEl.textContent = mapAuthError(err);
-    errEl.classList.remove('hidden');
-  }
-});
+            <!-- SECTION 2: RESOURCE BELAJAR -->
+            <section id="section-resources" class="space-y-6 hidden">
+                <div class="flex flex-col md:flex-row md:items-center justify-between gap-4">
+                    <div>
+                        <h2 class="text-2xl font-black text-white">Resource Belajar OSN</h2>
+                        <p class="text-gray-400 text-sm">Modul, Pembahasan Soal, dan Catatan dari sesama kontestan OSN.</p>
+                    </div>
+                    <button onclick="openAddResourceModal()" class="gradient-red-btn px-4 py-2.5 rounded-xl text-sm font-bold text-white flex items-center gap-2 self-start md:self-auto shadow-md">
+                        <i class="fa-solid fa-plus"></i> Bagikan Modul / Soal
+                    </button>
+                </div>
 
-/* ======================================================================
-   AUTH: LOGIN
-   ====================================================================== */
-$('#loginForm').addEventListener('submit', async (e)=>{
-  e.preventDefault();
-  const errEl = $('#loginError'); errEl.classList.add('hidden');
-  const email = $('#loginEmail').value.trim();
-  const password = $('#loginPassword').value;
-  try{
-    await signInWithEmailAndPassword(auth, email, password);
-  }catch(err){
-    errEl.textContent = mapAuthError(err);
-    errEl.classList.remove('hidden');
-  }
-});
+                <!-- Subject Category Pills -->
+                <div class="flex items-center gap-2 overflow-x-auto pb-2 scrollbar-none" id="subject-pills-container">
+                    <button onclick="filterResourceBySubject('Semua')" class="res-pill px-4 py-2 bg-red-600 text-white rounded-xl text-xs font-bold whitespace-nowrap">Semua Bidang</button>
+                    <button onclick="filterResourceBySubject('Matematika')" class="res-pill px-4 py-2 bg-osn-card border border-osn-border text-gray-300 hover:text-white rounded-xl text-xs font-semibold whitespace-nowrap">Matematika</button>
+                    <button onclick="filterResourceBySubject('Fisika')" class="res-pill px-4 py-2 bg-osn-card border border-osn-border text-gray-300 hover:text-white rounded-xl text-xs font-semibold whitespace-nowrap">Fisika</button>
+                    <button onclick="filterResourceBySubject('Kimia')" class="res-pill px-4 py-2 bg-osn-card border border-osn-border text-gray-300 hover:text-white rounded-xl text-xs font-semibold whitespace-nowrap">Kimia</button>
+                    <button onclick="filterResourceBySubject('Biologi')" class="res-pill px-4 py-2 bg-osn-card border border-osn-border text-gray-300 hover:text-white rounded-xl text-xs font-semibold whitespace-nowrap">Biologi</button>
+                    <button onclick="filterResourceBySubject('Informatika / Komputer')" class="res-pill px-4 py-2 bg-osn-card border border-osn-border text-gray-300 hover:text-white rounded-xl text-xs font-semibold whitespace-nowrap">Informatika</button>
+                    <button onclick="filterResourceBySubject('Astronomi')" class="res-pill px-4 py-2 bg-osn-card border border-osn-border text-gray-300 hover:text-white rounded-xl text-xs font-semibold whitespace-nowrap">Astronomi</button>
+                    <button onclick="filterResourceBySubject('Ekonomi')" class="res-pill px-4 py-2 bg-osn-card border border-osn-border text-gray-300 hover:text-white rounded-xl text-xs font-semibold whitespace-nowrap">Ekonomi</button>
+                    <button onclick="filterResourceBySubject('Kebumian')" class="res-pill px-4 py-2 bg-osn-card border border-osn-border text-gray-300 hover:text-white rounded-xl text-xs font-semibold whitespace-nowrap">Kebumian</button>
+                    <button onclick="filterResourceBySubject('Geografi')" class="res-pill px-4 py-2 bg-osn-card border border-osn-border text-gray-300 hover:text-white rounded-xl text-xs font-semibold whitespace-nowrap">Geografi</button>
+                    <button onclick="filterResourceBySubject('Kecerdasan Buatan (AI)')" class="res-pill px-4 py-2 bg-osn-card border border-osn-border text-gray-300 hover:text-white rounded-xl text-xs font-semibold whitespace-nowrap">AI & Data Science</button>
+                </div>
 
-function mapAuthError(err){
-  const code = err.code || '';
-  if(code.includes('email-already-in-use')) return 'Email sudah terdaftar.';
-  if(code.includes('invalid-email')) return 'Format email tidak valid.';
-  if(code.includes('weak-password')) return 'Kata sandi minimal 6 karakter.';
-  if(code.includes('user-not-found') || code.includes('wrong-password') || code.includes('invalid-credential')) return 'Email atau kata sandi salah.';
-  return 'Terjadi kesalahan: ' + (err.message || code);
-}
+                <!-- Resource Cards Grid -->
+                <div id="resources-grid" class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
+                    <!-- Populated dynamically -->
+                </div>
+            </section>
 
-$('#logoutBtn').addEventListener('click', ()=> signOut(auth));
+            <!-- SECTION 3: STREAK HUB -->
+            <section id="section-streak" class="space-y-6 hidden">
+                <div class="bg-osn-card p-6 md:p-8 rounded-2xl border border-osn-border flex flex-col md:flex-row items-center justify-between gap-6">
+                    <div>
+                        <span class="text-amber-500 font-bold text-xs uppercase tracking-wider"><i class="fa-solid fa-fire mr-1"></i> Social Streak System</span>
+                        <h2 class="text-2xl md:text-3xl font-black text-white mt-1">Jaga Api Belajar Tetap Menyala</h2>
+                        <p class="text-gray-400 text-sm mt-1 max-w-xl">
+                            Lakukan check-in setiap hari saat kamu menyelesaikan latihan soal OSN. Jangan biarkan streak-mu terputus!
+                        </p>
+                    </div>
 
-/* ======================================================================
-   AUTH STATE OBSERVER
-   ====================================================================== */
-onAuthStateChanged(auth, async (user)=>{
-  currentUser = user;
-  if(user){
-    const snap = await getDoc(doc(db,'users',user.uid));
-    if(snap.exists()){
-      currentProfile = { uid:user.uid, ...snap.data() };
-      $('#authScreen').classList.add('hidden');
-      $('#appScreen').classList.remove('hidden');
-      renderProfile();
-      initFriendsRealtime();
-      initChatList();
-      initStreak();
-      ensurePublicGroupChat();
-      renderSubjectTabs();
-      loadResources();
-    }
-  } else {
-    currentProfile = null;
-    if(unsubIncoming) unsubIncoming();
-    if(unsubFriends) unsubFriends();
-    if(unsubChatList) unsubChatList();
-    if(activeChatUnsub) activeChatUnsub();
-    $('#appScreen').classList.add('hidden');
-    $('#authScreen').classList.remove('hidden');
-  }
-});
+                    <div class="text-center bg-osn-bg p-6 rounded-2xl border border-osn-border min-w-[200px]">
+                        <p class="text-xs text-gray-400 uppercase font-semibold">Streak Kamu Saat Ini</p>
+                        <div class="text-4xl font-black text-amber-500 my-2 flex items-center justify-center gap-2">
+                            <i class="fa-solid fa-fire animate-pulse"></i>
+                            <span id="streak-hub-val">0</span>
+                        </div>
+                        <button onclick="triggerCheckIn()" class="w-full gradient-red-btn px-4 py-2 rounded-xl text-xs font-bold text-white shadow-md">
+                            Check-In Hari Ini
+                        </button>
+                    </div>
+                </div>
 
-/* ======================================================================
-   SIDEBAR NAVIGATION
-   ====================================================================== */
-$all('.nav-item').forEach(item=>{
-  item.addEventListener('click', ()=>{
-    $all('.nav-item').forEach(i=>i.classList.remove('active'));
-    item.classList.add('active');
-    const sec = item.dataset.section;
-    ['profile','friends','chat','streak','resources'].forEach(s=>{
-      $('#sec-'+s).classList.toggle('hidden', s !== sec);
-    });
-    $('#sidebar').classList.remove('open');
-    $('#sidebarOverlay').classList.add('hidden');
-  });
-});
-$('#hamburgerBtn').addEventListener('click', ()=>{
-  $('#sidebar').classList.add('open');
-  $('#sidebarOverlay').classList.remove('hidden');
-});
-$('#sidebarOverlay').addEventListener('click', ()=>{
-  $('#sidebar').classList.remove('open');
-  $('#sidebarOverlay').classList.add('hidden');
-});
+                <!-- Streak Leaderboard -->
+                <div class="bg-osn-card p-6 rounded-2xl border border-osn-border">
+                    <h3 class="font-bold text-lg text-white mb-4 flex items-center gap-2">
+                        <i class="fa-solid fa-trophy text-amber-400"></i> Leaderboard Streak Calon Medalis
+                    </h3>
 
-/* ======================================================================
-   MODALS GENERIC
-   ====================================================================== */
-$all('.modal-close').forEach(btn=>{
-  btn.addEventListener('click', ()=>{
-    btn.closest('.modal-backdrop').classList.add('hidden');
-  });
-});
-function openModal(id){ $('#'+id).classList.remove('hidden'); }
-function closeModal(id){ $('#'+id).classList.add('hidden'); }
+                    <div class="overflow-x-auto">
+                        <table class="w-full text-left border-collapse">
+                            <thead>
+                                <tr class="border-b border-osn-border text-xs uppercase text-gray-400 font-semibold">
+                                    <th class="py-3 px-4">Peringkat</th>
+                                    <th class="py-3 px-4">Kontestan</th>
+                                    <th class="py-3 px-4">Bidang Target</th>
+                                    <th class="py-3 px-4 text-right">Streak Belajar</th>
+                                </tr>
+                            </thead>
+                            <tbody id="leaderboard-body" class="divide-y divide-osn-border/50 text-sm">
+                                <!-- Populated dynamically -->
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+            </section>
 
-/* ======================================================================
-   PROFILE: RENDER
-   ====================================================================== */
-function renderProfile(){
-  const p = currentProfile;
-  $('#sideAvatar').src = p.photoURL || initialsAvatar(p.fullName);
-  $('#sideName').textContent = p.fullName;
-  $('#sideUsername').textContent = '@'+p.username;
+            <!-- SECTION 4: CHAT & KOMUNITAS -->
+            <section id="section-chat" class="space-y-6 hidden">
+                <div class="grid grid-cols-1 lg:grid-cols-3 gap-6 h-[600px]">
+                    <!-- Friend / Room Sidebar -->
+                    <div class="bg-osn-card p-4 rounded-2xl border border-osn-border flex flex-col justify-between">
+                        <div>
+                            <h3 class="font-bold text-white mb-3 px-2 flex items-center justify-between">
+                                <span>Ruang Diskusi OSN</span>
+                                <i class="fa-solid fa-users text-xs text-gray-400"></i>
+                            </h3>
+                            <div class="space-y-1">
+                                <button class="w-full p-3 rounded-xl bg-red-600/20 border border-red-500/40 text-left font-semibold text-sm text-white flex items-center gap-3">
+                                    <div class="w-8 h-8 rounded-lg bg-red-600 flex items-center justify-center text-white text-xs font-bold"><i class="fa-solid fa-globe"></i></div>
+                                    <div>
+                                        <p class="leading-none text-sm font-bold">Grup Umum National OSN</p>
+                                        <span class="text-[10px] text-gray-400">Semua Kontestan</span>
+                                    </div>
+                                </button>
+                            </div>
 
-  $('#profileFullName').textContent = p.fullName;
-  $('#profileUsername').textContent = '@'+p.username;
-  $('#profileAvatarImg').src = p.photoURL || initialsAvatar(p.fullName);
-  $('#profileFieldChip').textContent = p.field || '-';
-  $('#profileStatusChip').textContent = 'Sedang belajar: ' + (p.statusToday || 'belum diisi');
-  $('#profileBio').textContent = p.bio || 'Belum ada bio.';
+                            <h4 class="font-semibold text-xs text-gray-400 uppercase tracking-wider mt-6 mb-2 px-2">Teman & Rival Belajar</h4>
+                            <div class="space-y-2 max-h-[300px] overflow-y-auto pr-1" id="friends-list">
+                                <p class="text-xs text-gray-500 italic px-2 py-2">Belum ada teman ditambahkan.</p>
+                            </div>
+                        </div>
 
-  if(p.bannerURL){
-    $('#profileBannerImg').src = p.bannerURL;
-    $('#profileBannerImg').classList.remove('hidden');
-    $('#profileBannerFallback').classList.add('hidden');
-  } else {
-    $('#profileBannerImg').classList.add('hidden');
-    $('#profileBannerFallback').classList.remove('hidden');
-  }
-}
+                        <!-- Add Friend Input -->
+                        <div class="pt-3 border-t border-osn-border">
+                            <form onsubmit="handleAddFriend(event)" class="flex gap-2">
+                                <input type="text" id="add-friend-input" placeholder="Nama / Email teman..." class="flex-1 bg-osn-bg border border-osn-border rounded-xl px-3 py-2 text-xs text-white focus:outline-none focus:border-red-500">
+                                <button type="submit" class="gradient-red-btn px-3 py-2 rounded-xl text-xs font-bold text-white">Tambah</button>
+                            </form>
+                        </div>
+                    </div>
 
-$('#editProfileBtn').addEventListener('click', ()=>{
-  const p = currentProfile;
-  $('#editFullName').value = p.fullName;
-  $('#editUsername').value = p.username;
-  $('#editPhotoURL').value = p.photoURL && !p.photoURL.includes('dicebear') ? p.photoURL : '';
-  $('#editBannerURL').value = p.bannerURL || '';
-  $('#editField').value = p.field;
-  $('#editBio').value = p.bio || '';
-  $('#editStatus').value = p.statusToday || '';
-  openModal('editProfileModal');
-});
+                    <!-- Chat Box -->
+                    <div class="lg:col-span-2 bg-osn-card rounded-2xl border border-osn-border flex flex-col overflow-hidden">
+                        <!-- Chat Header -->
+                        <div class="p-4 bg-osn-bg/80 border-b border-osn-border flex items-center justify-between">
+                            <div class="flex items-center gap-3">
+                                <div class="w-9 h-9 rounded-xl bg-gradient-to-br from-red-600 to-blue-600 flex items-center justify-center text-white font-bold text-sm">
+                                    <i class="fa-solid fa-comments"></i>
+                                </div>
+                                <div>
+                                    <h4 class="font-bold text-sm text-white">Grup Diskusi National OSN</h4>
+                                    <span class="text-[10px] text-green-400 font-medium"><i class="fa-solid fa-circle text-[8px] mr-1"></i> Live Chat Active</span>
+                                </div>
+                            </div>
+                        </div>
 
-$('#editProfileForm').addEventListener('submit', async (e)=>{
-  e.preventDefault();
-  const errEl = $('#editProfileError'); errEl.classList.add('hidden');
-  const newUsername = $('#editUsername').value.trim();
-  const newUsernameLower = newUsername.toLowerCase();
+                        <!-- Chat Messages Container -->
+                        <div id="chat-messages" class="flex-1 p-4 overflow-y-auto space-y-3">
+                            <!-- Messages populated dynamically -->
+                        </div>
 
-  try{
-    // handle username change -> cek unik lalu pindah mapping
-    if(newUsernameLower !== currentProfile.usernameLower){
-      const check = await getDoc(doc(db,'usernames',newUsernameLower));
-      if(check.exists()){
-        errEl.textContent = 'Username sudah dipakai.';
-        errEl.classList.remove('hidden');
-        return;
-      }
-      await deleteDoc(doc(db,'usernames',currentProfile.usernameLower));
-      await setDoc(doc(db,'usernames',newUsernameLower), { uid: currentUser.uid });
-    }
+                        <!-- Chat Input Form -->
+                        <form onsubmit="handleSendMessage(event)" class="p-3 bg-osn-bg border-t border-osn-border flex gap-2">
+                            <input type="text" id="chat-input" required placeholder="Tulis pesan atau pertanyaan soal OSN..." class="flex-1 bg-osn-card border border-osn-border rounded-xl px-4 py-2.5 text-sm text-white focus:outline-none focus:border-red-500 placeholder-gray-500">
+                            <button type="submit" class="gradient-red-btn px-5 py-2.5 rounded-xl font-bold text-sm text-white flex items-center gap-2">
+                                <span>Kirim</span>
+                                <i class="fa-solid fa-paper-plane text-xs"></i>
+                            </button>
+                        </form>
+                    </div>
+                </div>
+            </section>
 
-    let photoURL = $('#editPhotoURL').value.trim() || currentProfile.photoURL;
-    let bannerURL = $('#editBannerURL').value.trim() || currentProfile.bannerURL;
+            <!-- SECTION 5: PROFILE SETTINGS -->
+            <section id="section-profile" class="space-y-6 hidden">
+                <div class="max-w-2xl mx-auto bg-osn-card p-6 md:p-8 rounded-2xl border border-osn-border">
+                    <h2 class="text-2xl font-black text-white mb-6 flex items-center gap-3">
+                        <i class="fa-solid fa-user-gear text-red-500"></i> Pengaturan Profil Pejuang OSN
+                    </h2>
 
-    const photoFile = $('#editPhotoFile').files[0];
-    if(photoFile){
-      photoURL = await uploadImage(photoFile, `profile_photos/${currentUser.uid}_${Date.now()}`);
-    }
-    const bannerFile = $('#editBannerFile').files[0];
-    if(bannerFile){
-      bannerURL = await uploadImage(bannerFile, `banner_photos/${currentUser.uid}_${Date.now()}`);
-    }
+                    <form onsubmit="handleSaveProfile(event)" class="space-y-4">
+                        <div>
+                            <label class="block text-xs font-semibold uppercase text-gray-400 mb-1">Nama Tampilan</label>
+                            <input type="text" id="profile-edit-name" required class="w-full px-4 py-3 bg-osn-bg border border-osn-border rounded-xl text-sm text-white focus:outline-none focus:border-red-500">
+                        </div>
 
-    const updated = {
-      fullName: $('#editFullName').value.trim(),
-      username: newUsername,
-      usernameLower: newUsernameLower,
-      photoURL, bannerURL,
-      field: $('#editField').value,
-      bio: $('#editBio').value.trim(),
-      statusToday: $('#editStatus').value.trim()
-    };
-    await updateDoc(doc(db,'users',currentUser.uid), updated);
-    currentProfile = { ...currentProfile, ...updated };
-    renderProfile();
-    closeModal('editProfileModal');
-    showToast('Profil berhasil diperbarui ✨');
-  }catch(err){
-    errEl.textContent = 'Gagal menyimpan: ' + err.message;
-    errEl.classList.remove('hidden');
-  }
-});
+                        <div>
+                            <label class="block text-xs font-semibold uppercase text-gray-400 mb-1">Target Bidang OSN Utama</label>
+                            <select id="profile-edit-subject" required class="w-full px-4 py-3 bg-osn-bg border border-osn-border rounded-xl text-sm text-white focus:outline-none focus:border-red-500">
+                                <option value="Matematika">Matematika</option>
+                                <option value="Fisika">Fisika</option>
+                                <option value="Kimia">Kimia</option>
+                                <option value="Biologi">Biologi</option>
+                                <option value="Informatika / Komputer">Informatika / Komputer</option>
+                                <option value="Astronomi">Astronomi</option>
+                                <option value="Ekonomi">Ekonomi</option>
+                                <option value="Kebumian">Kebumian</option>
+                                <option value="Geografi">Geografi</option>
+                                <option value="Kecerdasan Buatan (AI)">Kecerdasan Buatan (AI)</option>
+                            </select>
+                        </div>
 
-/* ======================================================================
-   FRIENDS: SEARCH USER
-   ====================================================================== */
-$('#searchUserBtn').addEventListener('click', searchUser);
-$('#searchUsernameInput').addEventListener('keydown', (e)=>{ if(e.key === 'Enter') searchUser(); });
+                        <div>
+                            <label class="block text-xs font-semibold uppercase text-gray-400 mb-1">Bio / Motivasimu</label>
+                            <textarea id="profile-edit-bio" rows="3" placeholder="Tuliskan target medali atau kata-kata penyemangatmu..." class="w-full px-4 py-3 bg-osn-bg border border-osn-border rounded-xl text-sm text-white focus:outline-none focus:border-red-500 placeholder-gray-600"></textarea>
+                        </div>
 
-async function searchUser(){
-  const term = $('#searchUsernameInput').value.trim().toLowerCase();
-  const resultsEl = $('#searchResults');
-  resultsEl.innerHTML = '';
-  if(!term) return;
+                        <button type="submit" class="w-full py-3.5 gradient-red-btn font-bold text-sm text-white rounded-xl shadow-lg">
+                            Simpan Perubahan Profil
+                        </button>
+                    </form>
+                </div>
+            </section>
 
-  const q = query(collection(db,'users'), where('usernameLower','>=',term), where('usernameLower','<=',term+'\uf8ff'), limit(10));
-  const snap = await getDocs(q);
-  if(snap.empty){
-    resultsEl.innerHTML = '<p class="text-sm text-gray-400">Pengguna tidak ditemukan.</p>';
-    return;
-  }
-  snap.forEach(docu=>{
-    const u = { uid: docu.id, ...docu.data() };
-    if(u.uid === currentUser.uid) return;
-    const row = document.createElement('div');
-    row.className = 'flex items-center justify-between gap-2 p-2 rounded-lg hover:bg-slate-50';
-    row.innerHTML = `
-      <div class="flex items-center gap-2 cursor-pointer view-public" data-uid="${u.uid}">
-        <img src="${u.photoURL || initialsAvatar(u.fullName)}" class="w-9 h-9 rounded-full object-cover">
-        <div><p class="text-sm font-semibold">${u.fullName}</p><p class="text-xs text-gray-400">@${u.username}</p></div>
-      </div>
-      <button class="btn-outline text-xs add-friend-btn" data-uid="${u.uid}" data-name="${u.fullName}">Tambah</button>
-    `;
-    resultsEl.appendChild(row);
-  });
+        </main>
+    </div>
 
-  resultsEl.querySelectorAll('.view-public').forEach(el=>{
-    el.addEventListener('click', ()=> openPublicProfile(el.dataset.uid));
-  });
-  resultsEl.querySelectorAll('.add-friend-btn').forEach(el=>{
-    el.addEventListener('click', ()=> sendFriendRequest(el.dataset.uid));
-  });
-}
-
-async function sendFriendRequest(targetUid){
-  try{
-    // cek sudah berteman / sudah ada request
-    const existing = await getDocs(query(collection(db,'friendRequests'),
-      where('from','==',currentUser.uid), where('to','==',targetUid)));
-    if(!existing.empty){ showToast('Permintaan sudah pernah dikirim.'); return; }
-
-    await addDoc(collection(db,'friendRequests'), {
-      from: currentUser.uid, fromName: currentProfile.fullName, fromUsername: currentProfile.username, fromPhoto: currentProfile.photoURL || '',
-      to: targetUid, status: 'pending', createdAt: serverTimestamp()
-    });
-    showToast('Permintaan pertemanan terkirim!');
-  }catch(err){ showToast('Gagal mengirim permintaan.', true); }
-}
-
-/* PUBLIC PROFILE MODAL */
-let publicProfileTarget = null;
-async function openPublicProfile(uid){
-  const snap = await getDoc(doc(db,'users',uid));
-  if(!snap.exists()) return;
-  const u = snap.data();
-  publicProfileTarget = uid;
-  $('#ppAvatar').src = u.photoURL || initialsAvatar(u.fullName);
-  $('#ppName').textContent = u.fullName;
-  $('#ppUsername').textContent = '@'+u.username;
-  $('#ppField').textContent = u.field;
-  $('#ppBio').textContent = u.bio || 'Belum ada bio.';
-  $('#ppStatus').textContent = 'Sedang belajar: ' + (u.statusToday || 'belum diisi');
-  openModal('publicProfileModal');
-}
-$('#ppAddFriendBtn').addEventListener('click', ()=>{
-  if(publicProfileTarget) sendFriendRequest(publicProfileTarget);
-});
-
-/* ======================================================================
-   FRIENDS: REALTIME INCOMING REQUESTS & FRIEND LIST
-   ====================================================================== */
-function initFriendsRealtime(){
-  const qIncoming = query(collection(db,'friendRequests'), where('to','==',currentUser.uid), where('status','==','pending'));
-  unsubIncoming = onSnapshot(qIncoming, (snap)=>{
-    const box = $('#incomingRequests');
-    const badge = $('#friendReqBadge');
-    if(snap.empty){
-      box.innerHTML = '<p class="text-sm text-gray-400">Belum ada permintaan.</p>';
-      badge.classList.add('hidden');
-      return;
-    }
-    badge.textContent = snap.size;
-    badge.classList.remove('hidden');
-    box.innerHTML = '';
-    snap.forEach(d=>{
-      const r = { id:d.id, ...d.data() };
-      const row = document.createElement('div');
-      row.className = 'flex items-center justify-between gap-2 p-2 rounded-lg bg-slate-50';
-      row.innerHTML = `
-        <div class="flex items-center gap-2">
-          <img src="${r.fromPhoto || initialsAvatar(r.fromName)}" class="w-9 h-9 rounded-full object-cover">
-          <div><p class="text-sm font-semibold">${r.fromName}</p><p class="text-xs text-gray-400">@${r.fromUsername}</p></div>
+    <!-- MODAL: ADD RESOURCE -->
+    <div id="add-resource-modal" class="fixed inset-0 z-50 bg-black/80 backdrop-blur-sm flex items-center justify-center p-4 hidden">
+        <div class="bg-osn-card border border-osn-border p-6 rounded-2xl max-w-md w-full">
+            <div class="flex items-center justify-between mb-4">
+                <h3 class="font-bold text-lg text-white">Bagikan Modul / Soal OSN</h3>
+                <button onclick="closeAddResourceModal()" class="text-gray-400 hover:text-white"><i class="fa-solid fa-xmark text-lg"></i></button>
+            </div>
+            <form onsubmit="handleSaveResource(event)" class="space-y-4">
+                <div>
+                    <label class="block text-xs font-semibold uppercase text-gray-400 mb-1">Judul Materi / Soal</label>
+                    <input type="text" id="res-title" required placeholder="Contoh: Modul Kombinatorika OSN-K" class="w-full px-3 py-2 bg-osn-bg border border-osn-border rounded-xl text-sm text-white focus:outline-none focus:border-red-500">
+                </div>
+                <div>
+                    <label class="block text-xs font-semibold uppercase text-gray-400 mb-1">Bidang OSN</label>
+                    <select id="res-subject" required class="w-full px-3 py-2 bg-osn-bg border border-osn-border rounded-xl text-sm text-white focus:outline-none focus:border-red-500">
+                        <option value="Matematika">Matematika</option>
+                        <option value="Fisika">Fisika</option>
+                        <option value="Kimia">Kimia</option>
+                        <option value="Biologi">Biologi</option>
+                        <option value="Informatika / Komputer">Informatika / Komputer</option>
+                        <option value="Astronomi">Astronomi</option>
+                        <option value="Ekonomi">Ekonomi</option>
+                        <option value="Kebumian">Kebumian</option>
+                        <option value="Geografi">Geografi</option>
+                        <option value="Kecerdasan Buatan (AI)">Kecerdasan Buatan (AI)</option>
+                    </select>
+                </div>
+                <div>
+                    <label class="block text-xs font-semibold uppercase text-gray-400 mb-1">Tautan / Link Google Drive / PDF</label>
+                    <input type="url" id="res-link" required placeholder="https://drive.google.com/..." class="w-full px-3 py-2 bg-osn-bg border border-osn-border rounded-xl text-sm text-white focus:outline-none focus:border-red-500">
+                </div>
+                <button type="submit" class="w-full py-3 gradient-red-btn text-white font-bold text-sm rounded-xl">Posting Resource</button>
+            </form>
         </div>
-        <div class="flex gap-2">
-          <button class="btn-primary text-xs accept-btn" data-id="${r.id}" data-from="${r.from}">Terima</button>
-          <button class="btn-outline text-xs reject-btn" data-id="${r.id}">Tolak</button>
-        </div>`;
-      box.appendChild(row);
-    });
-    box.querySelectorAll('.accept-btn').forEach(b=> b.addEventListener('click', ()=> respondRequest(b.dataset.id, b.dataset.from, true)));
-    box.querySelectorAll('.reject-btn').forEach(b=> b.addEventListener('click', ()=> respondRequest(b.dataset.id, null, false)));
-  });
+    </div>
 
-  const qFriendsA = query(collection(db,'friendships'), where('members','array-contains',currentUser.uid));
-  unsubFriends = onSnapshot(qFriendsA, async (snap)=>{
-    const listEl = $('#friendsList');
-    if(snap.empty){
-      listEl.innerHTML = '<p class="text-sm text-gray-400">Belum ada teman terhubung.</p>';
-      friendsCache = [];
-      renderChatList();
-      return;
-    }
-    listEl.innerHTML = '';
-    friendsCache = [];
-    for(const d of snap.docs){
-      const data = d.data();
-      const otherUid = data.members.find(m=>m!==currentUser.uid);
-      const uSnap = await getDoc(doc(db,'users',otherUid));
-      if(!uSnap.exists()) continue;
-      const u = { uid:otherUid, ...uSnap.data() };
-      friendsCache.push(u);
-      const card = document.createElement('div');
-      card.className = 'flex items-center justify-between gap-2 p-2 rounded-lg border border-slate-100';
-      card.innerHTML = `
-        <div class="flex items-center gap-2 cursor-pointer view-public" data-uid="${u.uid}">
-          <img src="${u.photoURL || initialsAvatar(u.fullName)}" class="w-9 h-9 rounded-full object-cover">
-          <div><p class="text-sm font-semibold">${u.fullName}</p><p class="text-xs text-gray-400">@${u.username}</p></div>
-        </div>
-        <button class="btn-outline text-xs chat-friend-btn" data-uid="${u.uid}" data-name="${u.fullName}" data-photo="${u.photoURL || ''}">Chat</button>
-      `;
-      listEl.appendChild(card);
-    }
-    listEl.querySelectorAll('.view-public').forEach(el=> el.addEventListener('click', ()=> openPublicProfile(el.dataset.uid)));
-    listEl.querySelectorAll('.chat-friend-btn').forEach(el=> el.addEventListener('click', ()=>{
-      openDirectChat(el.dataset.uid, el.dataset.name, el.dataset.photo);
-      document.querySelector('.nav-item[data-section="chat"]').click();
-    }));
-    renderChatList();
-    renderFriendStreaks();
-  });
-}
+    <script>
+        /* 
+           ==========================================================================
+           FIREBASE CONFIGURATION
+           Ganti nilai firebaseConfig di bawah ini dengan konfigurasi dari
+           Firebase Console milikmu jika ingin menyambungkan ke cloud nyata!
+           ==========================================================================
+        */
+        const firebaseConfig = {
+            apiKey: "AIzaSyDe9WhvdNVyVgHKCwZ09pBtaN7-o67429U",
+            authDomain: "lock-in-osn.firebaseapp.com",
+            projectId: "lock-in-osn",
+            storageBucket: "lock-in-osn.firebasestorage.app",
+            messagingSenderId: "986878305012",
+            appId: "1:986878305012:web:47c872c202a1a3333574a1",
+            measurementId: "G-G2ZLVJ4EPM"
+        };
 
-async function respondRequest(reqId, fromUid, accept){
-  try{
-    await updateDoc(doc(db,'friendRequests',reqId), { status: accept ? 'accepted' : 'rejected' });
-    if(accept && fromUid){
-      const fid = pairId(currentUser.uid, fromUid);
-      await setDoc(doc(db,'friendships',fid), {
-        members:[currentUser.uid, fromUid], createdAt: serverTimestamp()
-      });
-      showToast('Permintaan pertemanan diterima!');
-    }
-  }catch(err){ showToast('Gagal memproses permintaan.', true); }
-}
+        // Global State Management
+        let isFirebaseActive = false;
+        let currentUser = null;
+        let appState = {
+            name: "Pejuang OSN",
+            email: "pejuang@osn.id",
+            subject: "Matematika",
+            bio: "Target Emas OSN 2026!",
+            streak: 1,
+            totalCheckIns: 1,
+            checkInDates: [],
+            friends: ["Budi (Fisika)", "Siti (Biologi)"]
+        };
 
-/* ======================================================================
-   CHAT: LIST (DIRECT / GROUP)
-   ====================================================================== */
-let chatTabMode = 'direct';
-$all('[data-chattab]').forEach(btn=>{
-  btn.addEventListener('click', ()=>{
-    $all('[data-chattab]').forEach(b=>b.classList.remove('active'));
-    btn.classList.add('active');
-    chatTabMode = btn.dataset.chattab;
-    renderChatList();
-  });
-});
+        // Sample Pre-populated Resources for 10 Subjects
+        let sampleResources = [
+            { id: 1, title: "Modul Diktat Kombinatorika & Teori Bilangan", subject: "Matematika", author: "Ahmad Medalis", link: "https://drive.google.com" },
+            { id: 2, title: "Kumpulan Soal Mekanika Klasik OSN-P", subject: "Fisika", author: "Dewi Fisika", link: "https://drive.google.com" },
+            { id: 3, title: "Cheat Sheet Kimia Organik Lengkap", subject: "Kimia", author: "Rian Kimia", link: "https://drive.google.com" },
+            { id: 4, title: "Guide Algoritma Graaf & Dynamic Programming", subject: "Informatika / Komputer", author: "Budi Coder", link: "https://drive.google.com" },
+            { id: 5, title: "Pengenalan Neural Network & Python OSN AI", subject: "Kecerdasan Buatan (AI)", author: "Priscilla", link: "https://drive.google.com" },
+            { id: 6, title: "Peta Bintang & Mekanika Celestial", subject: "Astronomi", author: "Astro Boy", link: "https://drive.google.com" }
+        ];
 
-function initChatList(){ renderChatList(); }
+        let sampleChatMessages = [
+            { sender: "Budi (Fisika)", text: "Halo kawan-kawan! Ada yang punya pembahasan OSN-K 2025?", time: "10:15" },
+            { sender: "Siti (Biologi)", text: "Coba cek di tab Resource Belajar, kemarin ada yang share modulnya di sana!", time: "10:18" }
+        ];
 
-function renderChatList(){
-  const container = $('#chatListItems');
-  container.innerHTML = '';
-  if(chatTabMode === 'direct'){
-    if(friendsCache.length === 0){
-      container.innerHTML = '<p class="text-xs text-gray-400 p-2">Belum ada teman. Tambahkan teman dulu di menu Teman.</p>';
-      return;
-    }
-    friendsCache.forEach(u=>{
-      const item = document.createElement('div');
-      item.className = 'flex items-center gap-2 p-2 rounded-lg hover:bg-slate-50 cursor-pointer';
-      item.innerHTML = `<img src="${u.photoURL || initialsAvatar(u.fullName)}" class="w-9 h-9 rounded-full object-cover">
-        <div class="min-w-0"><p class="text-sm font-semibold truncate">${u.fullName}</p><p class="text-xs text-gray-400 truncate">@${u.username}</p></div>`;
-      item.addEventListener('click', ()=> openDirectChat(u.uid, u.fullName, u.photoURL));
-      container.appendChild(item);
-    });
-  } else {
-    const item = document.createElement('div');
-    item.className = 'flex items-center gap-2 p-2 rounded-lg hover:bg-slate-50 cursor-pointer';
-    item.innerHTML = `<div class="w-9 h-9 rounded-full bg-navy flex items-center justify-center text-white text-sm">🌐</div>
-      <div><p class="text-sm font-semibold">Grup Publik OSN</p><p class="text-xs text-gray-400">Diskusi rame-rame</p></div>`;
-    item.addEventListener('click', ()=> openGroupChat());
-    container.appendChild(item);
-  }
-}
+        window.addEventListener('DOMContentLoaded', () => {
+            initFirebase();
+            loadLocalStorageData();
+            renderResources('Semua');
+            renderLeaderboard();
+            renderChatMessages();
+            renderFriendsList();
+        });
 
-async function ensurePublicGroupChat(){
-  const gRef = doc(db,'chats',PUBLIC_CHAT_ID);
-  const gSnap = await getDoc(gRef);
-  if(!gSnap.exists()){
-    await setDoc(gRef, { type:'group', name:'Grup Publik OSN', createdAt: serverTimestamp() });
-  }
-}
+        // Toast Notification System
+        function showToast(message, type = 'info') {
+            const container = document.getElementById('toast-container');
+            const toast = document.createElement('div');
+            
+            const bgClass = type === 'error' ? 'bg-red-600' : type === 'success' ? 'bg-green-600' : 'bg-blue-600';
+            toast.className = `${bgClass} text-white px-4 py-3 rounded-xl shadow-xl flex items-center gap-3 text-sm font-semibold transition-all duration-300 transform translate-y-2 pointer-events-auto`;
+            toast.innerHTML = `<i class="fa-solid ${type === 'error' ? 'fa-triangle-exclamation' : type === 'success' ? 'fa-circle-check' : 'fa-info-circle'}"></i> <span>${message}</span>`;
 
-function openDirectChat(otherUid, otherName, otherPhoto){
-  const chatId = 'dm_' + pairId(currentUser.uid, otherUid);
-  openChat(chatId, otherName, otherPhoto || initialsAvatar(otherName), 'direct', otherUid);
-}
-function openGroupChat(){
-  openChat(PUBLIC_CHAT_ID, 'Grup Publik OSN', '', 'group', null);
-}
+            container.appendChild(toast);
+            setTimeout(() => {
+                toast.classList.add('opacity-0', 'translate-y-[-10px]');
+                setTimeout(() => toast.remove(), 300);
+            }, 3000);
+        }
 
-async function openChat(chatId, headerName, headerPhoto, type, otherUid){
-  activeChatId = chatId;
-  if(activeChatUnsub) activeChatUnsub();
+        // Initialize Firebase SDK Safely
+        function initFirebase() {
+            try {
+                if (firebaseConfig.apiKey && !firebaseConfig.apiKey.includes('YOUR_API_KEY')) {
+                    firebase.initializeApp(firebaseConfig);
+                    isFirebaseActive = true;
+                    
+                    firebase.auth().onAuthStateChanged((user) => {
+                        if (user) {
+                            currentUser = user;
+                            appState.email = user.email;
+                            if (user.displayName) appState.name = user.displayName;
+                            showDashboard();
+                            showToast(`Selamat datang kembali, ${appState.name}!`, 'success');
+                        } else {
+                            showAuthScreen();
+                        }
+                    });
+                } else {
+                    console.warn("Firebase belum dikonfigurasi dengan API Key nyata. Menggunakan mode Lokal / Demo.");
+                }
+            } catch (err) {
+                console.error("Firebase init error:", err);
+            }
+        }
 
-  if(type === 'direct'){
-    const cRef = doc(db,'chats',chatId);
-    const cSnap = await getDoc(cRef);
-    if(!cSnap.exists()){
-      await setDoc(cRef, { type:'direct', members:[currentUser.uid, otherUid], createdAt: serverTimestamp() });
-    }
-  }
+        // Local Storage Handlers for Offline / Demo Mode
+        function loadLocalStorageData() {
+            const saved = localStorage.getItem('lockin_osn_user');
+            if (saved) {
+                try {
+                    appState = { ...appState, ...JSON.parse(saved) };
+                } catch(e){}
+            }
+            updateUserUI();
+        }
 
-  $('#chatEmptyState').classList.add('hidden');
-  $('#chatActive').classList.remove('hidden');
-  $('#chatActive').classList.add('flex');
-  $('#chatHeaderName').textContent = headerName;
-  $('#chatHeaderAvatar').src = headerPhoto || `https://api.dicebear.com/7.x/initials/svg?seed=${encodeURIComponent(headerName)}`;
-  $('#chatListPane').classList.add('hidden','sm:flex');
-  $('#chatMessages').innerHTML = '<p class="text-xs text-gray-400 text-center">Memuat pesan...</p>';
+        function saveLocalStorageData() {
+            localStorage.setItem('lockin_osn_user', JSON.stringify(appState));
+            updateUserUI();
+        }
 
-  const msgsQ = query(collection(db,'chats',chatId,'messages'), orderBy('createdAt','asc'), limit(200));
-  activeChatUnsub = onSnapshot(msgsQ, (snap)=>{
-    const box = $('#chatMessages');
-    box.innerHTML = '';
-    snap.forEach(d=>{
-      const m = d.data();
-      const isMe = m.senderId === currentUser.uid;
-      const row = document.createElement('div');
-      row.className = `flex ${isMe ? 'justify-end' : 'justify-start'}`;
-      row.innerHTML = `
-        <div class="max-w-[75%]">
-          ${!isMe ? `<p class="text-xs text-gray-400 mb-0.5 px-1">${m.senderName}</p>` : ''}
-          <div class="${isMe?'bubble-me':'bubble-them'} px-3 py-2 text-sm">${escapeHtml(m.text)}</div>
-          <p class="text-[10px] text-gray-400 mt-0.5 px-1 ${isMe?'text-right':''}">${fmtTime(m.createdAt)}</p>
-        </div>`;
-      box.appendChild(row);
-    });
-    box.scrollTop = box.scrollHeight;
-  });
-}
+        function updateUserUI() {
+            document.getElementById('user-name').innerText = appState.name;
+            document.getElementById('dash-subject-val').innerText = appState.subject;
+            document.getElementById('user-subject-badge').innerText = appState.subject;
+            document.getElementById('sidebar-streak-count').innerText = appState.streak;
+            document.getElementById('dash-streak-val').innerText = `${appState.streak} Hari`;
+            document.getElementById('streak-hub-val').innerText = appState.streak;
+            document.getElementById('dash-total-checkins').innerText = `${appState.totalCheckIns} Kali`;
 
-function escapeHtml(str){
-  const div = document.createElement('div');
-  div.textContent = str;
-  return div.innerHTML;
-}
+            document.getElementById('profile-edit-name').value = appState.name;
+            document.getElementById('profile-edit-subject').value = appState.subject;
+            document.getElementById('profile-edit-bio').value = appState.bio || '';
+        }
 
-$('#backToListBtn').addEventListener('click', ()=>{
-  $('#chatListPane').classList.remove('hidden');
-  $('#chatActive').classList.add('hidden');
-  $('#chatEmptyState').classList.remove('hidden');
-});
+        function switchAuthTab(tab) {
+            const loginForm = document.getElementById('login-form');
+            const regForm = document.getElementById('register-form');
+            const loginBtn = document.getElementById('tab-login-btn');
+            const regBtn = document.getElementById('tab-register-btn');
 
-$('#chatSendForm').addEventListener('submit', async (e)=>{
-  e.preventDefault();
-  const input = $('#chatInput');
-  const text = input.value.trim();
-  if(!text || !activeChatId) return;
-  input.value = '';
-  try{
-    await addDoc(collection(db,'chats',activeChatId,'messages'), {
-      senderId: currentUser.uid, senderName: currentProfile.fullName,
-      text, createdAt: serverTimestamp()
-    });
-  }catch(err){ showToast('Gagal mengirim pesan.', true); }
-});
+            if (tab === 'login') {
+                loginForm.classList.remove('hidden');
+                regForm.classList.add('hidden');
+                loginBtn.className = "flex-1 py-3 text-center font-semibold text-sm transition-colors text-red-500 border-b-2 border-red-500";
+                regBtn.className = "flex-1 py-3 text-center font-semibold text-sm transition-colors text-gray-400 hover:text-white";
+            } else {
+                loginForm.classList.add('hidden');
+                regForm.classList.remove('hidden');
+                regBtn.className = "flex-1 py-3 text-center font-semibold text-sm transition-colors text-red-500 border-b-2 border-red-500";
+                loginBtn.className = "flex-1 py-3 text-center font-semibold text-sm transition-colors text-gray-400 hover:text-white";
+            }
+        }
 
-/* ======================================================================
-   STREAK: PERSONAL & FRIEND
-   ====================================================================== */
-function initStreak(){
-  onSnapshot(doc(db,'streaks',currentUser.uid), (snap)=>{
-    const d = snap.data() || { count:0, lastCheckIn:'' };
-    $('#personalStreakCount').textContent = d.count || 0;
-    const doneToday = d.lastCheckIn === todayStr();
-    $('#personalFlame').classList.toggle('dim', !(d.count > 0));
-    $('#checkinBtn').disabled = doneToday;
-    $('#checkinBtn').classList.toggle('opacity-50', doneToday);
-    $('#checkinDoneMsg').classList.toggle('hidden', !doneToday);
-  });
-}
+        function handleLogin(e) {
+            e.preventDefault();
+            const email = document.getElementById('login-email').value;
+            const pass = document.getElementById('login-password').value;
 
-$('#checkinBtn').addEventListener('click', async ()=>{
-  const today = todayStr();
-  const sRef = doc(db,'streaks',currentUser.uid);
-  try{
-    await runTransaction(db, async (tx)=>{
-      const sSnap = await tx.get(sRef);
-      const data = sSnap.exists() ? sSnap.data() : { count:0, longest:0, lastCheckIn:'' };
-      if(data.lastCheckIn === today) return; // sudah check-in
+            if (isFirebaseActive) {
+                firebase.auth().signInWithEmailAndPassword(email, pass)
+                    .catch((err) => showToast(err.message, 'error'));
+            } else {
+                appState.email = email;
+                showToast("Masuk berhasil (Demo Mode)", "success");
+                showDashboard();
+            }
+        }
 
-      const yesterday = new Date(Date.now() - 86400000);
-      const yStr = `${yesterday.getFullYear()}-${String(yesterday.getMonth()+1).padStart(2,'0')}-${String(yesterday.getDate()).padStart(2,'0')}`;
-      const newCount = data.lastCheckIn === yStr ? (data.count||0)+1 : 1;
+        function handleRegister(e) {
+            e.preventDefault();
+            const name = document.getElementById('reg-name').value;
+            const email = document.getElementById('reg-email').value;
+            const subject = document.getElementById('reg-subject').value;
+            const pass = document.getElementById('reg-password').value;
 
-      tx.set(sRef, {
-        count:newCount, lastCheckIn:today,
-        longest: Math.max(newCount, data.longest||0)
-      }, { merge:true });
-    });
-    $('#personalFlameWrap').classList.add('trophy-pop');
-    setTimeout(()=> $('#personalFlameWrap').classList.remove('trophy-pop'), 500);
-    showToast('Check-in berhasil! Terus jaga apinya 🔥');
-    checkFriendStreaks(today);
-  }catch(err){ showToast('Gagal check-in.', true); }
-});
+            appState.name = name;
+            appState.email = email;
+            appState.subject = subject;
 
-async function checkFriendStreaks(today){
-  for(const f of friendsCache){
-    const fStreakSnap = await getDoc(doc(db,'streaks',f.uid));
-    if(!fStreakSnap.exists()) continue;
-    const fData = fStreakSnap.data();
-    if(fData.lastCheckIn === today){
-      const fid = pairId(currentUser.uid, f.uid);
-      const pairRef = doc(db,'friendStreaks',fid);
-      await runTransaction(db, async (tx)=>{
-        const pSnap = await tx.get(pairRef);
-        const pData = pSnap.exists() ? pSnap.data() : { count:0, lastDate:'' };
-        if(pData.lastDate === today) return;
-        const yesterday = new Date(Date.now() - 86400000);
-        const yStr = `${yesterday.getFullYear()}-${String(yesterday.getMonth()+1).padStart(2,'0')}-${String(yesterday.getDate()).padStart(2,'0')}`;
-        const newCount = pData.lastDate === yStr ? (pData.count||0)+1 : 1;
-        tx.set(pairRef, {
-          members:[currentUser.uid, f.uid], count:newCount, lastDate:today
-        }, { merge:true });
-      });
-    }
-  }
-  renderFriendStreaks();
-}
+            if (isFirebaseActive) {
+                firebase.auth().createUserWithEmailAndPassword(email, pass)
+                    .then((res) => {
+                        res.user.updateProfile({ displayName: name });
+                        saveLocalStorageData();
+                    })
+                    .catch((err) => showToast(err.message, 'error'));
+            } else {
+                saveLocalStorageData();
+                showToast("Registrasi berhasil!", "success");
+                showDashboard();
+            }
+        }
 
-async function renderFriendStreaks(){
-  const box = $('#friendStreakList');
-  if(friendsCache.length === 0){
-    box.innerHTML = '<p class="text-sm text-gray-400">Belum ada streak bersama teman.</p>';
-    return;
-  }
-  box.innerHTML = '';
-  let any = false;
-  for(const f of friendsCache){
-    const fid = pairId(currentUser.uid, f.uid);
-    const snap = await getDoc(doc(db,'friendStreaks',fid));
-    if(!snap.exists()) continue;
-    any = true;
-    const d = snap.data();
-    const row = document.createElement('div');
-    row.className = 'flex items-center justify-between p-2 rounded-lg bg-slate-50';
-    row.innerHTML = `
-      <div class="flex items-center gap-2">
-        <img src="${f.photoURL || initialsAvatar(f.fullName)}" class="w-8 h-8 rounded-full object-cover">
-        <p class="text-sm font-semibold">${f.fullName}</p>
-      </div>
-      <span class="text-sm font-bold text-maroon">🔥 ${d.count} hari</span>`;
-    box.appendChild(row);
-  }
-  if(!any) box.innerHTML = '<p class="text-sm text-gray-400">Belum ada streak bersama teman.</p>';
-}
+        function handleLogout() {
+            if (isFirebaseActive) {
+                firebase.auth().signOut();
+            }
+            showAuthScreen();
+            showToast("Berhasil keluar akun.", "info");
+        }
 
-/* ======================================================================
-   RESOURCE HUB
-   ====================================================================== */
-function renderSubjectTabs(){
-  const wrap = $('#subjectTabs');
-  wrap.innerHTML = '';
-  const selectEl = $('#resSubject');
-  selectEl.innerHTML = '';
-  ['Semua', ...SUBJECTS].forEach(s=>{
-    const chip = document.createElement('button');
-    chip.className = 'tab-chip' + (s === activeSubjectFilter ? ' active' : '');
-    chip.textContent = s;
-    chip.addEventListener('click', ()=>{
-      activeSubjectFilter = s;
-      renderSubjectTabs();
-      loadResources();
-    });
-    wrap.appendChild(chip);
-  });
-  SUBJECTS.forEach(s=>{
-    const opt = document.createElement('option'); opt.textContent = s; selectEl.appendChild(opt);
-  });
-}
+        function showDashboard() {
+            document.getElementById('auth-screen').classList.add('hidden');
+            document.getElementById('main-dashboard').classList.remove('hidden');
+            updateUserUI();
+        }
 
-async function loadResources(){
-  const listEl = $('#resourceList');
-  listEl.innerHTML = '<p class="text-sm text-gray-400 col-span-full">Memuat resource...</p>';
-  let q;
-  if(activeSubjectFilter === 'Semua'){
-    q = query(collection(db,'resources'), orderBy('createdAt','desc'), limit(60));
-  } else {
-    q = query(collection(db,'resources'), where('subject','==',activeSubjectFilter), orderBy('createdAt','desc'), limit(60));
-  }
-  try{
-    const snap = await getDocs(q);
-    if(snap.empty){
-      listEl.innerHTML = '<p class="text-sm text-gray-400 col-span-full">Belum ada resource untuk kategori ini.</p>';
-      return;
-    }
-    listEl.innerHTML = '';
-    snap.forEach(d=>{
-      const r = d.data();
-      const card = document.createElement('div');
-      card.className = 'card p-4 flex flex-col';
-      card.innerHTML = `
-        <span class="tab-chip active !cursor-default self-start mb-2 text-xs">${r.subject}</span>
-        <h4 class="font-display font-bold text-slate-800">${escapeHtml(r.title)}</h4>
-        <p class="text-sm text-gray-500 mt-1 flex-1">${escapeHtml(r.description || '')}</p>
-        <p class="text-xs text-gray-400 mt-2">Oleh ${escapeHtml(r.creatorName)}</p>
-        <a href="${r.url}" target="_blank" rel="noopener" class="btn-outline text-sm text-center mt-3">Buka Tautan</a>`;
-      listEl.appendChild(card);
-    });
-  }catch(err){
-    listEl.innerHTML = '<p class="text-sm text-maroon col-span-full">Gagal memuat resource.</p>';
-  }
-}
+        function showAuthScreen() {
+            document.getElementById('auth-screen').classList.remove('hidden');
+            document.getElementById('main-dashboard').classList.add('hidden');
+        }
 
-$('#addResourceBtn').addEventListener('click', ()=> openModal('addResourceModal'));
-$('#addResourceForm').addEventListener('submit', async (e)=>{
-  e.preventDefault();
-  const errEl = $('#addResourceError'); errEl.classList.add('hidden');
-  try{
-    await addDoc(collection(db,'resources'), {
-      subject: $('#resSubject').value,
-      title: $('#resTitle').value.trim(),
-      description: $('#resDesc').value.trim(),
-      url: $('#resUrl').value.trim(),
-      creatorName: currentProfile.fullName,
-      creatorUid: currentUser.uid,
-      createdAt: serverTimestamp()
-    });
-    e.target.reset();
-    closeModal('addResourceModal');
-    showToast('Resource berhasil ditambahkan!');
-    loadResources();
-  }catch(err){
-    errEl.textContent = 'Gagal menyimpan resource: ' + err.message;
-    errEl.classList.remove('hidden');
-  }
-});
-</script>
+        // Navigation between sections
+        function navigateTo(sectionId) {
+            const sections = ['overview', 'resources', 'streak', 'chat', 'profile'];
+            sections.forEach(s => {
+                const secEl = document.getElementById(`section-${s}`);
+                const navBtn = document.getElementById(`nav-${s}`);
+                if (s === sectionId) {
+                    secEl.classList.remove('hidden');
+                    navBtn.className = "w-full flex items-center gap-3 px-4 py-3 rounded-xl text-sm font-semibold transition-colors bg-red-600 text-white shadow-md";
+                } else {
+                    secEl.classList.add('hidden');
+                    navBtn.className = "w-full flex items-center gap-3 px-4 py-3 rounded-xl text-sm font-semibold text-gray-400 hover:text-white hover:bg-osn-bg transition-colors";
+                }
+            });
+        }
+
+        function triggerCheckIn() {
+            const today = new Date().toLocaleDateString('id-ID');
+            if (!appState.checkInDates.includes(today)) {
+                appState.streak += 1;
+                appState.totalCheckIns += 1;
+                appState.checkInDates.push(today);
+                saveLocalStorageData();
+
+                // Add to history list UI
+                const histList = document.getElementById('checkin-history-list');
+                if (histList.querySelector('p')) histList.innerHTML = '';
+                
+                const item = document.createElement('div');
+                item.className = "p-3 rounded-xl bg-osn-bg border border-osn-border flex items-center justify-between text-xs";
+                item.innerHTML = `<span class="font-bold text-white"><i class="fa-solid fa-fire text-amber-500 mr-2"></i> Lock In Belajar ${appState.subject}</span><span class="text-gray-400">${today}</span>`;
+                histList.prepend(item);
+
+                showToast(`🔥 Streak bertambah! Sekarang ${appState.streak} hari.`, 'success');
+            } else {
+                showToast("Kamu sudah melakukan check-in hari ini! Pertahankan!", "info");
+            }
+        }
+
+        function renderResources(filterSubject) {
+            const grid = document.getElementById('resources-grid');
+            grid.innerHTML = '';
+
+            const filtered = filterSubject === 'Semua' 
+                ? sampleResources 
+                : sampleResources.filter(r => r.subject === filterSubject);
+
+            if (filtered.length === 0) {
+                grid.innerHTML = `<div class="col-span-full py-8 text-center text-gray-500 text-sm">Belum ada modul untuk bidang <b>${filterSubject}</b>. Jadi yang pertama membagikannya!</div>`;
+                return;
+            }
+
+            filtered.forEach(res => {
+                const card = document.createElement('div');
+                card.className = "bg-osn-card p-5 rounded-2xl border border-osn-border flex flex-col justify-between hover:border-red-500/50 transition-all";
+                card.innerHTML = `
+                    <div>
+                        <span class="text-[10px] bg-red-950/60 text-red-400 border border-red-800/40 px-2.5 py-0.5 rounded-full font-bold uppercase">${res.subject}</span>
+                        <h4 class="font-bold text-white text-base mt-3 leading-snug">${res.title}</h4>
+                        <p class="text-xs text-gray-400 mt-1">Oleh: <span class="text-gray-200 font-semibold">${res.author}</span></p>
+                    </div>
+                    <div class="mt-5 pt-3 border-t border-osn-border/60 flex items-center justify-between">
+                        <a href="${res.link}" target="_blank" class="text-xs text-blue-400 hover:text-blue-300 font-bold flex items-center gap-1">
+                            <span>Buka Modul</span> <i class="fa-solid fa-arrow-up-right-from-square text-[10px]"></i>
+                        </a>
+                        <button onclick="showToast('Modul disimpan!', 'success')" class="text-gray-500 hover:text-amber-400 text-xs"><i class="fa-solid fa-bookmark"></i></button>
+                    </div>
+                `;
+                grid.appendChild(card);
+            });
+        }
+
+        function filterResourceBySubject(subj) {
+            document.querySelectorAll('.res-pill').forEach(btn => {
+                if (btn.innerText.includes(subj) || (subj === 'Semua' && btn.innerText.includes('Semua'))) {
+                    btn.className = "res-pill px-4 py-2 bg-red-600 text-white rounded-xl text-xs font-bold whitespace-nowrap";
+                } else {
+                    btn.className = "res-pill px-4 py-2 bg-osn-card border border-osn-border text-gray-300 hover:text-white rounded-xl text-xs font-semibold whitespace-nowrap";
+                }
+            });
+            renderResources(subj);
+        }
+
+        function openAddResourceModal() { document.getElementById('add-resource-modal').classList.remove('hidden'); }
+        function closeAddResourceModal() { document.getElementById('add-resource-modal').classList.add('hidden'); }
+
+        function handleSaveResource(e) {
+            e.preventDefault();
+            const title = document.getElementById('res-title').value;
+            const subject = document.getElementById('res-subject').value;
+            const link = document.getElementById('res-link').value;
+
+            sampleResources.unshift({
+                id: Date.now(),
+                title: title,
+                subject: subject,
+                author: appState.name,
+                link: link
+            });
+
+            closeAddResourceModal();
+            renderResources('Semua');
+            showToast("Berhasil membagikan resource belajar!", "success");
+        }
+
+        function renderLeaderboard() {
+            const body = document.getElementById('leaderboard-body');
+            const mockUsers = [
+                { rank: 1, name: "Farhan Medalis", subject: "Informatika / Komputer", streak: 28 },
+                { rank: 2, name: "Annisa Rahma", subject: "Matematika", streak: 21 },
+                { rank: 3, name: appState.name + " (Kamu)", subject: appState.subject, streak: appState.streak },
+                { rank: 4, name: "Kevin Sanjaya", subject: "Fisika", streak: 14 }
+            ];
+
+            body.innerHTML = mockUsers.map(u => `
+                <tr class="hover:bg-osn-bg/40 transition-colors">
+                    <td class="py-3.5 px-4 font-bold text-amber-400">#${u.rank}</td>
+                    <td class="py-3.5 px-4 font-bold text-white">${u.name}</td>
+                    <td class="py-3.5 px-4"><span class="text-xs bg-osn-bg px-2.5 py-1 rounded-lg border border-osn-border text-gray-300">${u.subject}</span></td>
+                    <td class="py-3.5 px-4 text-right font-black text-amber-500"><i class="fa-solid fa-fire mr-1"></i> ${u.streak} Hari</td>
+                </tr>
+            `).join('');
+        }
+
+        function renderChatMessages() {
+            const box = document.getElementById('chat-messages');
+            box.innerHTML = sampleChatMessages.map(m => `
+                <div class="bg-osn-bg p-3 rounded-xl border border-osn-border max-w-lg">
+                    <div class="flex items-center justify-between text-[11px] mb-1">
+                        <span class="font-bold text-red-400">${m.sender}</span>
+                        <span class="text-gray-500">${m.time}</span>
+                    </div>
+                    <p class="text-sm text-gray-200">${m.text}</p>
+                </div>
+            `).join('');
+            box.scrollTop = box.scrollHeight;
+        }
+
+        function handleSendMessage(e) {
+            e.preventDefault();
+            const input = document.getElementById('chat-input');
+            const txt = input.value.trim();
+            if (!txt) return;
+
+            const now = new Date();
+            const timeStr = `${now.getHours()}:${now.getMinutes() < 10 ? '0' : ''}${now.getMinutes()}`;
+
+            sampleChatMessages.push({
+                sender: `${appState.name} (${appState.subject})`,
+                text: txt,
+                time: timeStr
+            });
+
+            input.value = '';
+            renderChatMessages();
+        }
+
+        function renderFriendsList() {
+            const container = document.getElementById('friends-list');
+            if (appState.friends.length === 0) {
+                container.innerHTML = '<p class="text-xs text-gray-500 italic px-2 py-2">Belum ada teman ditambahkan.</p>';
+                return;
+            }
+            container.innerHTML = appState.friends.map(f => `
+                <div class="flex items-center justify-between p-2 rounded-xl bg-osn-bg border border-osn-border text-xs">
+                    <span class="font-medium text-gray-300"><i class="fa-solid fa-user-check text-green-400 mr-2"></i> ${f}</span>
+                    <span class="text-amber-500 font-bold"><i class="fa-solid fa-fire"></i></span>
+                </div>
+            `).join('');
+        }
+
+        function handleAddFriend(e) {
+            e.preventDefault();
+            const input = document.getElementById('add-friend-input');
+            const val = input.value.trim();
+            if (val) {
+                appState.friends.push(val);
+                saveLocalStorageData();
+                renderFriendsList();
+                input.value = '';
+                showToast(`Teman ${val} berhasil ditambahkan!`, 'success');
+            }
+        }
+
+        function handleSaveProfile(e) {
+            e.preventDefault();
+            appState.name = document.getElementById('profile-edit-name').value;
+            appState.subject = document.getElementById('profile-edit-subject').value;
+            appState.bio = document.getElementById('profile-edit-bio').value;
+
+            saveLocalStorageData();
+            renderLeaderboard();
+            showToast("Profil berhasil diperbarui!", "success");
+        }
+    </script>
 </body>
 </html>
