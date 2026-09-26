@@ -1,855 +1,1833 @@
 <!DOCTYPE html>
 <html lang="id">
 <head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Lock In OSN - Tempatmu Untuk Naik Level Setiap Hari</title>
-    <!-- Tailwind CSS CDN -->
-    <script src="https://cdn.tailwindcss.com"></script>
-    <!-- Lucide Icons CDN -->
-    <script src="https://unpkg.com/lucide@latest"></script>
-    <style>
-        @import url('https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800&display=swap');
-        body {
-            font-family: 'Plus Jakarta Sans', sans-serif;
-        }
-        .custom-scrollbar::-webkit-scrollbar {
-            width: 6px;
-        }
-        .custom-scrollbar::-webkit-scrollbar-track {
-            background: rgba(15, 23, 42, 0.6);
-        }
-        .custom-scrollbar::-webkit-scrollbar-thumb {
-            background: #334155;
-            border-radius: 4px;
-        }
-        .custom-scrollbar::-webkit-scrollbar-thumb:hover {
-            background: #475569;
-        }
-    </style>
-</head>
-<body class="bg-slate-950 text-slate-100 min-h-screen flex flex-col selection:bg-indigo-500 selection:text-white">
-
-    <!-- APP CONTAINER -->
-    <div id="app" class="flex-1 flex flex-col">
-        <!-- AUTH SCREEN (LOGIN / REGISTER) -->
-        <div id="auth-screen" class="min-h-screen flex items-center justify-center p-4 bg-[radial-gradient(ellipse_at_top,_var(--tw-gradient-stops))] from-indigo-900/30 via-slate-950 to-slate-950">
-            <div class="w-full max-w-md bg-slate-900/80 border border-slate-800 rounded-2xl p-6 sm:p-8 backdrop-blur-xl shadow-2xl relative overflow-hidden">
-                <!-- Glowing effect -->
-                <div class="absolute -top-24 -left-24 w-48 h-48 bg-indigo-500/20 rounded-full blur-3xl pointer-events-none"></div>
-                <div class="absolute -bottom-24 -right-24 w-48 h-48 bg-purple-500/20 rounded-full blur-3xl pointer-events-none"></div>
-
-                <!-- Branding Header -->
-                <div class="text-center mb-8">
-                    <div class="inline-flex items-center justify-center w-14 h-14 bg-indigo-600/20 border border-indigo-500/30 rounded-2xl mb-3 text-indigo-400">
-                        <i data-lucide="flame" class="w-8 h-8"></i>
-                    </div>
-                    <h1 class="text-2xl sm:text-3xl font-extrabold tracking-tight bg-gradient-to-r from-indigo-400 via-purple-300 to-pink-400 bg-clip-text text-transparent">
-                        LOCK IN OSN
-                    </h1>
-                    <p class="text-slate-400 text-sm mt-1.5 font-medium">
-                        Tempatmu Untuk Naik Level Setiap Hari
-                    </p>
-                </div>
-
-                <!-- Auth Tabs -->
-                <div class="flex border-b border-slate-800 mb-6 text-sm font-semibold">
-                    <button id="tab-login-btn" onclick="switchAuthTab('login')" class="flex-1 pb-3 border-b-2 border-indigo-500 text-indigo-400 transition-colors">
-                        Masuk
-                    </button>
-                    <button id="tab-register-btn" onclick="switchAuthTab('register')" class="flex-1 pb-3 border-b-2 border-transparent text-slate-400 hover:text-slate-200 transition-colors">
-                        Daftar Akun
-                    </button>
-                </div>
-
-                <!-- LOGIN FORM -->
-                <form id="login-form" onsubmit="handleLogin(event)" class="space-y-4">
-                    <div>
-                        <label class="block text-xs font-semibold uppercase tracking-wider text-slate-400 mb-1.5">Email / Username</label>
-                        <div class="relative">
-                            <i data-lucide="user" class="w-5 h-5 absolute left-3.5 top-1/2 -translate-y-1/2 text-slate-500"></i>
-                            <input type="text" id="login-identifier" required placeholder="Masukkan email atau username" class="w-full bg-slate-950 border border-slate-800 rounded-xl py-2.5 pl-11 pr-4 text-sm focus:outline-none focus:border-indigo-500 focus:ring-1 focus:ring-indigo-500 transition-all text-slate-100 placeholder-slate-600">
-                        </div>
-                    </div>
-
-                    <div>
-                        <label class="block text-xs font-semibold uppercase tracking-wider text-slate-400 mb-1.5">Kata Sandi</label>
-                        <div class="relative">
-                            <i data-lucide="lock" class="w-5 h-5 absolute left-3.5 top-1/2 -translate-y-1/2 text-slate-500"></i>
-                            <input type="password" id="login-password" required placeholder="••••••••" class="w-full bg-slate-950 border border-slate-800 rounded-xl py-2.5 pl-11 pr-11 text-sm focus:outline-none focus:border-indigo-500 focus:ring-1 focus:ring-indigo-500 transition-all text-slate-100 placeholder-slate-600">
-                            <button type="button" onclick="togglePasswordVisibility('login-password', 'login-eye-icon')" class="absolute right-3.5 top-1/2 -translate-y-1/2 text-slate-500 hover:text-slate-300 transition-colors">
-                                <i id="login-eye-icon" data-lucide="eye" class="w-5 h-5"></i>
-                            </button>
-                        </div>
-                    </div>
-
-                    <button type="submit" class="w-full bg-indigo-600 hover:bg-indigo-500 active:bg-indigo-700 text-white font-semibold py-3 rounded-xl shadow-lg shadow-indigo-600/25 transition-all text-sm mt-2 flex items-center justify-center gap-2">
-                        <span>Masuk ke Hub</span>
-                        <i data-lucide="arrow-right" class="w-4 h-4"></i>
-                    </button>
-                </form>
-
-                <!-- REGISTER FORM -->
-                <form id="register-form" onsubmit="handleRegister(event)" class="space-y-4 hidden">
-                    <div>
-                        <label class="block text-xs font-semibold uppercase tracking-wider text-slate-400 mb-1.5">Username</label>
-                        <div class="relative">
-                            <i data-lucide="user" class="w-5 h-5 absolute left-3.5 top-1/2 -translate-y-1/2 text-slate-500"></i>
-                            <input type="text" id="reg-username" required placeholder="Masukkan username kamu" class="w-full bg-slate-950 border border-slate-800 rounded-xl py-2.5 pl-11 pr-4 text-sm focus:outline-none focus:border-indigo-500 focus:ring-1 focus:ring-indigo-500 transition-all text-slate-100 placeholder-slate-600">
-                        </div>
-                    </div>
-
-                    <div>
-                        <label class="block text-xs font-semibold uppercase tracking-wider text-slate-400 mb-1.5">Bidang OSN Utama</label>
-                        <div class="relative">
-                            <i data-lucide="book-open" class="w-5 h-5 absolute left-3.5 top-1/2 -translate-y-1/2 text-slate-500"></i>
-                            <select id="reg-subject" required class="w-full bg-slate-950 border border-slate-800 rounded-xl py-2.5 pl-11 pr-4 text-sm focus:outline-none focus:border-indigo-500 focus:ring-1 focus:ring-indigo-500 transition-all text-slate-100 appearance-none">
-                                <option value="" disabled selected>Pilih Bidang OSN</option>
-                                <option value="Matematika">Matematika</option>
-                                <option value="Fisika">Fisika</option>
-                                <option value="Kimia">Kimia</option>
-                                <option value="Biologi">Biologi</option>
-                                <option value="Informatika">Informatika / Komputer</option>
-                                <option value="Astronomi">Astronomi</option>
-                                <option value="Kebumian">Kebumian</option>
-                                <option value="Ekonomi">Ekonomi</option>
-                                <option value="Geografi">Geografi</option>
-                            </select>
-                        </div>
-                    </div>
-
-                    <div>
-                        <label class="block text-xs font-semibold uppercase tracking-wider text-slate-400 mb-1.5">Email</label>
-                        <div class="relative">
-                            <i data-lucide="mail" class="w-5 h-5 absolute left-3.5 top-1/2 -translate-y-1/2 text-slate-500"></i>
-                            <input type="email" id="reg-email" required placeholder="email@contoh.com" class="w-full bg-slate-950 border border-slate-800 rounded-xl py-2.5 pl-11 pr-4 text-sm focus:outline-none focus:border-indigo-500 focus:ring-1 focus:ring-indigo-500 transition-all text-slate-100 placeholder-slate-600">
-                        </div>
-                    </div>
-
-                    <div>
-                        <label class="block text-xs font-semibold uppercase tracking-wider text-slate-400 mb-1.5">Kata Sandi</label>
-                        <div class="relative">
-                            <i data-lucide="lock" class="w-5 h-5 absolute left-3.5 top-1/2 -translate-y-1/2 text-slate-500"></i>
-                            <input type="password" id="reg-password" required minlength="6" placeholder="Minimal 6 karakter" class="w-full bg-slate-950 border border-slate-800 rounded-xl py-2.5 pl-11 pr-11 text-sm focus:outline-none focus:border-indigo-500 focus:ring-1 focus:ring-indigo-500 transition-all text-slate-100 placeholder-slate-600">
-                            <button type="button" onclick="togglePasswordVisibility('reg-password', 'reg-eye-icon')" class="absolute right-3.5 top-1/2 -translate-y-1/2 text-slate-500 hover:text-slate-300 transition-colors">
-                                <i id="reg-eye-icon" data-lucide="eye" class="w-5 h-5"></i>
-                            </button>
-                        </div>
-                    </div>
-
-                    <button type="submit" class="w-full bg-indigo-600 hover:bg-indigo-500 active:bg-indigo-700 text-white font-semibold py-3 rounded-xl shadow-lg shadow-indigo-600/25 transition-all text-sm mt-2 flex items-center justify-center gap-2">
-                        <span>Buat Akun & Mulai</span>
-                        <i data-lucide="sparkles" class="w-4 h-4"></i>
-                    </button>
-                </form>
-            </div>
-        </div>
-
-        <!-- MAIN DASHBOARD (HIDDEN UNTIL LOGIN) -->
-        <div id="dashboard-screen" class="hidden flex-1 flex flex-col min-h-screen bg-slate-950">
-            <!-- NAVBAR -->
-            <header class="bg-slate-900/80 border-b border-slate-800 backdrop-blur-md sticky top-0 z-30">
-                <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 h-16 flex items-center justify-between">
-                    <!-- Brand -->
-                    <div class="flex items-center gap-3">
-                        <div class="w-10 h-10 bg-indigo-600/20 border border-indigo-500/30 rounded-xl flex items-center justify-center text-indigo-400">
-                            <i data-lucide="flame" class="w-6 h-6"></i>
-                        </div>
-                        <div>
-                            <div class="font-extrabold text-base tracking-tight bg-gradient-to-r from-indigo-400 to-purple-400 bg-clip-text text-transparent">
-                                LOCK IN OSN
-                            </div>
-                            <div class="text-[10px] text-slate-400 font-medium tracking-wide">
-                                Tempatmu Untuk Naik Level Setiap Hari
-                            </div>
-                        </div>
-                    </div>
-
-                    <!-- User Info & Logout -->
-                    <div class="flex items-center gap-4">
-                        <div class="hidden sm:flex items-center gap-2 bg-slate-800/60 border border-slate-700/50 rounded-full py-1 px-3 text-xs">
-                            <span class="w-2 h-2 rounded-full bg-emerald-500 animate-pulse"></span>
-                            <span id="nav-username" class="font-semibold text-slate-200">Username</span>
-                            <span class="text-slate-500">|</span>
-                            <span id="nav-subject" class="text-indigo-400 font-medium">Matematika</span>
-                        </div>
-                        <button onclick="handleLogout()" class="p-2 text-slate-400 hover:text-rose-400 hover:bg-rose-500/10 rounded-xl transition-all" title="Keluar">
-                            <i data-lucide="log-out" class="w-5 h-5"></i>
-                        </button>
-                    </div>
-                </div>
-            </header>
-
-            <!-- DASHBOARD BODY -->
-            <main class="flex-1 max-w-7xl w-full mx-auto px-4 sm:px-6 lg:px-8 py-6 flex flex-col gap-6">
-                <!-- NAVIGATION TABS -->
-                <div class="flex items-center gap-2 border-b border-slate-800 pb-2 overflow-x-auto custom-scrollbar">
-                    <button id="nav-tab-streak" onclick="switchDashboardTab('streak')" class="tab-btn px-4 py-2 rounded-xl font-semibold text-sm flex items-center gap-2 whitespace-nowrap bg-indigo-600 text-white shadow-md">
-                        <i data-lucide="flame" class="w-4 h-4"></i>
-                        <span>Streak Hub</span>
-                    </button>
-                    <button id="nav-tab-materi" onclick="switchDashboardTab('materi')" class="tab-btn px-4 py-2 rounded-xl font-semibold text-sm flex items-center gap-2 whitespace-nowrap bg-slate-900 text-slate-400 hover:text-slate-200 hover:bg-slate-800 transition-colors">
-                        <i data-lucide="book-open" class="w-4 h-4"></i>
-                        <span>Hub Materi</span>
-                    </button>
-                    <button id="nav-tab-chat" onclick="switchDashboardTab('chat')" class="tab-btn px-4 py-2 rounded-xl font-semibold text-sm flex items-center gap-2 whitespace-nowrap bg-slate-900 text-slate-400 hover:text-slate-200 hover:bg-slate-800 transition-colors">
-                        <i data-lucide="message-square" class="w-4 h-4"></i>
-                        <span>Ruang Diskusi</span>
-                    </button>
-                    <button id="nav-tab-timer" onclick="switchDashboardTab('timer')" class="tab-btn px-4 py-2 rounded-xl font-semibold text-sm flex items-center gap-2 whitespace-nowrap bg-slate-900 text-slate-400 hover:text-slate-200 hover:bg-slate-800 transition-colors">
-                        <i data-lucide="timer" class="w-4 h-4"></i>
-                        <span>Timer Focus</span>
-                    </button>
-                </div>
-
-                <!-- SECTION 1: STREAK HUB -->
-                <section id="section-streak" class="space-y-6">
-                    <!-- Daily Check-in Card -->
-                    <div class="bg-gradient-to-r from-indigo-950/60 via-slate-900 to-slate-900 border border-indigo-500/20 rounded-2xl p-6 sm:p-8 flex flex-col md:flex-row items-center justify-between gap-6 relative overflow-hidden">
-                        <div class="space-y-2 text-center md:text-left z-10">
-                            <span class="inline-flex items-center gap-1.5 px-3 py-1 rounded-full text-xs font-semibold bg-indigo-500/10 text-indigo-400 border border-indigo-500/20">
-                                <i data-lucide="zap" class="w-3.5 h-3.5"></i> Daily Target
-                            </span>
-                            <h2 class="text-2xl sm:text-3xl font-bold">Sudah Belajar OSN Hari Ini?</h2>
-                            <p class="text-slate-400 text-sm max-w-lg">
-                                Tekan tombol check-in setiap kali kamu menyelesaikan sesi belajar. Jaga konsistensi dan naikkan peringkatmu!
-                            </p>
-                        </div>
-
-                        <div class="flex flex-col items-center gap-3 z-10 w-full md:w-auto">
-                            <div class="text-center">
-                                <span id="current-streak-count" class="text-4xl font-extrabold text-amber-400">0</span>
-                                <span class="text-slate-400 text-xs block font-medium">Hari Streak</span>
-                            </div>
-                            <button id="checkin-btn" onclick="handleCheckIn()" class="w-full md:w-auto px-8 py-3.5 bg-gradient-to-r from-amber-500 to-orange-500 hover:from-amber-400 hover:to-orange-400 text-slate-950 font-extrabold rounded-xl shadow-lg shadow-amber-500/20 transition-all flex items-center justify-center gap-2 text-base">
-                                <i data-lucide="flame" class="w-5 h-5 fill-slate-950"></i>
-                                <span>Check-in Belajar Hari Ini</span>
-                            </button>
-                        </div>
-                    </div>
-
-                    <!-- LEADERBOARD (PURE ORGANIC - NO FAKE USERS) -->
-                    <div class="bg-slate-900/60 border border-slate-800 rounded-2xl p-6">
-                        <div class="flex items-center justify-between mb-6">
-                            <div>
-                                <h3 class="text-lg font-bold flex items-center gap-2">
-                                    <i data-lucide="trophy" class="w-5 h-5 text-amber-400"></i>
-                                    <span>Peringkat Konsistensi (Leaderboard)</span>
-                                </h3>
-                                <p class="text-xs text-slate-400 mt-0.5">Peringkat murni dari anggota aktif komunitas</p>
-                            </div>
-                        </div>
-
-                        <!-- Leaderboard List -->
-                        <div id="leaderboard-list" class="space-y-3">
-                            <!-- Empty State for Pure Community -->
-                            <div id="leaderboard-empty" class="text-center py-12 px-4 border border-dashed border-slate-800 rounded-xl">
-                                <div class="w-12 h-12 bg-slate-800/50 rounded-2xl flex items-center justify-center mx-auto mb-3 text-slate-500">
-                                    <i data-lucide="users" class="w-6 h-6"></i>
-                                </div>
-                                <h4 class="text-base font-semibold text-slate-300">Belum Ada Peringkat</h4>
-                                <p class="text-xs text-slate-500 max-w-sm mx-auto mt-1">
-                                    Jadilah orang pertama yang mendaftar dan melakukan check-in hari ini untuk memimpin papan peringkat!
-                                </p>
-                            </div>
-                        </div>
-                    </div>
-                </section>
-
-                <!-- SECTION 2: HUB MATERI (PURE ORGANIC - NO DEFAULT RESOURCES) -->
-                <section id="section-materi" class="space-y-6 hidden">
-                    <div class="flex flex-col sm:flex-row sm:items-center justify-between gap-4 bg-slate-900/60 border border-slate-800 p-6 rounded-2xl">
-                        <div>
-                            <h2 class="text-xl font-bold flex items-center gap-2">
-                                <i data-lucide="folder-git-2" class="w-6 h-6 text-indigo-400"></i>
-                                <span>Perpustakaan & Modul OSN</span>
-                            </h2>
-                            <p class="text-xs text-slate-400 mt-1">Materi dan catatan gratis yang dibagikan murni oleh anggota komunitas</p>
-                        </div>
-                        <button onclick="openAddResourceModal()" class="px-4 py-2.5 bg-indigo-600 hover:bg-indigo-500 text-white rounded-xl font-semibold text-sm flex items-center justify-center gap-2 transition-all shadow-md">
-                            <i data-lucide="plus" class="w-4 h-4"></i>
-                            <span>Tambah Materi</span>
-                        </button>
-                    </div>
-
-                    <!-- Category Filter -->
-                    <div class="flex items-center gap-2 overflow-x-auto pb-2 custom-scrollbar text-xs">
-                        <button onclick="filterResources('Semua')" class="filter-btn px-3 py-1.5 rounded-lg bg-indigo-600 text-white font-medium whitespace-nowrap">Semua</button>
-                        <button onclick="filterResources('Matematika')" class="filter-btn px-3 py-1.5 rounded-lg bg-slate-900 text-slate-400 hover:text-slate-200 border border-slate-800 whitespace-nowrap">Matematika</button>
-                        <button onclick="filterResources('Fisika')" class="filter-btn px-3 py-1.5 rounded-lg bg-slate-900 text-slate-400 hover:text-slate-200 border border-slate-800 whitespace-nowrap">Fisika</button>
-                        <button onclick="filterResources('Kimia')" class="filter-btn px-3 py-1.5 rounded-lg bg-slate-900 text-slate-400 hover:text-slate-200 border border-slate-800 whitespace-nowrap">Kimia</button>
-                        <button onclick="filterResources('Biologi')" class="filter-btn px-3 py-1.5 rounded-lg bg-slate-900 text-slate-400 hover:text-slate-200 border border-slate-800 whitespace-nowrap">Biologi</button>
-                        <button onclick="filterResources('Informatika')" class="filter-btn px-3 py-1.5 rounded-lg bg-slate-900 text-slate-400 hover:text-slate-200 border border-slate-800 whitespace-nowrap">Informatika</button>
-                        <button onclick="filterResources('Astronomi')" class="filter-btn px-3 py-1.5 rounded-lg bg-slate-900 text-slate-400 hover:text-slate-200 border border-slate-800 whitespace-nowrap">Astronomi</button>
-                        <button onclick="filterResources('Kebumian')" class="filter-btn px-3 py-1.5 rounded-lg bg-slate-900 text-slate-400 hover:text-slate-200 border border-slate-800 whitespace-nowrap">Kebumian</button>
-                        <button onclick="filterResources('Ekonomi')" class="filter-btn px-3 py-1.5 rounded-lg bg-slate-900 text-slate-400 hover:text-slate-200 border border-slate-800 whitespace-nowrap">Ekonomi</button>
-                        <button onclick="filterResources('Geografi')" class="filter-btn px-3 py-1.5 rounded-lg bg-slate-900 text-slate-400 hover:text-slate-200 border border-slate-800 whitespace-nowrap">Geografi</button>
-                    </div>
-
-                    <!-- Resources Grid -->
-                    <div id="resources-grid" class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
-                        <!-- Empty State -->
-                        <div id="resources-empty" class="col-span-full text-center py-16 px-4 border border-dashed border-slate-800 rounded-2xl bg-slate-900/30">
-                            <div class="w-12 h-12 bg-slate-800/50 rounded-2xl flex items-center justify-center mx-auto mb-3 text-slate-500">
-                                <i data-lucide="file-text" class="w-6 h-6"></i>
-                            </div>
-                            <h4 class="text-base font-semibold text-slate-300">Belum Ada Materi Ditambahkan</h4>
-                            <p class="text-xs text-slate-500 max-w-sm mx-auto mt-1">
-                                Perpustakaan masih murni kosong. Bagikan modul, drive, atau file latihan kamu dengan menekan tombol "+ Tambah Materi"!
-                            </p>
-                        </div>
-                    </div>
-                </section>
-
-                <!-- SECTION 3: RUANG DISKUSI -->
-                <section id="section-chat" class="space-y-4 hidden flex-1 flex flex-col min-h-[500px] bg-slate-900/60 border border-slate-800 rounded-2xl p-4 sm:p-6">
-                    <div class="flex items-center justify-between border-b border-slate-800 pb-4">
-                        <div class="flex items-center gap-3">
-                            <div class="w-10 h-10 bg-indigo-600/20 text-indigo-400 rounded-xl flex items-center justify-center">
-                                <i data-lucide="message-square" class="w-5 h-5"></i>
-                            </div>
-                            <div>
-                                <h3 class="font-bold text-base">Diskusi Komunitas OSN</h3>
-                                <p class="text-xs text-slate-400">Tanyakan soal, berbagi tips, atau saling memberi semangat</p>
-                            </div>
-                        </div>
-                    </div>
-
-                    <!-- Chat Box Container -->
-                    <div id="chat-messages" class="flex-1 overflow-y-auto space-y-3 p-2 custom-scrollbar min-h-[320px]">
-                        <div id="chat-empty" class="text-center py-12 text-slate-500 text-xs">
-                            Belum ada pesan. Mulai percakapan pertama kamu sekarang!
-                        </div>
-                    </div>
-
-                    <!-- Send Form -->
-                    <form onsubmit="handleSendMessage(event)" class="flex gap-2 pt-2 border-t border-slate-800">
-                        <input type="text" id="chat-input" required placeholder="Ketik pesan atau pertanyaan kamu..." class="flex-1 bg-slate-950 border border-slate-800 rounded-xl px-4 py-2.5 text-sm focus:outline-none focus:border-indigo-500 text-slate-100 placeholder-slate-600">
-                        <button type="submit" class="px-5 py-2.5 bg-indigo-600 hover:bg-indigo-500 text-white font-semibold rounded-xl transition-all text-sm flex items-center gap-2">
-                            <span>Kirim</span>
-                            <i data-lucide="send" class="w-4 h-4"></i>
-                        </button>
-                    </form>
-                </section>
-
-                <!-- SECTION 4: TIMER FOCUS -->
-                <section id="section-timer" class="space-y-6 hidden">
-                    <div class="max-w-xl mx-auto bg-slate-900/80 border border-slate-800 rounded-2xl p-8 text-center space-y-6">
-                        <div class="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-indigo-500/10 text-indigo-400 text-xs font-semibold border border-indigo-500/20">
-                            <i data-lucide="clock" class="w-3.5 h-3.5"></i> Pomodoro Focus Timer
-                        </div>
-
-                        <div id="timer-display" class="text-6xl sm:text-7xl font-extrabold tracking-wider font-mono text-indigo-400">
-                            25:00
-                        </div>
-
-                        <div class="flex items-center justify-center gap-4">
-                            <button id="timer-start-btn" onclick="toggleTimer()" class="px-8 py-3 bg-indigo-600 hover:bg-indigo-500 text-white font-bold rounded-xl transition-all text-sm flex items-center gap-2 shadow-lg shadow-indigo-600/25">
-                                <i data-lucide="play" class="w-4 h-4"></i>
-                                <span>Mulai Fokus</span>
-                            </button>
-                            <button onclick="resetTimer()" class="px-6 py-3 bg-slate-800 hover:bg-slate-700 text-slate-300 font-semibold rounded-xl transition-all text-sm flex items-center gap-2">
-                                <i data-lucide="rotate-ccw" class="w-4 h-4"></i>
-                                <span>Reset</span>
-                            </button>
-                        </div>
-                    </div>
-                </section>
-            </main>
-        </div>
-    </div>
-
-    <!-- MODAL: TAMBAH MATERI -->
-    <div id="modal-add-resource" class="fixed inset-0 bg-slate-950/80 backdrop-blur-sm z-50 flex items-center justify-center p-4 hidden">
-        <div class="bg-slate-900 border border-slate-800 rounded-2xl max-w-md w-full p-6 space-y-4">
-            <div class="flex items-center justify-between border-b border-slate-800 pb-3">
-                <h3 class="font-bold text-base flex items-center gap-2">
-                    <i data-lucide="plus-circle" class="w-5 h-5 text-indigo-400"></i>
-                    <span>Bagikan Materi OSN</span>
-                </h3>
-                <button onclick="closeAddResourceModal()" class="text-slate-500 hover:text-slate-300">
-                    <i data-lucide="x" class="w-5 h-5"></i>
-                </button>
-            </div>
-
-            <form onsubmit="handleAddResource(event)" class="space-y-4 text-xs">
-                <div>
-                    <label class="block font-semibold text-slate-400 mb-1">Judul Materi / Modul</label>
-                    <input type="text" id="res-title" required placeholder="misal: Catatan Ringkas Teori Bilangan" class="w-full bg-slate-950 border border-slate-800 rounded-xl p-2.5 text-slate-100 focus:outline-none focus:border-indigo-500">
-                </div>
-
-                <div>
-                    <label class="block font-semibold text-slate-400 mb-1">Bidang OSN</label>
-                    <select id="res-subject" required class="w-full bg-slate-950 border border-slate-800 rounded-xl p-2.5 text-slate-100 focus:outline-none focus:border-indigo-500">
-                        <option value="Matematika">Matematika</option>
-                        <option value="Fisika">Fisika</option>
-                        <option value="Kimia">Kimia</option>
-                        <option value="Biologi">Biologi</option>
-                        <option value="Informatika">Informatika</option>
-                        <option value="Astronomi">Astronomi</option>
-                        <option value="Kebumian">Kebumian</option>
-                        <option value="Ekonomi">Ekonomi</option>
-                        <option value="Geografi">Geografi</option>
-                    </select>
-                </div>
-
-                <div>
-                    <label class="block font-semibold text-slate-400 mb-1">Tautan File (Google Drive / YouTube / Web)</label>
-                    <input type="url" id="res-link" required placeholder="https://drive.google.com/..." class="w-full bg-slate-950 border border-slate-800 rounded-xl p-2.5 text-slate-100 focus:outline-none focus:border-indigo-500">
-                </div>
-
-                <div>
-                    <label class="block font-semibold text-slate-400 mb-1">Deskripsi Singkat</label>
-                    <textarea id="res-desc" rows="3" placeholder="Jelaskan ringkas isi materi ini..." class="w-full bg-slate-950 border border-slate-800 rounded-xl p-2.5 text-slate-100 focus:outline-none focus:border-indigo-500"></textarea>
-                </div>
-
-                <div class="flex justify-end gap-2 pt-2">
-                    <button type="button" onclick="closeAddResourceModal()" class="px-4 py-2 bg-slate-800 text-slate-300 rounded-xl hover:bg-slate-700">Batal</button>
-                    <button type="submit" class="px-4 py-2 bg-indigo-600 hover:bg-indigo-500 text-white font-semibold rounded-xl">Unggah Materi</button>
-                </div>
-            </form>
-        </div>
-    </div>
-
-    <!-- JAVASCRIPT LOGIC -->
-    <script>
-        // LOCAL STATE (Pure Organic Data Model)
-        let currentUser = null;
-        let usersList = [];       // Store organic users who register
-        let resourcesList = [];   // Pure community user resources
-        let chatMessages = [];    // Pure chat messages
-        
-        // Timer State
-        let timerSeconds = 1500;
-        let timerInterval = null;
-        let isTimerRunning = false;
-
-        // Initialize Lucide Icons
-        window.addEventListener('DOMContentLoaded', () => {
-            lucide.createIcons();
-            loadLocalStorageData();
-        });
-
-        // Toggle Password Visibility Function
-        function togglePasswordVisibility(inputId, iconId) {
-            const input = document.getElementById(inputId);
-            const icon = document.getElementById(iconId);
-            if (input.type === 'password') {
-                input.type = 'text';
-                icon.setAttribute('data-lucide', 'eye-off');
-            } else {
-                input.type = 'password';
-                icon.setAttribute('data-lucide', 'eye');
-            }
-            lucide.createIcons();
-        }
-
-        // Switch Auth Tab (Login / Register)
-        function switchAuthTab(tab) {
-            const loginForm = document.getElementById('login-form');
-            const registerForm = document.getElementById('register-form');
-            const loginBtn = document.getElementById('tab-login-btn');
-            const registerBtn = document.getElementById('tab-register-btn');
-
-            if (tab === 'login') {
-                loginForm.classList.remove('hidden');
-                registerForm.classList.add('hidden');
-                loginBtn.className = "flex-1 pb-3 border-b-2 border-indigo-500 text-indigo-400 transition-colors";
-                registerBtn.className = "flex-1 pb-3 border-b-2 border-transparent text-slate-400 hover:text-slate-200 transition-colors";
-            } else {
-                loginForm.classList.add('hidden');
-                registerForm.classList.remove('hidden');
-                registerBtn.className = "flex-1 pb-3 border-b-2 border-indigo-500 text-indigo-400 transition-colors";
-                loginBtn.className = "flex-1 pb-3 border-b-2 border-transparent text-slate-400 hover:text-slate-200 transition-colors";
-            }
-        }
-
-        // Register Handler
-        function handleRegister(e) {
-            e.preventDefault();
-            const username = document.getElementById('reg-username').value.trim();
-            const subject = document.getElementById('reg-subject').value;
-            const email = document.getElementById('reg-email').value.trim();
-            const password = document.getElementById('reg-password').value;
-
-            // Check if username or email already exists
-            const existingUser = usersList.find(u => u.username.toLowerCase() === username.toLowerCase() || u.email.toLowerCase() === email.toLowerCase());
-            if (existingUser) {
-                alert('Username atau Email sudah terdaftar!');
-                return;
-            }
-
-            const newUser = {
-                id: 'usr_' + Date.now(),
-                username: username,
-                email: email,
-                password: password,
-                subject: subject,
-                streak: 0,
-                lastCheckIn: null
-            };
-
-            usersList.push(newUser);
-            currentUser = newUser;
-            saveLocalStorageData();
-
-            alert(`Selamat datang, ${username}! Akun kamu berhasil dibuat.`);
-            showDashboard();
-        }
-
-        // Login Handler
-        function handleLogin(e) {
-            e.preventDefault();
-            const identifier = document.getElementById('login-identifier').value.trim().toLowerCase();
-            const password = document.getElementById('login-password').value;
-
-            const user = usersList.find(u => 
-                (u.username.toLowerCase() === identifier || u.email.toLowerCase() === identifier) && u.password === password
-            );
-
-            if (user) {
-                currentUser = user;
-                saveLocalStorageData();
-                showDashboard();
-            } else {
-                alert('Username/Email atau kata sandi tidak cocok!');
-            }
-        }
-
-        // Logout
-        function handleLogout() {
-            currentUser = null;
-            localStorage.removeItem('lockin_current_user');
-            document.getElementById('dashboard-screen').classList.add('hidden');
-            document.getElementById('auth-screen').classList.remove('hidden');
-        }
-
-        // Show Dashboard
-        function showDashboard() {
-            document.getElementById('auth-screen').classList.add('hidden');
-            document.getElementById('dashboard-screen').classList.remove('hidden');
-
-            document.getElementById('nav-username').textContent = currentUser.username;
-            document.getElementById('nav-subject').textContent = currentUser.subject;
-            document.getElementById('current-streak-count').textContent = currentUser.streak;
-
-            renderLeaderboard();
-            renderResources();
-            renderChat();
-            lucide.createIcons();
-        }
-
-        // Switch Dashboard Tab
-        function switchDashboardTab(tabName) {
-            const sections = ['streak', 'materi', 'chat', 'timer'];
-            sections.forEach(s => {
-                const secEl = document.getElementById(`section-${s}`);
-                const btnEl = document.getElementById(`nav-tab-${s}`);
-                if (s === tabName) {
-                    secEl.classList.remove('hidden');
-                    btnEl.className = "tab-btn px-4 py-2 rounded-xl font-semibold text-sm flex items-center gap-2 whitespace-nowrap bg-indigo-600 text-white shadow-md";
-                } else {
-                    secEl.classList.add('hidden');
-                    btnEl.className = "tab-btn px-4 py-2 rounded-xl font-semibold text-sm flex items-center gap-2 whitespace-nowrap bg-slate-900 text-slate-400 hover:text-slate-200 hover:bg-slate-800 transition-colors";
-                }
-            });
-            lucide.createIcons();
-        }
-
-        // Check-in Handler
-        function handleCheckIn() {
-            if (!currentUser) return;
-
-            const today = new Date().toDateString();
-            if (currentUser.lastCheckIn === today) {
-                alert('Kamu sudah melakukan check-in hari ini! Kembali lagi besok.');
-                return;
-            }
-
-            currentUser.streak += 1;
-            currentUser.lastCheckIn = today;
-
-            // Update user in array
-            const userIdx = usersList.findIndex(u => u.id === currentUser.id);
-            if (userIdx !== -1) {
-                usersList[userIdx] = currentUser;
-            }
-
-            saveLocalStorageData();
-            document.getElementById('current-streak-count').textContent = currentUser.streak;
-            renderLeaderboard();
-
-            alert(`Luar biasa! Streak kamu bertambah menjadi ${currentUser.streak} hari! 🔥`);
-        }
-
-        // Render Leaderboard (Pure Organic Data)
-        function renderLeaderboard() {
-            const listContainer = document.getElementById('leaderboard-list');
-            
-            // Sort active registered users by streak descending
-            const activeUsers = [...usersList].filter(u => u.streak > 0).sort((a, b) => b.streak - a.streak);
-
-            if (activeUsers.length === 0) {
-                listContainer.innerHTML = `
-                    <div class="text-center py-12 px-4 border border-dashed border-slate-800 rounded-xl">
-                        <div class="w-12 h-12 bg-slate-800/50 rounded-2xl flex items-center justify-center mx-auto mb-3 text-slate-500">
-                            <i data-lucide="users" class="w-6 h-6"></i>
-                        </div>
-                        <h4 class="text-base font-semibold text-slate-300">Belum Ada Peringkat</h4>
-                        <p class="text-xs text-slate-500 max-w-sm mx-auto mt-1">
-                            Jadilah orang pertama yang mendaftar dan melakukan check-in hari ini untuk memimpin papan peringkat!
-                        </p>
-                    </div>
-                `;
-            } else {
-                listContainer.innerHTML = activeUsers.map((user, idx) => `
-                    <div class="flex items-center justify-between p-3 bg-slate-950/60 border border-slate-800 rounded-xl">
-                        <div class="flex items-center gap-3">
-                            <span class="font-extrabold text-sm ${idx === 0 ? 'text-amber-400' : idx === 1 ? 'text-slate-300' : idx === 2 ? 'text-amber-600' : 'text-slate-500'} w-6 text-center">
-                                #${idx + 1}
-                            </span>
-                            <div>
-                                <div class="font-semibold text-sm text-slate-200">${escapeHtml(user.username)}</div>
-                                <div class="text-[10px] text-slate-500">${escapeHtml(user.subject)}</div>
-                            </div>
-                        </div>
-                        <div class="flex items-center gap-1.5 font-bold text-amber-400 text-sm">
-                            <i data-lucide="flame" class="w-4 h-4"></i>
-                            <span>${user.streak} hari</span>
-                        </div>
-                    </div>
-                `).join('');
-            }
-            lucide.createIcons();
-        }
-
-        // Modal Controls for Adding Resource
-        function openAddResourceModal() {
-            document.getElementById('modal-add-resource').classList.remove('hidden');
-        }
-        function closeAddResourceModal() {
-            document.getElementById('modal-add-resource').classList.add('hidden');
-        }
-
-        // Add Resource Handler
-        function handleAddResource(e) {
-            e.preventDefault();
-            const title = document.getElementById('res-title').value.trim();
-            const subject = document.getElementById('res-subject').value;
-            const link = document.getElementById('res-link').value.trim();
-            const desc = document.getElementById('res-desc').value.trim();
-
-            const newRes = {
-                id: 'res_' + Date.now(),
-                title: title,
-                subject: subject,
-                link: link,
-                desc: desc,
-                author: currentUser ? currentUser.username : 'Anonim',
-                date: new Date().toLocaleDateString('id-ID')
-            };
-
-            resourcesList.unshift(newRes);
-            saveLocalStorageData();
-            renderResources();
-            closeAddResourceModal();
-
-            // Clear inputs
-            document.getElementById('res-title').value = '';
-            document.getElementById('res-link').value = '';
-            document.getElementById('res-desc').value = '';
-
-            alert('Materi berhasil dibagikan ke komunitas!');
-        }
-
-        // Render Resources Grid
-        function renderResources(filterSubject = 'Semua') {
-            const grid = document.getElementById('resources-grid');
-            const filtered = filterSubject === 'Semua' 
-                ? resourcesList 
-                : resourcesList.filter(r => r.subject === filterSubject);
-
-            if (filtered.length === 0) {
-                grid.innerHTML = `
-                    <div class="col-span-full text-center py-16 px-4 border border-dashed border-slate-800 rounded-2xl bg-slate-900/30">
-                        <div class="w-12 h-12 bg-slate-800/50 rounded-2xl flex items-center justify-center mx-auto mb-3 text-slate-500">
-                            <i data-lucide="file-text" class="w-6 h-6"></i>
-                        </div>
-                        <h4 class="text-base font-semibold text-slate-300">Belum Ada Materi Ditambahkan</h4>
-                        <p class="text-xs text-slate-500 max-w-sm mx-auto mt-1">
-                            Perpustakaan masih murni kosong. Bagikan modul, drive, atau file latihan kamu dengan menekan tombol "+ Tambah Materi"!
-                        </p>
-                    </div>
-                `;
-            } else {
-                grid.innerHTML = filtered.map(item => `
-                    <div class="bg-slate-900/60 border border-slate-800 rounded-2xl p-5 flex flex-col justify-between hover:border-indigo-500/50 transition-all">
-                        <div class="space-y-2">
-                            <div class="flex items-center justify-between">
-                                <span class="px-2.5 py-0.5 rounded-full text-[10px] font-semibold bg-indigo-500/10 text-indigo-400 border border-indigo-500/20">
-                                    ${escapeHtml(item.subject)}
-                                </span>
-                                <span class="text-[10px] text-slate-500">${item.date}</span>
-                            </div>
-                            <h4 class="font-bold text-sm text-slate-200 line-clamp-2">${escapeHtml(item.title)}</h4>
-                            <p class="text-xs text-slate-400 line-clamp-3">${escapeHtml(item.desc || 'Tidak ada deskripsi.')}</p>
-                        </div>
-                        <div class="pt-4 mt-4 border-t border-slate-800/60 flex items-center justify-between">
-                            <span class="text-[10px] text-slate-500">Oleh: <strong class="text-slate-400">${escapeHtml(item.author)}</strong></span>
-                            <a href="${escapeHtml(item.link)}" target="_blank" rel="noopener noreferrer" class="px-3 py-1.5 bg-indigo-600/20 hover:bg-indigo-600 text-indigo-300 hover:text-white rounded-lg text-xs font-semibold transition-all flex items-center gap-1">
-                                <span>Buka File</span>
-                                <i data-lucide="external-link" class="w-3.5 h-3.5"></i>
-                            </a>
-                        </div>
-                    </div>
-                `).join('');
-            }
-            lucide.createIcons();
-        }
-
-        function filterResources(subject) {
-            renderResources(subject);
-        }
-
-        // Chat Handler
-        function handleSendMessage(e) {
-            e.preventDefault();
-            const input = document.getElementById('chat-input');
-            const text = input.value.trim();
-            if (!text || !currentUser) return;
-
-            const msg = {
-                id: 'msg_' + Date.now(),
-                user: currentUser.username,
-                subject: currentUser.subject,
-                text: text,
-                time: new Date().toLocaleTimeString('id-ID', { hour: '2-digit', minute: '2-digit' })
-            };
-
-            chatMessages.push(msg);
-            saveLocalStorageData();
-            input.value = '';
-            renderChat();
-        }
-
-        function renderChat() {
-            const container = document.getElementById('chat-messages');
-            if (chatMessages.length === 0) {
-                container.innerHTML = `
-                    <div class="text-center py-12 text-slate-500 text-xs">
-                        Belum ada pesan. Mulai percakapan pertama kamu sekarang!
-                    </div>
-                `;
-            } else {
-                container.innerHTML = chatMessages.map(m => `
-                    <div class="bg-slate-950/80 border border-slate-800/80 p-3 rounded-xl max-w-2xl space-y-1">
-                        <div class="flex items-center justify-between">
-                            <div class="flex items-center gap-2">
-                                <span class="font-bold text-xs text-indigo-400">${escapeHtml(m.user)}</span>
-                                <span class="text-[9px] px-2 py-0.5 rounded bg-slate-800 text-slate-400">${escapeHtml(m.subject)}</span>
-                            </div>
-                            <span class="text-[10px] text-slate-500">${m.time}</span>
-                        </div>
-                        <p class="text-xs text-slate-200 leading-relaxed">${escapeHtml(m.text)}</p>
-                    </div>
-                `).join('');
-                container.scrollTop = container.scrollHeight;
-            }
-        }
-
-        // Focus Timer Logic
-        function toggleTimer() {
-            const btn = document.getElementById('timer-start-btn');
-            if (isTimerRunning) {
-                clearInterval(timerInterval);
-                isTimerRunning = false;
-                btn.innerHTML = `<i data-lucide="play" class="w-4 h-4"></i><span>Mulai Fokus</span>`;
-            } else {
-                isTimerRunning = true;
-                btn.innerHTML = `<i data-lucide="pause" class="w-4 h-4"></i><span>Jeda</span>`;
-                timerInterval = setInterval(() => {
-                    if (timerSeconds > 0) {
-                        timerSeconds--;
-                        updateTimerDisplay();
-                    } else {
-                        clearInterval(timerInterval);
-                        isTimerRunning = false;
-                        alert('Sesi fokus selesai! Istirahat sejenak.');
-                        resetTimer();
-                    }
-                }, 1000);
-            }
-            lucide.createIcons();
-        }
-
-        function resetTimer() {
-            clearInterval(timerInterval);
-            isTimerRunning = false;
-            timerSeconds = 1500;
-            updateTimerDisplay();
-            const btn = document.getElementById('timer-start-btn');
-            btn.innerHTML = `<i data-lucide="play" class="w-4 h-4"></i><span>Mulai Fokus</span>`;
-            lucide.createIcons();
-        }
-
-        function updateTimerDisplay() {
-            const mins = Math.floor(timerSeconds / 60);
-            const secs = timerSeconds % 60;
-            document.getElementById('timer-display').textContent = 
-                `${mins.toString().padStart(2, '0')}:${secs.toString().padStart(2, '0')}`;
-        }
-
-        // Local Storage Utilities
-        function saveLocalStorageData() {
-            localStorage.setItem('lockin_users', JSON.stringify(usersList));
-            localStorage.setItem('lockin_resources', JSON.stringify(resourcesList));
-            localStorage.setItem('lockin_chat', JSON.stringify(chatMessages));
-            if (currentUser) {
-                localStorage.setItem('lockin_current_user', JSON.stringify(currentUser));
-            }
-        }
-
-        function loadLocalStorageData() {
-            const storedUsers = localStorage.getItem('lockin_users');
-            const storedRes = localStorage.getItem('lockin_resources');
-            const storedChat = localStorage.getItem('lockin_chat');
-            const storedCurrent = localStorage.getItem('lockin_current_user');
-
-            if (storedUsers) usersList = JSON.parse(storedUsers);
-            if (storedRes) resourcesList = JSON.parse(storedRes);
-            if (storedChat) chatMessages = JSON.parse(storedChat);
-
-            if (storedCurrent) {
-                currentUser = JSON.parse(storedCurrent);
-                showDashboard();
-            }
-        }
-
-        // Helper
-        function escapeHtml(str) {
-            if (!str) return '';
-            return str.replace(/&/g, "&amp;").replace(/</g, "&lt;").replace(/>/g, "&gt;").replace(/"/g, "&quot;").replace(/'/g, "&#039;");
-        }
-    </script>
-
-  <script>
-    // === TEMPEL / PASTE FIREBASE CONFIG KAMU DI BAWAH INI ===
-    const firebaseConfig = {
-      apiKey: "AIzaSyDe9WhvdNVyVgHKCwZ09pBtaN7-o67429U",
-      authDomain: "lock-in-osn.firebaseapp.com",
-      projectId: "lock-in-osn",
-      storageBucket: "lock-in-osn.firebasestorage.app",
-      messagingSenderId: "986878305012",
-      appId: "1:986878305012:web:47c872c202a1a3333574a1",
-      measurementId: "G-G2ZLVJ4EPM"
-    };
-
-    // Inisialisasi Firebase
-    if (!firebase.apps.length) {
-      firebase.initializeApp(firebaseConfig);
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Lock In OSN</title>
+
+<!-- Tailwind CDN -->
+<script src="https://cdn.tailwindcss.com"></script>
+<!-- Font Awesome -->
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css">
+<!-- Google Font -->
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+
+<!-- Firebase (Compat mode, no ES modules) -->
+<script src="https://www.gstatic.com/firebasejs/10.12.2/firebase-app-compat.js"></script>
+<script src="https://www.gstatic.com/firebasejs/10.12.2/firebase-auth-compat.js"></script>
+<script src="https://www.gstatic.com/firebasejs/10.12.2/firebase-firestore-compat.js"></script>
+
+<script>
+  tailwind.config = {
+    darkMode: 'class',
+    theme: {
+      extend: {
+        fontFamily: { sans: ['Plus Jakarta Sans','sans-serif'] },
+        colors: {
+          navy:   { 950:'#050810', 900:'#0a0f1e', 850:'#0d1428', 800:'#101a33', 700:'#16233f', 600:'#1c2c4d', 500:'#28406b' },
+          maroon: { 700:'#7a1224', 600:'#8f1729', 500:'#a81d31', 400:'#c8394d' },
+          ash:    { 950:'#0b0d12', 900:'#12151c', 800:'#1b202b', 700:'#262d3a', 600:'#3a4356', 500:'#5b6478', 400:'#8890a0', 300:'#b3b9c6', 200:'#dde0e6' }
+        },
+        boxShadow: { glow: '0 0 0 1px rgba(168,29,49,0.25), 0 8px 24px -8px rgba(0,0,0,0.6)' }
+      }
     }
-    const auth = firebase.auth();
-    const db = firebase.firestore();
-  </script>
+  }
+</script>
+
+<style>
+  html, body { font-family:'Plus Jakarta Sans', sans-serif; }
+  ::-webkit-scrollbar { width:8px; height:8px; }
+  ::-webkit-scrollbar-track { background:transparent; }
+  ::-webkit-scrollbar-thumb { background:#3a4356; border-radius:8px; }
+  .light ::-webkit-scrollbar-thumb { background:#c7cbd4; }
+  .fade-in { animation: fadeIn .25s ease both; }
+  @keyframes fadeIn { from{opacity:0; transform:translateY(6px);} to{opacity:1; transform:translateY(0);} }
+  .flame-pulse { animation: flamePulse 2.2s ease-in-out infinite; }
+  @keyframes flamePulse { 0%,100%{ transform:scale(1); } 50%{ transform:scale(1.12); } }
+  .hidden-force { display:none !important; }
+  .msg-bubble:hover .msg-actions { opacity:1; }
+  .scrollbar-thin { scrollbar-width: thin; }
+  [contenteditable]:focus { outline:none; }
+  .status-dot { box-shadow:0 0 0 2px var(--dotring); }
+  .tab-active { border-bottom:2px solid #a81d31; color:#fff; }
+  .light .tab-active { color:#0a0f1e; }
+  .toast { animation: toastIn .25s ease both; }
+  @keyframes toastIn { from{opacity:0; transform:translateY(-10px);} to{opacity:1; transform:translateY(0);} }
+</style>
+</head>
+<body class="dark bg-navy-950 text-ash-200 min-h-screen transition-colors">
+
+<!-- ===================== TOASTS ===================== -->
+<div id="toastContainer" class="fixed top-4 right-4 z-[9999] flex flex-col gap-2 items-end"></div>
+
+<!-- ===================== AUTH VIEW ===================== -->
+<div id="authView" class="min-h-screen flex items-center justify-center px-4 bg-gradient-to-br from-navy-950 via-navy-900 to-navy-850">
+  <div class="w-full max-w-md">
+    <div class="flex flex-col items-center mb-8">
+      <div class="w-16 h-16 rounded-2xl bg-maroon-600/20 border border-maroon-600/40 flex items-center justify-center mb-3">
+        <i class="fa-solid fa-fire text-3xl text-maroon-500 flame-pulse"></i>
+      </div>
+      <h1 class="text-2xl font-extrabold text-white tracking-tight">Lock In <span class="text-maroon-500">OSN</span></h1>
+      <p class="text-ash-400 text-sm mt-1" data-i18n="auth.tagline">Konsisten hari ini, medali di masa depan.</p>
+    </div>
+
+    <div class="bg-navy-900/70 border border-navy-700 rounded-2xl shadow-glow p-6 backdrop-blur">
+      <div class="flex mb-6 rounded-xl bg-navy-950/60 p-1">
+        <button id="tabLoginBtn" class="flex-1 py-2 rounded-lg text-sm font-semibold bg-maroon-600 text-white transition" data-i18n="auth.login">Masuk</button>
+        <button id="tabRegisterBtn" class="flex-1 py-2 rounded-lg text-sm font-semibold text-ash-300 transition" data-i18n="auth.register">Daftar</button>
+      </div>
+
+      <!-- LOGIN FORM -->
+      <form id="loginForm" class="space-y-4">
+        <div>
+          <label class="text-xs font-semibold text-ash-400" data-i18n="auth.email">Email</label>
+          <input type="email" id="loginEmail" required class="mt-1 w-full bg-navy-950 border border-navy-700 rounded-xl px-4 py-2.5 text-sm text-white focus:border-maroon-500 outline-none" placeholder="kamu@email.com">
+        </div>
+        <div>
+          <label class="text-xs font-semibold text-ash-400" data-i18n="auth.password">Kata Sandi</label>
+          <div class="relative mt-1">
+            <input type="password" id="loginPassword" required class="w-full bg-navy-950 border border-navy-700 rounded-xl px-4 py-2.5 text-sm text-white focus:border-maroon-500 outline-none pr-10" placeholder="••••••••">
+            <button type="button" data-target="loginPassword" class="togglePw absolute right-3 top-1/2 -translate-y-1/2 text-ash-400 hover:text-white"><i class="fa-solid fa-eye"></i></button>
+          </div>
+        </div>
+        <p id="loginError" class="text-xs text-maroon-400 hidden-force"></p>
+        <button type="submit" class="w-full bg-maroon-600 hover:bg-maroon-500 text-white font-semibold py-2.5 rounded-xl transition" data-i18n="auth.loginBtn">Masuk Sekarang</button>
+      </form>
+
+      <!-- REGISTER FORM -->
+      <form id="registerForm" class="space-y-4 hidden-force">
+        <div>
+          <label class="text-xs font-semibold text-ash-400" data-i18n="auth.username">Username</label>
+          <input type="text" id="regUsername" required minlength="3" maxlength="20" class="mt-1 w-full bg-navy-950 border border-navy-700 rounded-xl px-4 py-2.5 text-sm text-white focus:border-maroon-500 outline-none" placeholder="username_kamu">
+          <p class="text-[11px] text-ash-500 mt-1" data-i18n="auth.usernameNote">Username dapat diganti nanti di profil.</p>
+        </div>
+        <div>
+          <label class="text-xs font-semibold text-ash-400" data-i18n="auth.email">Email</label>
+          <input type="email" id="regEmail" required class="mt-1 w-full bg-navy-950 border border-navy-700 rounded-xl px-4 py-2.5 text-sm text-white focus:border-maroon-500 outline-none" placeholder="kamu@email.com">
+        </div>
+        <div>
+          <label class="text-xs font-semibold text-ash-400" data-i18n="auth.password">Kata Sandi</label>
+          <div class="relative mt-1">
+            <input type="password" id="regPassword" required minlength="6" class="w-full bg-navy-950 border border-navy-700 rounded-xl px-4 py-2.5 text-sm text-white focus:border-maroon-500 outline-none pr-10" placeholder="Minimal 6 karakter">
+            <button type="button" data-target="regPassword" class="togglePw absolute right-3 top-1/2 -translate-y-1/2 text-ash-400 hover:text-white"><i class="fa-solid fa-eye"></i></button>
+          </div>
+        </div>
+        <p id="registerError" class="text-xs text-maroon-400 hidden-force"></p>
+        <button type="submit" class="w-full bg-maroon-600 hover:bg-maroon-500 text-white font-semibold py-2.5 rounded-xl transition" data-i18n="auth.registerBtn">Buat Akun</button>
+      </form>
+    </div>
+    <p class="text-center text-ash-600 text-xs mt-6">Lock In OSN &copy; 2026</p>
+  </div>
+</div>
+
+<!-- ===================== APP VIEW ===================== -->
+<div id="appView" class="hidden-force min-h-screen flex flex-col">
+
+  <!-- TOP NAV -->
+  <header class="sticky top-0 z-40 bg-navy-900/90 backdrop-blur border-b border-navy-700 px-4 md:px-6 py-3 flex items-center justify-between gap-3">
+    <div class="flex items-center gap-2 shrink-0">
+      <i class="fa-solid fa-fire text-maroon-500 text-xl flame-pulse"></i>
+      <span class="font-extrabold text-white text-lg hidden sm:inline">Lock In <span class="text-maroon-500">OSN</span></span>
+    </div>
+
+    <nav class="hidden md:flex items-center gap-1 bg-navy-950/50 rounded-xl p-1">
+      <button class="navBtn px-3 py-1.5 rounded-lg text-sm font-medium" data-view="dashboard"><i class="fa-solid fa-gauge-high mr-1.5"></i><span data-i18n="nav.dashboard">Dashboard</span></button>
+      <button class="navBtn px-3 py-1.5 rounded-lg text-sm font-medium" data-view="friends"><i class="fa-solid fa-user-group mr-1.5"></i><span data-i18n="nav.friends">Teman</span></button>
+      <button class="navBtn px-3 py-1.5 rounded-lg text-sm font-medium" data-view="resources"><i class="fa-solid fa-book mr-1.5"></i><span data-i18n="nav.resources">Materi</span></button>
+      <button class="navBtn px-3 py-1.5 rounded-lg text-sm font-medium" data-view="profile"><i class="fa-solid fa-id-card mr-1.5"></i><span data-i18n="nav.profile">Profil</span></button>
+      <button class="navBtn px-3 py-1.5 rounded-lg text-sm font-medium" data-view="settings"><i class="fa-solid fa-gear mr-1.5"></i><span data-i18n="nav.settings">Pengaturan</span></button>
+    </nav>
+
+    <div class="flex items-center gap-2 md:gap-3">
+      <button id="notifBtn" class="relative w-9 h-9 rounded-lg bg-navy-800 hover:bg-navy-700 flex items-center justify-center text-ash-300">
+        <i class="fa-solid fa-bell"></i>
+        <span id="notifBadge" class="hidden-force absolute -top-1 -right-1 bg-maroon-500 text-white text-[10px] rounded-full w-4 h-4 flex items-center justify-center">0</span>
+      </button>
+      <button id="langBtn" class="w-9 h-9 rounded-lg bg-navy-800 hover:bg-navy-700 text-xs font-bold text-ash-300">ID</button>
+      <button id="themeBtn" class="w-9 h-9 rounded-lg bg-navy-800 hover:bg-navy-700 flex items-center justify-center text-ash-300"><i class="fa-solid fa-moon"></i></button>
+      <div class="hidden sm:flex items-center gap-2 pl-2 border-l border-navy-700">
+        <img id="topAvatar" src="" class="w-8 h-8 rounded-full object-cover bg-navy-700 border border-navy-600">
+        <div class="leading-tight">
+          <p id="topUsername" class="text-sm font-semibold text-white">-</p>
+          <p id="topSubject" class="text-[11px] text-ash-500">-</p>
+        </div>
+      </div>
+    </div>
+  </header>
+
+  <!-- MOBILE NAV -->
+  <nav class="md:hidden flex items-center justify-around bg-navy-900 border-b border-navy-700 px-1 py-1.5 sticky top-[57px] z-30">
+    <button class="navBtn flex flex-col items-center text-[10px] gap-0.5 px-2 py-1 rounded-lg" data-view="dashboard"><i class="fa-solid fa-gauge-high"></i>Home</button>
+    <button class="navBtn flex flex-col items-center text-[10px] gap-0.5 px-2 py-1 rounded-lg" data-view="friends"><i class="fa-solid fa-user-group"></i>Teman</button>
+    <button class="navBtn flex flex-col items-center text-[10px] gap-0.5 px-2 py-1 rounded-lg" data-view="resources"><i class="fa-solid fa-book"></i>Materi</button>
+    <button class="navBtn flex flex-col items-center text-[10px] gap-0.5 px-2 py-1 rounded-lg" data-view="profile"><i class="fa-solid fa-id-card"></i>Profil</button>
+    <button class="navBtn flex flex-col items-center text-[10px] gap-0.5 px-2 py-1 rounded-lg" data-view="settings"><i class="fa-solid fa-gear"></i>Setel</button>
+  </nav>
+
+  <main class="flex-1 px-3 md:px-6 py-5 max-w-7xl w-full mx-auto">
+
+    <!-- ============ DASHBOARD VIEW ============ -->
+    <section id="view-dashboard" class="viewSection space-y-5 fade-in">
+      <div class="grid grid-cols-1 lg:grid-cols-3 gap-5">
+        <!-- Streak card -->
+        <div class="bg-navy-900 border border-navy-700 rounded-2xl p-5 flex flex-col items-center text-center">
+          <p class="text-xs uppercase tracking-wider text-ash-500 font-semibold mb-2" data-i18n="dash.streakTitle">Streak Belajar</p>
+          <div class="relative w-24 h-24 flex items-center justify-center mb-3">
+            <i class="fa-solid fa-fire text-6xl text-maroon-500/90"></i>
+            <span id="streakCount" class="absolute text-2xl font-extrabold text-white mt-2">0</span>
+          </div>
+          <button id="checkinBtn" class="w-full bg-maroon-600 hover:bg-maroon-500 disabled:bg-navy-700 disabled:text-ash-500 text-white font-semibold py-2.5 rounded-xl transition text-sm" data-i18n="dash.checkinBtn">Check-in Belajar Hari Ini</button>
+        </div>
+
+        <!-- Quote widget -->
+        <div class="bg-navy-900 border border-navy-700 rounded-2xl p-5 lg:col-span-2 flex flex-col justify-center">
+          <p class="text-xs uppercase tracking-wider text-ash-500 font-semibold mb-3"><i class="fa-solid fa-quote-left mr-1"></i> <span data-i18n="dash.quoteTitle">Motivasi Hari Ini</span></p>
+          <p id="quoteText" class="text-lg text-white font-medium italic leading-relaxed">"..."</p>
+          <p id="quoteAuthor" class="text-sm text-maroon-400 mt-2 font-semibold">-</p>
+          <button id="newQuoteBtn" class="mt-3 self-start text-xs text-ash-400 hover:text-white"><i class="fa-solid fa-arrows-rotate mr-1"></i><span data-i18n="dash.anotherQuote">Kutipan lain</span></button>
+        </div>
+      </div>
+
+      <!-- Daily focus -->
+      <div class="bg-navy-900 border border-navy-700 rounded-2xl p-5">
+        <p class="text-sm font-semibold text-white mb-2"><i class="fa-solid fa-bullseye text-maroon-500 mr-1.5"></i><span data-i18n="dash.focusTitle">Apa yang akan kamu pelajari sekarang?</span></p>
+        <div class="flex gap-2">
+          <input id="focusInput" type="text" maxlength="120" class="flex-1 bg-navy-950 border border-navy-700 rounded-xl px-4 py-2.5 text-sm text-white focus:border-maroon-500 outline-none" placeholder="Contoh: Integral lipat dua - Kalkulus">
+          <button id="saveFocusBtn" class="bg-navy-700 hover:bg-navy-600 text-white text-sm font-semibold px-4 rounded-xl"><span data-i18n="dash.save">Simpan</span></button>
+        </div>
+      </div>
+
+      <!-- Online friends -->
+      <div class="bg-navy-900 border border-navy-700 rounded-2xl p-5">
+        <p class="text-sm font-semibold text-white mb-3"><i class="fa-solid fa-tower-broadcast text-maroon-500 mr-1.5"></i><span data-i18n="dash.onlineTitle">Teman Sedang Online</span></p>
+        <div id="onlineFriendsList" class="space-y-2"></div>
+        <p id="onlineFriendsEmpty" class="text-sm text-ash-500 text-center py-4" data-i18n="dash.onlineEmpty">Belum ada teman yang online sekarang.</p>
+      </div>
+    </section>
+
+    <!-- ============ FRIENDS & CHAT VIEW ============ -->
+    <section id="view-friends" class="viewSection hidden-force fade-in">
+      <div class="grid grid-cols-1 lg:grid-cols-3 gap-5 h-full">
+        <!-- Left: friend list & search -->
+        <div class="bg-navy-900 border border-navy-700 rounded-2xl p-4 flex flex-col lg:col-span-1 max-h-[75vh]">
+          <div class="flex items-center gap-2 mb-3">
+            <div class="relative flex-1">
+              <i class="fa-solid fa-magnifying-glass absolute left-3 top-1/2 -translate-y-1/2 text-ash-500 text-xs"></i>
+              <input id="userSearchInput" type="text" placeholder="Cari username..." class="w-full bg-navy-950 border border-navy-700 rounded-xl pl-8 pr-3 py-2 text-sm text-white focus:border-maroon-500 outline-none">
+            </div>
+            <button id="friendReqBtn" class="relative w-9 h-9 rounded-xl bg-navy-800 hover:bg-navy-700 flex items-center justify-center text-ash-300 shrink-0">
+              <i class="fa-solid fa-user-plus"></i>
+              <span id="friendReqBadge" class="hidden-force absolute -top-1 -right-1 bg-maroon-500 text-white text-[10px] rounded-full w-4 h-4 flex items-center justify-center">0</span>
+            </button>
+          </div>
+          <div id="userSearchResults" class="space-y-2 mb-2"></div>
+
+          <div class="flex items-center gap-2 mt-2 mb-2 border-b border-navy-700 pb-2">
+            <button class="friendsTabBtn tab-active text-sm font-semibold px-2 py-1" data-tab="direct" data-i18n="friends.direct">Pribadi</button>
+            <button class="friendsTabBtn text-sm font-semibold px-2 py-1 text-ash-400" data-tab="groups" data-i18n="friends.groups">Grup</button>
+          </div>
+
+          <div id="directListWrap" class="flex-1 overflow-y-auto scrollbar-thin space-y-1.5">
+            <div id="friendListContainer" class="space-y-1.5"></div>
+            <p id="friendListEmpty" class="text-sm text-ash-500 text-center py-6" data-i18n="friends.empty">Belum punya teman. Cari username di atas!</p>
+          </div>
+
+          <div id="groupsListWrap" class="hidden-force flex-1 overflow-y-auto scrollbar-thin space-y-2">
+            <div class="flex gap-2 mb-1">
+              <input id="groupSearchInput" type="text" placeholder="Cari grup publik..." class="flex-1 bg-navy-950 border border-navy-700 rounded-xl px-3 py-2 text-xs text-white focus:border-maroon-500 outline-none">
+              <button id="createGroupBtn" class="bg-maroon-600 hover:bg-maroon-500 text-white text-xs font-semibold px-3 rounded-xl whitespace-nowrap"><i class="fa-solid fa-plus mr-1"></i>Grup</button>
+            </div>
+            <div id="groupPublicResults" class="space-y-1.5"></div>
+            <p class="text-[11px] uppercase tracking-wide text-ash-500 font-semibold pt-2" data-i18n="friends.myGroups">Grup Saya</p>
+            <div id="myGroupsList" class="space-y-1.5"></div>
+          </div>
+        </div>
+
+        <!-- Right: chat panel -->
+        <div class="bg-navy-900 border border-navy-700 rounded-2xl flex flex-col lg:col-span-2 max-h-[75vh]">
+          <div id="chatEmptyState" class="flex-1 flex flex-col items-center justify-center text-ash-500 gap-2">
+            <i class="fa-regular fa-comments text-4xl"></i>
+            <p class="text-sm" data-i18n="chat.selectPrompt">Pilih teman atau grup untuk mulai chat</p>
+          </div>
+
+          <div id="chatActiveWrap" class="hidden-force flex flex-col h-full">
+            <div id="chatHeader" class="flex items-center justify-between gap-3 p-4 border-b border-navy-700"></div>
+            <div id="chatMessages" class="flex-1 overflow-y-auto scrollbar-thin p-4 space-y-3"></div>
+            <div class="p-3 border-t border-navy-700 flex items-center gap-2">
+              <input id="chatInput" type="text" placeholder="Tulis pesan..." class="flex-1 bg-navy-950 border border-navy-700 rounded-xl px-4 py-2.5 text-sm text-white focus:border-maroon-500 outline-none">
+              <button id="chatSendBtn" class="w-10 h-10 rounded-xl bg-maroon-600 hover:bg-maroon-500 text-white flex items-center justify-center"><i class="fa-solid fa-paper-plane"></i></button>
+            </div>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- ============ RESOURCE HUB VIEW ============ -->
+    <section id="view-resources" class="viewSection hidden-force fade-in space-y-4">
+      <div class="bg-navy-900 border border-navy-700 rounded-2xl p-4 space-y-3">
+        <div class="flex flex-col sm:flex-row gap-2">
+          <div class="relative flex-1">
+            <i class="fa-solid fa-magnifying-glass absolute left-3 top-1/2 -translate-y-1/2 text-ash-500 text-xs"></i>
+            <input id="resourceSearchInput" type="text" placeholder="Cari judul materi..." class="w-full bg-navy-950 border border-navy-700 rounded-xl pl-8 pr-3 py-2.5 text-sm text-white focus:border-maroon-500 outline-none">
+          </div>
+          <button id="addResourceBtn" class="bg-maroon-600 hover:bg-maroon-500 text-white text-sm font-semibold px-4 py-2.5 rounded-xl whitespace-nowrap"><i class="fa-solid fa-plus mr-1.5"></i><span data-i18n="res.add">Tambahkan Resource</span></button>
+        </div>
+        <div id="subjectFilters" class="flex flex-wrap gap-2"></div>
+      </div>
+      <div id="resourceList" class="grid grid-cols-1 md:grid-cols-2 gap-4"></div>
+      <p id="resourceEmpty" class="text-center text-ash-500 py-10 hidden-force" data-i18n="res.empty">Belum ada materi. Jadilah yang pertama menambahkan!</p>
+    </section>
+
+    <!-- ============ PROFILE VIEW ============ -->
+    <section id="view-profile" class="viewSection hidden-force fade-in">
+      <div class="bg-navy-900 border border-navy-700 rounded-2xl overflow-hidden">
+        <div class="h-40 bg-navy-700 relative">
+          <img id="profileCoverImg" src="" class="w-full h-full object-cover">
+          <button id="editCoverBtn" class="absolute top-3 right-3 bg-navy-950/70 hover:bg-navy-950 text-white text-xs px-3 py-1.5 rounded-lg"><i class="fa-solid fa-camera mr-1"></i><span data-i18n="profile.editCover">Ubah Cover</span></button>
+        </div>
+        <div class="px-5 pb-5">
+          <div class="flex items-end gap-4 -mt-10">
+            <div class="relative">
+              <img id="profileAvatarImg" src="" class="w-24 h-24 rounded-2xl object-cover border-4 border-navy-900 bg-navy-700">
+              <button id="editAvatarBtn" class="absolute -bottom-1 -right-1 w-7 h-7 rounded-full bg-maroon-600 hover:bg-maroon-500 text-white flex items-center justify-center text-xs"><i class="fa-solid fa-camera"></i></button>
+            </div>
+            <div class="pb-1">
+              <p id="profileUsernameDisplay" class="text-xl font-bold text-white">-</p>
+              <p id="profileSubjectDisplay" class="text-sm text-maroon-400 font-medium">-</p>
+            </div>
+          </div>
+
+          <div class="grid grid-cols-1 md:grid-cols-2 gap-4 mt-6">
+            <div>
+              <label class="text-xs font-semibold text-ash-400" data-i18n="profile.username">Username</label>
+              <input id="profileUsernameInput" type="text" class="mt-1 w-full bg-navy-950 border border-navy-700 rounded-xl px-4 py-2.5 text-sm text-white focus:border-maroon-500 outline-none">
+              <p id="usernameChangeNote" class="text-[11px] text-ash-500 mt-1"></p>
+            </div>
+            <div>
+              <label class="text-xs font-semibold text-ash-400" data-i18n="profile.subject">Mapel Fokus OSN</label>
+              <select id="profileSubjectInput" class="mt-1 w-full bg-navy-950 border border-navy-700 rounded-xl px-4 py-2.5 text-sm text-white focus:border-maroon-500 outline-none"></select>
+            </div>
+            <div class="md:col-span-2">
+              <label class="text-xs font-semibold text-ash-400" data-i18n="profile.bio">Bio</label>
+              <textarea id="profileBioInput" rows="3" maxlength="200" class="mt-1 w-full bg-navy-950 border border-navy-700 rounded-xl px-4 py-2.5 text-sm text-white focus:border-maroon-500 outline-none resize-none"></textarea>
+            </div>
+          </div>
+          <button id="saveProfileBtn" class="mt-4 bg-maroon-600 hover:bg-maroon-500 text-white font-semibold px-5 py-2.5 rounded-xl text-sm"><span data-i18n="profile.save">Simpan Perubahan</span></button>
+        </div>
+      </div>
+    </section>
+
+    <!-- ============ SETTINGS VIEW ============ -->
+    <section id="view-settings" class="viewSection hidden-force fade-in space-y-4 max-w-xl">
+      <div class="bg-navy-900 border border-navy-700 rounded-2xl p-5 space-y-3">
+        <p class="text-sm font-semibold text-white" data-i18n="settings.changePw">Ubah Kata Sandi</p>
+        <input id="currentPwInput" type="password" placeholder="Password saat ini" class="w-full bg-navy-950 border border-navy-700 rounded-xl px-4 py-2.5 text-sm text-white focus:border-maroon-500 outline-none">
+        <input id="newPwInput" type="password" placeholder="Password baru (min 6 karakter)" class="w-full bg-navy-950 border border-navy-700 rounded-xl px-4 py-2.5 text-sm text-white focus:border-maroon-500 outline-none">
+        <button id="changePwBtn" class="bg-navy-700 hover:bg-navy-600 text-white text-sm font-semibold px-4 py-2.5 rounded-xl w-full"><span data-i18n="settings.changePwBtn">Ubah Password</span></button>
+      </div>
+
+      <div class="bg-navy-900 border border-navy-700 rounded-2xl p-5 space-y-3">
+        <p class="text-sm font-semibold text-white" data-i18n="settings.account">Akun</p>
+        <button id="logoutBtn" class="w-full flex items-center justify-between bg-navy-800 hover:bg-navy-700 text-white text-sm font-medium px-4 py-3 rounded-xl">
+          <span><i class="fa-solid fa-right-from-bracket mr-2 text-ash-400"></i><span data-i18n="settings.logout">Keluar Akun</span></span><i class="fa-solid fa-chevron-right text-ash-500 text-xs"></i>
+        </button>
+        <button id="switchAccountBtn" class="w-full flex items-center justify-between bg-navy-800 hover:bg-navy-700 text-white text-sm font-medium px-4 py-3 rounded-xl">
+          <span><i class="fa-solid fa-arrow-right-arrow-left mr-2 text-ash-400"></i><span data-i18n="settings.switch">Pindah Akun</span></span><i class="fa-solid fa-chevron-right text-ash-500 text-xs"></i>
+        </button>
+      </div>
+
+      <div class="bg-navy-900 border border-maroon-700/40 rounded-2xl p-5 space-y-3">
+        <p class="text-sm font-semibold text-maroon-400" data-i18n="settings.danger">Zona Berbahaya</p>
+        <button id="resetLocalBtn" class="w-full bg-navy-800 hover:bg-navy-700 text-white text-sm font-medium px-4 py-3 rounded-xl text-left"><i class="fa-solid fa-broom mr-2 text-ash-400"></i><span data-i18n="settings.resetLocal">Reset Data Lokal (tema & bahasa)</span></button>
+        <button id="deleteAccountBtn" class="w-full bg-maroon-600/20 hover:bg-maroon-600/30 text-maroon-400 text-sm font-medium px-4 py-3 rounded-xl text-left"><i class="fa-solid fa-trash mr-2"></i><span data-i18n="settings.deleteAccount">Hapus Akun Permanen</span></button>
+      </div>
+    </section>
+
+  </main>
+</div>
+
+<!-- ===================== GENERIC MODAL ROOT ===================== -->
+<div id="modalRoot" class="hidden-force fixed inset-0 z-[999] flex items-center justify-center p-4">
+  <div id="modalBackdrop" class="absolute inset-0 bg-black/60 backdrop-blur-sm"></div>
+  <div id="modalBox" class="relative bg-navy-900 border border-navy-700 rounded-2xl w-full max-w-lg max-h-[85vh] overflow-y-auto scrollbar-thin p-5 fade-in"></div>
+</div>
+
+<!-- ===================== CONTEXT MENU (chat message) ===================== -->
+<div id="msgContextMenu" class="hidden-force fixed z-[1000] bg-navy-800 border border-navy-600 rounded-xl shadow-lg overflow-hidden text-sm">
+  <button id="ctxEditBtn" class="block w-full text-left px-4 py-2 hover:bg-navy-700 text-white"><i class="fa-solid fa-pen mr-2"></i>Edit</button>
+  <button id="ctxDeleteBtn" class="block w-full text-left px-4 py-2 hover:bg-navy-700 text-maroon-400"><i class="fa-solid fa-trash mr-2"></i>Hapus</button>
+</div>
+
+<script>
+/* =========================================================================
+   LOCK IN OSN — APP LOGIC
+   Firebase Compat SDK v10 (Auth + Firestore)
+   ========================================================================= */
+
+/* -------------------------------------------------------------------------
+   1. FIREBASE CONFIG
+   Ganti nilai di bawah ini dengan kredensial project Firebase kamu sendiri
+   (Firebase Console > Project Settings > General > Your apps > SDK setup).
+   Aktifkan Authentication (Email/Password) dan Cloud Firestore di project.
+------------------------------------------------------------------------- */
+const firebaseConfig = {
+  apiKey: "AIzaSyDe9WhvdNVyVgHKCwZ09pBtaN7-o67429U",
+  authDomain: "lock-in-osn.firebaseapp.com",
+  projectId: "lock-in-osn",
+  storageBucket: "lock-in-osn.firebasestorage.app",
+  messagingSenderId: "986878305012",
+  appId: "1:986878305012:web:47c872c202a1a3333574a1",
+  measurementId: "G-G2ZLVJ4EPM"
+};
+
+firebase.initializeApp(firebaseConfig);
+const auth = firebase.auth();
+const db = firebase.firestore();
+const FieldValue = firebase.firestore.FieldValue;
+const Timestamp = firebase.firestore.Timestamp;
+
+/* -------------------------------------------------------------------------
+   2. i18n
+------------------------------------------------------------------------- */
+const I18N = {
+  id: {
+    "auth.tagline": "Konsisten hari ini, medali di masa depan.",
+    "auth.login": "Masuk", "auth.register": "Daftar",
+    "auth.email": "Email", "auth.password": "Kata Sandi", "auth.username": "Username",
+    "auth.usernameNote": "Username dapat diganti nanti di profil.",
+    "auth.loginBtn": "Masuk Sekarang", "auth.registerBtn": "Buat Akun",
+    "nav.dashboard": "Dashboard", "nav.friends": "Teman", "nav.resources": "Materi",
+    "nav.profile": "Profil", "nav.settings": "Pengaturan",
+    "dash.streakTitle": "Streak Belajar", "dash.checkinBtn": "Check-in Belajar Hari Ini",
+    "dash.checkinDone": "Sudah Check-in Hari Ini",
+    "dash.quoteTitle": "Motivasi Hari Ini", "dash.anotherQuote": "Kutipan lain",
+    "dash.focusTitle": "Apa yang akan kamu pelajari sekarang?", "dash.save": "Simpan",
+    "dash.onlineTitle": "Teman Sedang Online", "dash.onlineEmpty": "Belum ada teman yang online sekarang.",
+    "friends.direct": "Pribadi", "friends.groups": "Grup", "friends.myGroups": "Grup Saya",
+    "friends.empty": "Belum punya teman. Cari username di atas!",
+    "chat.selectPrompt": "Pilih teman atau grup untuk mulai chat",
+    "res.add": "Tambahkan Resource", "res.empty": "Belum ada materi. Jadilah yang pertama menambahkan!",
+    "profile.editCover": "Ubah Cover", "profile.username": "Username", "profile.subject": "Mapel Fokus OSN",
+    "profile.bio": "Bio", "profile.save": "Simpan Perubahan",
+    "settings.changePw": "Ubah Kata Sandi", "settings.changePwBtn": "Ubah Password",
+    "settings.account": "Akun", "settings.logout": "Keluar Akun", "settings.switch": "Pindah Akun",
+    "settings.danger": "Zona Berbahaya", "settings.resetLocal": "Reset Data Lokal (tema & bahasa)",
+    "settings.deleteAccount": "Hapus Akun Permanen"
+  },
+  en: {
+    "auth.tagline": "Stay consistent today, win medals tomorrow.",
+    "auth.login": "Login", "auth.register": "Register",
+    "auth.email": "Email", "auth.password": "Password", "auth.username": "Username",
+    "auth.usernameNote": "Username can be changed later in your profile.",
+    "auth.loginBtn": "Log In", "auth.registerBtn": "Create Account",
+    "nav.dashboard": "Dashboard", "nav.friends": "Friends", "nav.resources": "Resources",
+    "nav.profile": "Profile", "nav.settings": "Settings",
+    "dash.streakTitle": "Study Streak", "dash.checkinBtn": "Check-in For Today",
+    "dash.checkinDone": "Checked In Today",
+    "dash.quoteTitle": "Today's Motivation", "dash.anotherQuote": "Another quote",
+    "dash.focusTitle": "What will you study now?", "dash.save": "Save",
+    "dash.onlineTitle": "Friends Online Now", "dash.onlineEmpty": "No friends online right now.",
+    "friends.direct": "Direct", "friends.groups": "Groups", "friends.myGroups": "My Groups",
+    "friends.empty": "No friends yet. Search a username above!",
+    "chat.selectPrompt": "Pick a friend or group to start chatting",
+    "res.add": "Add Resource", "res.empty": "No resources yet. Be the first to add one!",
+    "profile.editCover": "Edit Cover", "profile.username": "Username", "profile.subject": "OSN Focus Subject",
+    "profile.bio": "Bio", "profile.save": "Save Changes",
+    "settings.changePw": "Change Password", "settings.changePwBtn": "Change Password",
+    "settings.account": "Account", "settings.logout": "Log Out", "settings.switch": "Switch Account",
+    "settings.danger": "Danger Zone", "settings.resetLocal": "Reset Local Data (theme & language)",
+    "settings.deleteAccount": "Permanently Delete Account"
+  }
+};
+let currentLang = localStorage.getItem('lockin_lang') || 'id';
+function t(key){ return (I18N[currentLang] && I18N[currentLang][key]) || key; }
+function applyI18n(){
+  document.querySelectorAll('[data-i18n]').forEach(el=>{
+    el.textContent = t(el.getAttribute('data-i18n'));
+  });
+  document.getElementById('langBtn').textContent = currentLang.toUpperCase();
+  updateCheckinButtonLabel();
+}
+
+/* -------------------------------------------------------------------------
+   3. SUBJECTS (10 bidang OSN)
+------------------------------------------------------------------------- */
+const SUBJECTS = ["Matematika","Fisika","Kimia","Biologi","Geografi","Kebumian","Ekonomi","Astronomi","Informatika/Komputer","AI & Data Science"];
+
+/* -------------------------------------------------------------------------
+   4. QUOTES (kutipan motivasi belajar)
+------------------------------------------------------------------------- */
+const QUOTES = [
+  {text:"Pendidikan adalah senjata paling mematikan di dunia, karena dengan pendidikan Anda dapat mengubah dunia.", author:"Nelson Mandela"},
+  {text:"Investasi dalam pengetahuan selalu membayar bunga terbaik.", author:"Benjamin Franklin"},
+  {text:"Belajar tanpa berpikir itu sia-sia; berpikir tanpa belajar itu berbahaya.", author:"Kong Hu Cu"},
+  {text:"Masa depan adalah milik mereka yang mempersiapkannya hari ini.", author:"Malcolm X"},
+  {text:"Hiduplah seolah-olah kamu akan mati besok. Belajarlah seolah-olah kamu akan hidup selamanya.", author:"Mahatma Gandhi"},
+  {text:"Proses belajar tidak pernah selesai; ia adalah perjalanan seumur hidup.", author:"Albert Einstein"},
+  {text:"Semakin banyak yang Anda baca, semakin banyak hal yang akan Anda ketahui.", author:"Dr. Seuss"},
+  {text:"Perjalanan ribuan mil dimulai dengan satu langkah kecil.", author:"Lao Tzu"},
+  {text:"Akar pendidikan memang pahit, tetapi buahnya manis.", author:"Aristoteles"},
+  {text:"Keindahan belajar adalah tidak ada seorang pun yang bisa mengambilnya darimu.", author:"B.B. King"},
+  {text:"Disiplin adalah jembatan antara tujuan dan pencapaian.", author:"Jim Rohn"},
+  {text:"Pengetahuan adalah kekuatan.", author:"Francis Bacon"},
+  {text:"Satu-satunya hal yang menghalangi pembelajaran saya adalah pendidikan saya.", author:"Albert Einstein"},
+  {text:"Jangan tunggu peluang datang, ciptakan peluang itu.", author:"George Bernard Shaw"},
+  {text:"Fokuslah pada proses, bukan hanya pada hasil.", author:"Carol Dweck"},
+  {text:"Pikiran bukanlah bejana yang harus diisi, melainkan api yang harus dinyalakan.", author:"Plutarch"},
+  {text:"Kamu tidak harus hebat untuk memulai, tapi kamu harus memulai untuk menjadi hebat.", author:"Zig Ziglar"},
+  {text:"Kegagalan adalah kesempatan untuk memulai lagi dengan lebih cerdas.", author:"Henry Ford"},
+  {text:"Waktu terbaik untuk menanam pohon adalah 20 tahun yang lalu. Waktu terbaik kedua adalah sekarang.", author:"Pepatah Tiongkok"},
+  {text:"Hambatan terbesar dalam belajar adalah rasa takut akan kegagalan.", author:"John C. Maxwell"},
+  {text:"Rahasia untuk maju adalah memulai.", author:"Mark Twain"},
+  {text:"Kesuksesan adalah jumlah dari upaya kecil yang diulangi hari demi hari.", author:"Robert Collier"},
+  {text:"Genius adalah 1% inspirasi dan 99% keringat.", author:"Thomas Edison"},
+  {text:"Saya belum gagal. Saya hanya menemukan 10.000 cara yang tidak berhasil.", author:"Thomas Edison"},
+  {text:"Bukan berarti saya sangat pintar, hanya saja saya bertahan pada masalah lebih lama.", author:"Albert Einstein"},
+  {text:"Keberhasilan bukanlah akhir, kegagalan bukanlah fatal: keberanian untuk melanjutkannyalah yang terpenting.", author:"Winston Churchill"},
+  {text:"Usaha yang gigih akan mengalahkan bakat ketika bakat tidak bekerja keras.", author:"Tim Notke"},
+  {text:"Kesabaran dan ketekunan memiliki efek magis di mana kesulitan menghilang dan rintangan lenyap.", author:"John Quincy Adams"},
+  {text:"Cara terbaik untuk memprediksi masa depan adalah dengan menciptakannya.", author:"Abraham Lincoln"},
+  {text:"Setiap master pernah menjadi seorang pemula.", author:"Helen Hayes"},
+  {text:"Jika kamu tidak sanggup menahan lelahnya belajar, kamu harus sanggup menahan perihnya kebodohan.", author:"Imam Syafi'i"},
+  {text:"Jangan berhenti saat kamu lelah; berhentilah saat kamu selesai.", author:"David Goggins"},
+  {text:"Konsistensi adalah apa yang mengubah yang biasa menjadi luar biasa.", author:"Tony Robbins"},
+  {text:"Gagal dalam merencanakan berarti merencanakan untuk gagal.", author:"Benjamin Franklin"},
+  {text:"Keunggulan bukanlah sebuah tindakan, melainkan sebuah kebiasaan.", author:"Aristoteles"},
+  {text:"Kamu tidak akan pernah rugi dengan berinvestasi pada dirimu sendiri.", author:"Warren Buffett"},
+  {text:"Rasa sakit karena belajar hanya bersifat sementara. Rasa sakit karena tidak belajar adalah seumur hidup.", author:"Anonim"},
+  {text:"Percayalah kamu bisa, dan kamu sudah separuh jalan menuju ke sana.", author:"Theodore Roosevelt"},
+  {text:"Pendidikan adalah senjata terbaik untuk mengubah dunia.", author:"Malala Yousafzai"},
+  {text:"Impian tidak menjadi kenyataan melalui sihir; itu membutuhkan keringat, tekad, dan kerja keras.", author:"Colin Powell"},
+  {text:"Saya tidak memiliki bakat khusus. Saya hanya sangat ingin tahu.", author:"Albert Einstein"},
+  {text:"Tetaplah lapar, tetaplah bodoh.", author:"Steve Jobs"},
+  {text:"Inovasi membedakan antara seorang pemimpin dan pengikut.", author:"Steve Jobs"},
+  {text:"Imajinasi lebih penting daripada pengetahuan. Pengetahuan terbatas, imajinasi mengelilingi dunia.", author:"Albert Einstein"},
+  {text:"Kreativitas adalah kecerdasan yang bersenang-senang.", author:"Albert Einstein"},
+  {text:"Orang yang membaca buku hidup dalam seribu kehidupan sebelum dia mati.", author:"George R.R. Martin"},
+  {text:"Kegagalan hanyalah batu loncatan menuju keberhasilan.", author:"C.S. Lewis"},
+  {text:"Disiplin adalah memilih antara apa yang kamu inginkan sekarang dan apa yang paling kamu inginkan.", author:"Abraham Lincoln"},
+  {text:"Jika kamu mendengar suara di dalam dirimu yang berkata 'kamu tidak bisa melukis', maka melukislah, dan suara itu akan bungkam.", author:"Vincent van Gogh"},
+  {text:"Rasa sakit karena disiplin beratnya beberapa gram, rasa sakit karena penyesalan beratnya beberapa ton.", author:"Jim Rohn"},
+  {text:"Kegagalan tidak terjadi saat kamu jatuh, tapi saat kamu menolak untuk bangkit.", author:"Vince Lombardi"},
+  {text:"Kelemahan terbesar kita terletak pada menyerah. Cara paling pasti untuk sukses adalah selalu mencoba satu kali lagi.", author:"Thomas Edison"},
+  {text:"Semua impian kita bisa menjadi kenyataan jika kita memiliki keberanian untuk mengejarnya.", author:"Walt Disney"},
+  {text:"Pendidikan yang sejati tidak hanya mengasah otak, tetapi juga membentuk karakter.", author:"Martin Luther King Jr."},
+  {text:"Pengetahuan memberimu kekuatan, tetapi karakter memberimu rasa hormat.", author:"Bruce Lee"},
+  {text:"Kerendahan hati adalah awal dari kebijaksanaan.", author:"Socrates"},
+  {text:"Setiap orang adalah guru, setiap tempat adalah sekolah.", author:"Ki Hajar Dewantara"},
+  {text:"Pendidikan adalah hiasan dalam kemakmuran dan tempat berlindung dalam kemalangan.", author:"Aristoteles"},
+  {text:"Kemampuan untuk fokus adalah kekuatan super di dunia modern.", author:"Cal Newport"},
+  {text:"Masa depan tergantung pada apa yang kita pelajari dan kerjakan hari ini.", author:"Mahatma Gandhi"},
+  {text:"Pemimpin sejati adalah pembelajar sejati.", author:"John C. Maxwell"},
+  {text:"Keinginan untuk sukses harus lebih besar daripada ketakutan akan kegagalan.", author:"Bill Cosby"},
+  {text:"Siapa yang belajar hari ini akan memimpin esok hari.", author:"W.E.B. Du Bois"},
+  {text:"Pendidikan adalah perhiasan di saat senang dan tempat berlindung di saat susah.", author:"Aristoteles"},
+  {text:"Ilmu tanpa agama adalah lumpuh, agama tanpa ilmu adalah buta.", author:"Albert Einstein"},
+  {text:"Belajarlah dari kesalahan orang lain. Kamu tak akan hidup cukup lama untuk melakukan semuanya sendiri.", author:"Eleanor Roosevelt"},
+  {text:"Semakin banyak kamu belajar, semakin kamu sadar betapa sedikitnya yang kamu ketahui.", author:"Socrates"},
+  {text:"Satu buku dapat mengubah cara pandangmu terhadap dunia.", author:"Anonim"},
+  {text:"Pendidikan membuatmu tidak mudah dibohongi.", author:"Anonim"},
+  {text:"Jangan menyerah saat materi terasa sulit, itulah tanda otakmu sedang berkembang.", author:"Anonim"},
+  {text:"Teruslah bertanya sampai kamu benar-benar paham.", author:"Anonim"},
+  {text:"Belajar adalah investasi yang tidak akan pernah mengalami inflasi.", author:"Anonim"},
+  {text:"Jangan takut gagal dalam menjawab, takutlah jika kamu tidak mau mencoba.", author:"Anonim"},
+  {text:"Hari ini adalah kesempatan baru untuk belajar hal luar biasa. Jangan sia-siakan!", author:"Anonim"}
+];
+
+/* -------------------------------------------------------------------------
+   5. GLOBAL STATE
+------------------------------------------------------------------------- */
+let currentUser = null;      // firebase auth user
+let currentUserData = null;  // firestore users/{uid} doc data (live)
+let activeChat = null;       // { type:'private'|'group', id, otherUid?, groupId? }
+let unsubscribers = [];      // active onSnapshot detachers to clean up on logout
+let friendsCache = [];       // array of accepted friend uids
+let contextMenuTarget = null;
+let heartbeatInterval = null;
+
+function trackUnsub(fn){ unsubscribers.push(fn); }
+function clearAllListeners(){ unsubscribers.forEach(u=>{ try{u();}catch(e){} }); unsubscribers = []; }
+
+/* -------------------------------------------------------------------------
+   6. UTILITIES
+------------------------------------------------------------------------- */
+function todayStr(){
+  const d = new Date();
+  return `${d.getFullYear()}-${String(d.getMonth()+1).padStart(2,'0')}-${String(d.getDate()).padStart(2,'0')}`;
+}
+function dateFromStr(s){ const [y,m,d]=s.split('-').map(Number); return new Date(y,m-1,d); }
+function daysBetweenStr(a,b){
+  if(!a || !b) return Infinity;
+  const d1 = dateFromStr(a), d2 = dateFromStr(b);
+  return Math.round((d2 - d1) / 86400000);
+}
+function escapeHtml(str){
+  if(str===undefined || str===null) return '';
+  return String(str).replace(/[&<>"']/g, m=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[m]));
+}
+function showToast(msg, type='info'){
+  const wrap = document.getElementById('toastContainer');
+  const el = document.createElement('div');
+  const colors = { info:'bg-navy-800 border-navy-600', success:'bg-navy-800 border-green-600', error:'bg-navy-800 border-maroon-600' };
+  el.className = `toast px-4 py-2.5 rounded-xl border text-sm text-white shadow-lg max-w-xs ${colors[type]||colors.info}`;
+  el.textContent = msg;
+  wrap.appendChild(el);
+  setTimeout(()=>{ el.style.opacity='0'; el.style.transition='opacity .3s'; setTimeout(()=>el.remove(),300); }, 3200);
+}
+function openModal(html){
+  document.getElementById('modalBox').innerHTML = html;
+  document.getElementById('modalRoot').classList.remove('hidden-force');
+}
+function closeModal(){
+  document.getElementById('modalRoot').classList.add('hidden-force');
+  document.getElementById('modalBox').innerHTML = '';
+}
+document.getElementById('modalBackdrop').addEventListener('click', closeModal);
+function formatDuration(ms){
+  const mins = Math.floor(ms/60000);
+  if(mins < 1) return '<1m';
+  if(mins < 60) return `${mins}m`;
+  const hrs = Math.floor(mins/60);
+  return `${hrs}j ${mins%60}m`;
+}
+function timeAgo(ts){
+  if(!ts) return '-';
+  const ms = Date.now() - (ts.toMillis ? ts.toMillis() : ts);
+  const s = Math.floor(ms/1000);
+  if(s<60) return 'baru saja';
+  const m = Math.floor(s/60); if(m<60) return `${m}m lalu`;
+  const h = Math.floor(m/60); if(h<24) return `${h}j lalu`;
+  const d = Math.floor(h/24); return `${d}h lalu`;
+}
+function pairId(a,b){ return [a,b].sort().join('_'); }
+
+/* -------------------------------------------------------------------------
+   7. THEME & LANGUAGE TOGGLES
+------------------------------------------------------------------------- */
+function applyTheme(mode){
+  const html = document.documentElement;
+  if(mode === 'light'){
+    html.classList.remove('dark'); html.classList.add('light');
+    document.body.className = document.body.className.replace('bg-navy-950 text-ash-200','bg-ash-100 text-navy-900');
+    document.getElementById('themeBtn').innerHTML = '<i class="fa-solid fa-sun"></i>';
+  } else {
+    html.classList.remove('light'); html.classList.add('dark');
+    document.body.className = document.body.className.replace('bg-ash-100 text-navy-900','bg-navy-950 text-ash-200');
+    document.getElementById('themeBtn').innerHTML = '<i class="fa-solid fa-moon"></i>';
+  }
+  localStorage.setItem('lockin_theme', mode);
+}
+document.getElementById('themeBtn').addEventListener('click', ()=>{
+  const isLight = document.documentElement.classList.contains('light');
+  applyTheme(isLight ? 'dark' : 'light');
+});
+document.getElementById('langBtn').addEventListener('click', ()=>{
+  currentLang = currentLang === 'id' ? 'en' : 'id';
+  localStorage.setItem('lockin_lang', currentLang);
+  applyI18n();
+});
+applyTheme(localStorage.getItem('lockin_theme') || 'dark');
+
+/* -------------------------------------------------------------------------
+   8. AUTH: tab switching + show/hide password
+------------------------------------------------------------------------- */
+document.getElementById('tabLoginBtn').addEventListener('click', ()=>{
+  document.getElementById('tabLoginBtn').classList.add('bg-maroon-600','text-white');
+  document.getElementById('tabLoginBtn').classList.remove('text-ash-300');
+  document.getElementById('tabRegisterBtn').classList.remove('bg-maroon-600','text-white');
+  document.getElementById('tabRegisterBtn').classList.add('text-ash-300');
+  document.getElementById('loginForm').classList.remove('hidden-force');
+  document.getElementById('registerForm').classList.add('hidden-force');
+});
+document.getElementById('tabRegisterBtn').addEventListener('click', ()=>{
+  document.getElementById('tabRegisterBtn').classList.add('bg-maroon-600','text-white');
+  document.getElementById('tabRegisterBtn').classList.remove('text-ash-300');
+  document.getElementById('tabLoginBtn').classList.remove('bg-maroon-600','text-white');
+  document.getElementById('tabLoginBtn').classList.add('text-ash-300');
+  document.getElementById('registerForm').classList.remove('hidden-force');
+  document.getElementById('loginForm').classList.add('hidden-force');
+});
+document.querySelectorAll('.togglePw').forEach(btn=>{
+  btn.addEventListener('click', ()=>{
+    const input = document.getElementById(btn.getAttribute('data-target'));
+    const icon = btn.querySelector('i');
+    if(input.type === 'password'){ input.type = 'text'; icon.className = 'fa-solid fa-eye-slash'; }
+    else { input.type = 'password'; icon.className = 'fa-solid fa-eye'; }
+  });
+});
+
+/* -------------------------------------------------------------------------
+   9. AUTH: register / login / logout
+------------------------------------------------------------------------- */
+document.getElementById('registerForm').addEventListener('submit', async (e)=>{
+  e.preventDefault();
+  const errEl = document.getElementById('registerError');
+  errEl.classList.add('hidden-force');
+  const username = document.getElementById('regUsername').value.trim();
+  const email = document.getElementById('regEmail').value.trim();
+  const password = document.getElementById('regPassword').value;
+  const usernameLower = username.toLowerCase();
+
+  if(!/^[a-zA-Z0-9_.]{3,20}$/.test(username)){
+    errEl.textContent = 'Username hanya boleh huruf, angka, underscore, titik (3-20 karakter).';
+    errEl.classList.remove('hidden-force'); return;
+  }
+  try{
+    const dupCheck = await db.collection('users').where('usernameLower','==',usernameLower).limit(1).get();
+    if(!dupCheck.empty){
+      errEl.textContent = 'Username sudah digunakan, coba yang lain.';
+      errEl.classList.remove('hidden-force'); return;
+    }
+    const cred = await auth.createUserWithEmailAndPassword(email, password);
+    await db.collection('users').doc(cred.user.uid).set({
+      username, usernameLower, email,
+      photoURL: '', coverURL: '', subject: SUBJECTS[0], bio: '',
+      streak: 0, lastCheckIn: '', currentFocus: '',
+      usernameChangeHistory: [],
+      friends: [],
+      lastActive: FieldValue.serverTimestamp(),
+      createdAt: FieldValue.serverTimestamp()
+    });
+    showToast('Akun berhasil dibuat! Selamat datang 🎉', 'success');
+  }catch(err){
+    errEl.textContent = mapAuthError(err);
+    errEl.classList.remove('hidden-force');
+  }
+});
+
+document.getElementById('loginForm').addEventListener('submit', async (e)=>{
+  e.preventDefault();
+  const errEl = document.getElementById('loginError');
+  errEl.classList.add('hidden-force');
+  const email = document.getElementById('loginEmail').value.trim();
+  const password = document.getElementById('loginPassword').value;
+  try{
+    await auth.signInWithEmailAndPassword(email, password);
+  }catch(err){
+    errEl.textContent = mapAuthError(err);
+    errEl.classList.remove('hidden-force');
+  }
+});
+
+function mapAuthError(err){
+  const map = {
+    'auth/email-already-in-use': 'Email sudah terdaftar.',
+    'auth/invalid-email': 'Format email tidak valid.',
+    'auth/weak-password': 'Password terlalu lemah (min 6 karakter).',
+    'auth/user-not-found': 'Email atau password salah.',
+    'auth/wrong-password': 'Email atau password salah.',
+    'auth/invalid-credential': 'Email atau password salah.',
+    'auth/too-many-requests': 'Terlalu banyak percobaan. Coba lagi nanti.'
+  };
+  return map[err.code] || (err.message || 'Terjadi kesalahan.');
+}
+
+document.getElementById('logoutBtn').addEventListener('click', ()=>{
+  confirmDialog('Keluar dari akun?', 'Kamu bisa masuk kembali kapan saja.', async ()=>{
+    await doLogout();
+  });
+});
+document.getElementById('switchAccountBtn').addEventListener('click', ()=>{
+  confirmDialog('Pindah Akun', 'Kamu akan keluar dari akun ini agar bisa masuk dengan akun lain.', async ()=>{
+    await doLogout();
+  });
+});
+async function doLogout(){
+  if(heartbeatInterval) clearInterval(heartbeatInterval);
+  clearAllListeners();
+  try{
+    if(currentUser){
+      await db.collection('users').doc(currentUser.uid).update({ lastActive: FieldValue.serverTimestamp() });
+    }
+  }catch(e){}
+  await auth.signOut();
+}
+
+function confirmDialog(title, desc, onConfirm){
+  openModal(`
+    <h3 class="text-lg font-bold text-white mb-2">${escapeHtml(title)}</h3>
+    <p class="text-sm text-ash-400 mb-5">${escapeHtml(desc)}</p>
+    <div class="flex gap-2 justify-end">
+      <button id="cdCancel" class="px-4 py-2 rounded-xl bg-navy-800 hover:bg-navy-700 text-sm text-white">Batal</button>
+      <button id="cdConfirm" class="px-4 py-2 rounded-xl bg-maroon-600 hover:bg-maroon-500 text-sm text-white">Ya, Lanjutkan</button>
+    </div>
+  `);
+  document.getElementById('cdCancel').addEventListener('click', closeModal);
+  document.getElementById('cdConfirm').addEventListener('click', ()=>{ closeModal(); onConfirm(); });
+}
+
+/* -------------------------------------------------------------------------
+   10. AUTH STATE LISTENER — main entry point
+------------------------------------------------------------------------- */
+auth.onAuthStateChanged(async (user)=>{
+  if(user){
+    currentUser = user;
+    document.getElementById('authView').classList.add('hidden-force');
+    document.getElementById('appView').classList.remove('hidden-force');
+    await initApp();
+  } else {
+    currentUser = null; currentUserData = null;
+    document.getElementById('appView').classList.add('hidden-force');
+    document.getElementById('authView').classList.remove('hidden-force');
+    document.getElementById('loginForm').reset();
+    document.getElementById('registerForm').reset();
+  }
+});
+
+async function initApp(){
+  applyI18n();
+  populateSubjectFilters();
+  populateSubjectSelect();
+  pickRandomQuote();
+  listenToOwnUserDoc();
+  listenToFriendRequests();
+  listenToNotifications();
+  listenToFriendsList();
+  listenToResources();
+  startHeartbeat();
+  goToView('dashboard');
+}
+
+function startHeartbeat(){
+  const beat = ()=>{
+    if(currentUser){
+      db.collection('users').doc(currentUser.uid).update({ lastActive: FieldValue.serverTimestamp() }).catch(()=>{});
+    }
+  };
+  beat();
+  heartbeatInterval = setInterval(beat, 45000);
+  window.addEventListener('beforeunload', ()=>{
+    if(currentUser){
+      navigator.sendBeacon && db.collection('users').doc(currentUser.uid).update({ lastActive: firebase.firestore.Timestamp.fromMillis(Date.now()-200000) });
+    }
+  });
+}
+
+/* -------------------------------------------------------------------------
+   11. NAVIGATION
+------------------------------------------------------------------------- */
+function goToView(name){
+  document.querySelectorAll('.viewSection').forEach(s=>s.classList.add('hidden-force'));
+  document.getElementById('view-'+name).classList.remove('hidden-force');
+  document.querySelectorAll('.navBtn').forEach(b=>{
+    if(b.getAttribute('data-view') === name){ b.classList.add('bg-maroon-600','text-white'); b.classList.remove('text-ash-300'); }
+    else { b.classList.remove('bg-maroon-600','text-white'); b.classList.add('text-ash-300'); }
+  });
+  if(name === 'profile') fillProfileForm();
+}
+document.querySelectorAll('.navBtn').forEach(btn=>{
+  btn.addEventListener('click', ()=> goToView(btn.getAttribute('data-view')));
+});
+
+/* -------------------------------------------------------------------------
+   12. OWN USER DOC LISTENER + STREAK LOGIC
+------------------------------------------------------------------------- */
+function listenToOwnUserDoc(){
+  const unsub = db.collection('users').doc(currentUser.uid).onSnapshot(async (doc)=>{
+    if(!doc.exists) return;
+    const data = doc.data();
+    const prevStreak = currentUserData ? currentUserData.streak : undefined;
+    currentUserData = data;
+    renderTopBar(data);
+    renderStreakUI(data);
+    document.getElementById('focusInput').value = data.currentFocus || '';
+
+    // Check for streak death on load: if lastCheckIn exists and gap > 1 day
+    const today = todayStr();
+    if(data.lastCheckIn && data.lastCheckIn !== today){
+      const gap = daysBetweenStr(data.lastCheckIn, today);
+      if(gap > 1 && data.streak > 0 && !window.__streakDeathShown){
+        window.__streakDeathShown = true;
+        await db.collection('users').doc(currentUser.uid).update({ streak: 0 });
+        showStreakDeathAlert();
+      }
+    }
+  });
+  trackUnsub(unsub);
+}
+
+function renderTopBar(data){
+  document.getElementById('topUsername').textContent = data.username;
+  document.getElementById('topSubject').textContent = data.subject || '-';
+  document.getElementById('topAvatar').src = data.photoURL || defaultAvatar(data.username);
+}
+function defaultAvatar(name){
+  return `https://api.dicebear.com/7.x/initials/svg?seed=${encodeURIComponent(name||'U')}&backgroundColor=7a1224,101a33&fontFamily=Arial`;
+}
+
+function renderStreakUI(data){
+  document.getElementById('streakCount').textContent = data.streak || 0;
+  updateCheckinButtonLabel();
+}
+function updateCheckinButtonLabel(){
+  if(!currentUserData) return;
+  const btn = document.getElementById('checkinBtn');
+  const done = currentUserData.lastCheckIn === todayStr();
+  btn.disabled = done;
+  btn.textContent = done ? t('dash.checkinDone') : t('dash.checkinBtn');
+}
+
+function showStreakDeathAlert(){
+  openModal(`
+    <div class="text-center py-2">
+      <i class="fa-solid fa-fire-flame-curved text-5xl text-ash-600 mb-3"></i>
+      <h3 class="text-lg font-bold text-white mb-1">Streak kamu mati! 💔</h3>
+      <p class="text-sm text-ash-400 mb-5">Yuk mulai konsisten lagi! Check-in hari ini untuk memulai streak baru.</p>
+      <button id="streakDeathOk" class="bg-maroon-600 hover:bg-maroon-500 text-white font-semibold px-6 py-2.5 rounded-xl text-sm">Oke, Semangat Lagi!</button>
+    </div>
+  `);
+  document.getElementById('streakDeathOk').addEventListener('click', closeModal);
+}
+
+document.getElementById('checkinBtn').addEventListener('click', async ()=>{
+  const today = todayStr();
+  if(currentUserData.lastCheckIn === today) return;
+  const yesterday = new Date(); yesterday.setDate(yesterday.getDate()-1);
+  const yStr = `${yesterday.getFullYear()}-${String(yesterday.getMonth()+1).padStart(2,'0')}-${String(yesterday.getDate()).padStart(2,'0')}`;
+  let newStreak = 1;
+  if(currentUserData.lastCheckIn === yStr){ newStreak = (currentUserData.streak||0) + 1; }
+  await db.collection('users').doc(currentUser.uid).update({ streak: newStreak, lastCheckIn: today });
+  showToast('Check-in berhasil! Tetap semangat 🔥', 'success');
+  await propagateCheckinToFriendships(today, yStr);
+});
+
+async function propagateCheckinToFriendships(today, yStr){
+  const snap = await db.collection('friendships').where('users','array-contains', currentUser.uid).get();
+  const batch = db.batch();
+  snap.forEach(docSnap=>{
+    const fs = docSnap.data();
+    const otherUid = fs.users.find(u=>u!==currentUser.uid);
+    const checkins = fs.checkins || {};
+    checkins[currentUser.uid] = today;
+    let streak = fs.streak || 0;
+    let lastBothDate = fs.lastBothDate || '';
+    if(checkins[otherUid] === today){
+      // both checked in today
+      if(lastBothDate === today){ /* already counted */ }
+      else if(lastBothDate === yStr){ streak += 1; }
+      else { streak = 1; }
+      lastBothDate = today;
+    }
+    batch.update(docSnap.ref, { checkins, streak, lastBothDate });
+  });
+  await batch.commit().catch(()=>{});
+}
+
+document.getElementById('newQuoteBtn').addEventListener('click', pickRandomQuote);
+function pickRandomQuote(){
+  const q = QUOTES[Math.floor(Math.random()*QUOTES.length)];
+  document.getElementById('quoteText').textContent = `"${q.text}"`;
+  document.getElementById('quoteAuthor').textContent = `— ${q.author}`;
+}
+
+document.getElementById('saveFocusBtn').addEventListener('click', async ()=>{
+  const val = document.getElementById('focusInput').value.trim();
+  await db.collection('users').doc(currentUser.uid).update({ currentFocus: val });
+  showToast('Target belajar disimpan!', 'success');
+});
+
+/* -------------------------------------------------------------------------
+   13. NOTIFICATIONS
+------------------------------------------------------------------------- */
+function listenToNotifications(){
+  const unsub = db.collection('notifications').doc(currentUser.uid).collection('items')
+    .orderBy('createdAt','desc').limit(50)
+    .onSnapshot(snap=>{
+      let unread = 0;
+      const items = [];
+      snap.forEach(d=>{ const data = d.data(); if(!data.read) unread++; items.push({id:d.id, ...data}); });
+      const badge = document.getElementById('notifBadge');
+      if(unread > 0){ badge.textContent = unread > 9 ? '9+' : unread; badge.classList.remove('hidden-force'); }
+      else { badge.classList.add('hidden-force'); }
+      window.__notifItems = items;
+    });
+  trackUnsub(unsub);
+}
+async function sendNotification(toUid, type, message, extra={}){
+  if(toUid === currentUser.uid) return;
+  await db.collection('notifications').doc(toUid).collection('items').add({
+    type, message, fromUid: currentUser.uid, fromUsername: currentUserData ? currentUserData.username : '',
+    read:false, createdAt: FieldValue.serverTimestamp(), ...extra
+  }).catch(()=>{});
+}
+document.getElementById('notifBtn').addEventListener('click', ()=>{
+  const items = window.__notifItems || [];
+  const html = items.length ? items.map(n=>`
+    <div class="flex items-start gap-3 p-3 rounded-xl ${n.read ? 'bg-navy-800/40' : 'bg-navy-800'} mb-2">
+      <div class="w-8 h-8 rounded-full bg-maroon-600/20 flex items-center justify-center text-maroon-400 shrink-0">
+        <i class="fa-solid ${notifIcon(n.type)}"></i>
+      </div>
+      <div class="flex-1 min-w-0">
+        <p class="text-sm text-white">${escapeHtml(n.message)}</p>
+        <p class="text-[11px] text-ash-500 mt-0.5">${timeAgo(n.createdAt)}</p>
+      </div>
+      ${n.read ? '' : `<button class="markReadBtn text-[11px] text-maroon-400 hover:text-maroon-300 shrink-0" data-id="${n.id}">Tandai Dibaca</button>`}
+    </div>
+  `).join('') : `<p class="text-sm text-ash-500 text-center py-8">Belum ada notifikasi.</p>`;
+  openModal(`<h3 class="text-lg font-bold text-white mb-3"><i class="fa-solid fa-bell text-maroon-500 mr-2"></i>Notifikasi</h3>${html}`);
+  document.querySelectorAll('.markReadBtn').forEach(b=>{
+    b.addEventListener('click', async ()=>{
+      await db.collection('notifications').doc(currentUser.uid).collection('items').doc(b.getAttribute('data-id')).update({read:true});
+      b.parentElement.classList.add('bg-navy-800/40'); b.remove();
+    });
+  });
+});
+function notifIcon(type){
+  return { like:'fa-heart', comment:'fa-comment', friend_request:'fa-user-plus', friend_accept:'fa-user-check', group_invite:'fa-users' }[type] || 'fa-bell';
+}
+
+/* -------------------------------------------------------------------------
+   14. FRIENDS: search users, send/accept/reject requests, friend list
+------------------------------------------------------------------------- */
+let searchDebounce = null;
+document.getElementById('userSearchInput').addEventListener('input', (e)=>{
+  clearTimeout(searchDebounce);
+  const term = e.target.value.trim().toLowerCase();
+  const resultsEl = document.getElementById('userSearchResults');
+  if(!term){ resultsEl.innerHTML=''; return; }
+  searchDebounce = setTimeout(async ()=>{
+    const snap = await db.collection('users')
+      .where('usernameLower','>=',term).where('usernameLower','<=',term+'\uf8ff').limit(8).get();
+    const rows = [];
+    snap.forEach(d=>{ if(d.id !== currentUser.uid) rows.push({id:d.id, ...d.data()}); });
+    resultsEl.innerHTML = rows.length ? rows.map(u=>`
+      <div class="flex items-center gap-2 p-2 rounded-xl hover:bg-navy-800">
+        <img src="${u.photoURL || defaultAvatar(u.username)}" class="w-8 h-8 rounded-full object-cover bg-navy-700">
+        <span class="flex-1 text-sm text-white truncate">${escapeHtml(u.username)}</span>
+        <button class="addFriendBtn text-xs bg-maroon-600 hover:bg-maroon-500 text-white px-3 py-1.5 rounded-lg" data-uid="${u.id}" data-uname="${escapeHtml(u.username)}">Add</button>
+      </div>
+    `).join('') : `<p class="text-xs text-ash-500 text-center py-3">Tidak ditemukan.</p>`;
+    document.querySelectorAll('.addFriendBtn').forEach(btn=>{
+      btn.addEventListener('click', async ()=>{
+        const toUid = btn.getAttribute('data-uid');
+        btn.disabled = true; btn.textContent = '...';
+        const existing = await db.collection('friendRequests')
+          .where('from','==',currentUser.uid).where('to','==',toUid).where('status','==','pending').limit(1).get();
+        if(!existing.empty){ btn.textContent='Terkirim'; return; }
+        await db.collection('friendRequests').add({
+          from: currentUser.uid, to: toUid, fromUsername: currentUserData.username, toUsername: btn.getAttribute('data-uname'),
+          status:'pending', createdAt: FieldValue.serverTimestamp()
+        });
+        await sendNotification(toUid, 'friend_request', `${currentUserData.username} mengirim permintaan pertemanan.`);
+        btn.textContent = 'Terkirim'; showToast('Permintaan pertemanan terkirim!', 'success');
+      });
+    });
+  }, 350);
+});
+
+function listenToFriendRequests(){
+  const unsub = db.collection('friendRequests').where('to','==',currentUser.uid).where('status','==','pending')
+    .onSnapshot(snap=>{
+      const badge = document.getElementById('friendReqBadge');
+      if(snap.size > 0){ badge.textContent = snap.size; badge.classList.remove('hidden-force'); }
+      else badge.classList.add('hidden-force');
+      window.__pendingRequests = [];
+      snap.forEach(d=> window.__pendingRequests.push({id:d.id, ...d.data()}));
+    });
+  trackUnsub(unsub);
+}
+document.getElementById('friendReqBtn').addEventListener('click', ()=>{
+  const reqs = window.__pendingRequests || [];
+  const html = reqs.length ? reqs.map(r=>`
+    <div class="flex items-center gap-2 p-3 rounded-xl bg-navy-800 mb-2">
+      <span class="flex-1 text-sm text-white">${escapeHtml(r.fromUsername)}</span>
+      <button class="approveReq text-xs bg-green-700 hover:bg-green-600 text-white px-3 py-1.5 rounded-lg" data-id="${r.id}" data-from="${r.from}" data-uname="${escapeHtml(r.fromUsername)}">Terima</button>
+      <button class="rejectReq text-xs bg-navy-700 hover:bg-navy-600 text-white px-3 py-1.5 rounded-lg" data-id="${r.id}">Tolak</button>
+    </div>
+  `).join('') : `<p class="text-sm text-ash-500 text-center py-8">Tidak ada permintaan pertemanan.</p>`;
+  openModal(`<h3 class="text-lg font-bold text-white mb-3"><i class="fa-solid fa-user-plus text-maroon-500 mr-2"></i>Permintaan Pertemanan</h3>${html}`);
+  document.querySelectorAll('.approveReq').forEach(b=>{
+    b.addEventListener('click', async ()=>{
+      const reqId = b.getAttribute('data-id'), fromUid = b.getAttribute('data-from'), fromUname = b.getAttribute('data-uname');
+      await db.collection('friendRequests').doc(reqId).update({status:'accepted'});
+      await db.collection('friendships').doc(pairId(currentUser.uid, fromUid)).set({
+        users:[currentUser.uid, fromUid], streak:0, checkins:{}, lastBothDate:'', createdAt: FieldValue.serverTimestamp()
+      });
+      await db.collection('users').doc(currentUser.uid).update({ friends: FieldValue.arrayUnion(fromUid) });
+      await db.collection('users').doc(fromUid).update({ friends: FieldValue.arrayUnion(currentUser.uid) });
+      await sendNotification(fromUid, 'friend_accept', `${currentUserData.username} menerima permintaan pertemananmu.`);
+      showToast(`Kamu sekarang berteman dengan ${fromUname}!`, 'success');
+      closeModal();
+    });
+  });
+  document.querySelectorAll('.rejectReq').forEach(b=>{
+    b.addEventListener('click', async ()=>{
+      await db.collection('friendRequests').doc(b.getAttribute('data-id')).update({status:'rejected'});
+      closeModal();
+    });
+  });
+});
+
+function listenToFriendsList(){
+  const unsub = db.collection('users').doc(currentUser.uid).onSnapshot(async (doc)=>{
+    const data = doc.data(); if(!data) return;
+    friendsCache = data.friends || [];
+    await renderFriendList();
+  });
+  trackUnsub(unsub);
+}
+async function renderFriendList(){
+  const container = document.getElementById('friendListContainer');
+  const emptyEl = document.getElementById('friendListEmpty');
+  const onlineContainer = document.getElementById('onlineFriendsList');
+  const onlineEmpty = document.getElementById('onlineFriendsEmpty');
+  if(friendsCache.length === 0){
+    container.innerHTML=''; emptyEl.classList.remove('hidden-force');
+    onlineContainer.innerHTML=''; onlineEmpty.classList.remove('hidden-force');
+    return;
+  }
+  emptyEl.classList.add('hidden-force');
+  const chunks = [];
+  for(let i=0;i<friendsCache.length;i+=10) chunks.push(friendsCache.slice(i,i+10));
+  let allFriends = [];
+  for(const chunk of chunks){
+    const snap = await db.collection('users').where(firebase.firestore.FieldPath.documentId(),'in',chunk).get();
+    snap.forEach(d=> allFriends.push({id:d.id, ...d.data()}));
+  }
+  const now = Date.now();
+  allFriends.forEach(f=>{ f.isOnline = f.lastActive && (now - f.lastActive.toMillis() < 120000); });
+
+  container.innerHTML = allFriends.map(f=>`
+    <div class="friendItem flex items-center gap-2 p-2 rounded-xl hover:bg-navy-800 cursor-pointer" data-uid="${f.id}" data-uname="${escapeHtml(f.username)}">
+      <div class="relative">
+        <img src="${f.photoURL || defaultAvatar(f.username)}" class="w-9 h-9 rounded-full object-cover bg-navy-700">
+        <span class="absolute bottom-0 right-0 w-2.5 h-2.5 rounded-full border-2 border-navy-900 ${f.isOnline ? 'bg-green-500' : 'bg-ash-600'}"></span>
+      </div>
+      <div class="flex-1 min-w-0">
+        <p class="text-sm font-medium text-white truncate">${escapeHtml(f.username)}</p>
+        <p class="text-[11px] text-ash-500 truncate">${f.isOnline ? 'Online' : 'Offline'}</p>
+      </div>
+      <button class="viewProfileBtn text-ash-500 hover:text-white px-1" data-uid="${f.id}"><i class="fa-solid fa-circle-info"></i></button>
+    </div>
+  `).join('');
+
+  document.querySelectorAll('.friendItem').forEach(el=>{
+    el.addEventListener('click',(ev)=>{
+      if(ev.target.closest('.viewProfileBtn')) return;
+      openPrivateChat(el.getAttribute('data-uid'), el.getAttribute('data-uname'));
+    });
+  });
+  document.querySelectorAll('.viewProfileBtn').forEach(el=>{
+    el.addEventListener('click',(ev)=>{ ev.stopPropagation(); openFriendProfileModal(el.getAttribute('data-uid')); });
+  });
+
+  const onlineFriends = allFriends.filter(f=>f.isOnline);
+  if(onlineFriends.length === 0){
+    onlineContainer.innerHTML=''; onlineEmpty.classList.remove('hidden-force');
+  } else {
+    onlineEmpty.classList.add('hidden-force');
+    onlineContainer.innerHTML = onlineFriends.map(f=>`
+      <div class="flex items-center gap-3 p-2.5 rounded-xl bg-navy-950/50">
+        <div class="relative shrink-0">
+          <img src="${f.photoURL || defaultAvatar(f.username)}" class="w-9 h-9 rounded-full object-cover bg-navy-700">
+          <span class="absolute bottom-0 right-0 w-2.5 h-2.5 rounded-full bg-green-500 border-2 border-navy-900"></span>
+        </div>
+        <div class="min-w-0 flex-1">
+          <p class="text-sm font-semibold text-white truncate">${escapeHtml(f.username)}</p>
+          <p class="text-[11px] text-ash-400 truncate">${f.currentFocus ? `sedang mempelajari: ${escapeHtml(f.currentFocus)}` : 'belum mengisi target belajar'}</p>
+        </div>
+        <span class="text-[11px] text-ash-500 shrink-0">${f.lastActive ? formatDuration(Date.now()-f.lastActive.toMillis()) : ''}</span>
+      </div>
+    `).join('');
+  }
+}
+
+async function openFriendProfileModal(uid){
+  const doc = await db.collection('users').doc(uid).get();
+  if(!doc.exists) return;
+  const f = doc.data();
+  const mutuals = (f.friends||[]).filter(id => friendsCache.includes(id));
+  openModal(`
+    <div class="-m-5 mb-0">
+      <div class="h-28 bg-navy-700"><img src="${f.coverURL||''}" class="w-full h-full object-cover"></div>
+      <div class="px-5 -mt-8 pb-5">
+        <img src="${f.photoURL || defaultAvatar(f.username)}" class="w-20 h-20 rounded-2xl object-cover border-4 border-navy-900 bg-navy-700">
+        <p class="text-lg font-bold text-white mt-2">${escapeHtml(f.username)}</p>
+        <p class="text-sm text-maroon-400 font-medium">${escapeHtml(f.subject||'-')}</p>
+        <p class="text-sm text-ash-400 mt-2">${escapeHtml(f.bio||'Belum ada bio.')}</p>
+        <p class="text-xs text-ash-500 mt-3"><i class="fa-solid fa-bullseye mr-1"></i>${f.currentFocus ? escapeHtml(f.currentFocus) : 'Belum mengisi target belajar hari ini.'}</p>
+        <button id="mutualBtn" class="mt-3 text-xs text-ash-400 hover:text-white underline">${mutuals.length} Teman Bersama</button>
+      </div>
+    </div>
+  `);
+  document.getElementById('mutualBtn').addEventListener('click', async ()=>{
+    if(mutuals.length === 0){ showToast('Tidak ada teman bersama.'); return; }
+    const chunks = []; for(let i=0;i<mutuals.length;i+=10) chunks.push(mutuals.slice(i,i+10));
+    let people = [];
+    for(const c of chunks){
+      const snap = await db.collection('users').where(firebase.firestore.FieldPath.documentId(),'in',c).get();
+      snap.forEach(d=>people.push(d.data()));
+    }
+    openModal(`
+      <h3 class="text-lg font-bold text-white mb-3">Teman Bersama (${people.length})</h3>
+      ${people.map(p=>`
+        <div class="flex items-center gap-2 p-2 rounded-xl hover:bg-navy-800">
+          <img src="${p.photoURL || defaultAvatar(p.username)}" class="w-8 h-8 rounded-full object-cover bg-navy-700">
+          <span class="text-sm text-white">${escapeHtml(p.username)}</span>
+        </div>
+      `).join('')}
+    `);
+  });
+}
+
+document.querySelectorAll('.friendsTabBtn').forEach(btn=>{
+  btn.addEventListener('click', ()=>{
+    document.querySelectorAll('.friendsTabBtn').forEach(b=>{ b.classList.remove('tab-active'); b.classList.add('text-ash-400'); });
+    btn.classList.add('tab-active'); btn.classList.remove('text-ash-400');
+    const tab = btn.getAttribute('data-tab');
+    document.getElementById('directListWrap').classList.toggle('hidden-force', tab!=='direct');
+    document.getElementById('groupsListWrap').classList.toggle('hidden-force', tab!=='groups');
+    if(tab==='groups') loadMyGroups();
+  });
+});
+
+/* -------------------------------------------------------------------------
+   15. PRIVATE CHAT
+------------------------------------------------------------------------- */
+let chatMsgUnsub = null;
+async function openPrivateChat(otherUid, otherUname){
+  if(chatMsgUnsub){ chatMsgUnsub(); chatMsgUnsub = null; }
+  activeChat = { type:'private', otherUid };
+  document.getElementById('chatEmptyState').classList.add('hidden-force');
+  document.getElementById('chatActiveWrap').classList.remove('hidden-force');
+
+  const friendshipDoc = await db.collection('friendships').doc(pairId(currentUser.uid, otherUid)).get();
+  const fs = friendshipDoc.exists ? friendshipDoc.data() : { streak:0 };
+  const otherDoc = await db.collection('users').doc(otherUid).get();
+  const otherData = otherDoc.data();
+
+  document.getElementById('chatHeader').innerHTML = `
+    <div class="flex items-center gap-2 min-w-0">
+      <img src="${otherData.photoURL || defaultAvatar(otherData.username)}" class="w-9 h-9 rounded-full object-cover bg-navy-700">
+      <div class="min-w-0">
+        <p class="text-sm font-semibold text-white truncate">${escapeHtml(otherUname)}</p>
+        <p class="text-[11px] text-ash-500 truncate">${otherData.subject || ''}</p>
+      </div>
+    </div>
+    <div class="flex items-center gap-1 text-maroon-400 text-sm font-semibold shrink-0">
+      <i class="fa-solid fa-fire"></i><span>${fs.streak || 0}</span>
+    </div>
+  `;
+
+  const chatId = pairId(currentUser.uid, otherUid);
+  const msgBox = document.getElementById('chatMessages');
+  msgBox.innerHTML = '<p class="text-center text-xs text-ash-500">Memuat pesan...</p>';
+  chatMsgUnsub = db.collection('chats').doc(chatId).collection('messages').orderBy('createdAt','asc').limit(200)
+    .onSnapshot(snap=>{
+      const msgs = []; snap.forEach(d=>msgs.push({id:d.id, ...d.data()}));
+      renderChatMessages(msgs, { kind:'private', chatId });
+    });
+
+  document.getElementById('chatSendBtn').onclick = ()=> sendPrivateMessage(chatId);
+  document.getElementById('chatInput').onkeydown = (e)=>{ if(e.key==='Enter') sendPrivateMessage(chatId); };
+}
+async function sendPrivateMessage(chatId){
+  const input = document.getElementById('chatInput');
+  const text = input.value.trim();
+  if(!text) return;
+  input.value='';
+  await db.collection('chats').doc(chatId).collection('messages').add({
+    text, senderId: currentUser.uid, senderUsername: currentUserData.username,
+    createdAt: FieldValue.serverTimestamp(), edited:false
+  });
+}
+
+function renderChatMessages(msgs, ctx){
+  const box = document.getElementById('chatMessages');
+  box.innerHTML = msgs.map(m=>{
+    const mine = m.senderId === currentUser.uid;
+    return `
+    <div class="msg-bubble flex ${mine?'justify-end':'justify-start'}" data-mid="${m.id}" data-mine="${mine}" data-text="${escapeHtml(m.text)}" data-ctx='${ctx.kind}' data-chatid="${ctx.chatId||''}" data-groupid="${ctx.groupId||''}">
+      <div class="max-w-[75%] group relative">
+        ${ctx.kind==='group' && !mine ? `<p class="text-[11px] text-maroon-400 font-semibold mb-0.5 ml-1">${escapeHtml(m.senderUsername)}</p>` : ''}
+        <div class="px-3.5 py-2 rounded-2xl text-sm ${mine ? 'bg-maroon-600 text-white rounded-br-sm' : 'bg-navy-800 text-ash-100 rounded-bl-sm'}">
+          ${escapeHtml(m.text)} ${m.edited ? '<span class="text-[10px] opacity-60">(diedit)</span>' : ''}
+        </div>
+      </div>
+    </div>`;
+  }).join('');
+  box.scrollTop = box.scrollHeight;
+  box.querySelectorAll('.msg-bubble[data-mine="true"]').forEach(el=>{
+    el.style.cursor='pointer';
+    el.addEventListener('contextmenu', (e)=>{ e.preventDefault(); showMsgContextMenu(e, el); });
+    let pressTimer;
+    el.addEventListener('touchstart', ()=>{ pressTimer = setTimeout(()=>showMsgContextMenu({clientX:innerWidth/2,clientY:innerHeight/2}, el), 500); });
+    el.addEventListener('touchend', ()=> clearTimeout(pressTimer));
+  });
+}
+function showMsgContextMenu(e, el){
+  contextMenuTarget = el;
+  const menu = document.getElementById('msgContextMenu');
+  menu.style.left = Math.min(e.clientX, window.innerWidth-140) + 'px';
+  menu.style.top = Math.min(e.clientY, window.innerHeight-100) + 'px';
+  menu.classList.remove('hidden-force');
+}
+document.addEventListener('click', (e)=>{
+  if(!e.target.closest('#msgContextMenu')) document.getElementById('msgContextMenu').classList.add('hidden-force');
+});
+document.getElementById('ctxEditBtn').addEventListener('click', ()=>{
+  if(!contextMenuTarget) return;
+  const mid = contextMenuTarget.getAttribute('data-mid');
+  const oldText = contextMenuTarget.getAttribute('data-text');
+  const kind = contextMenuTarget.getAttribute('data-ctx');
+  const chatId = contextMenuTarget.getAttribute('data-chatid');
+  const groupId = contextMenuTarget.getAttribute('data-groupid');
+  document.getElementById('msgContextMenu').classList.add('hidden-force');
+  openModal(`
+    <h3 class="text-base font-bold text-white mb-3">Edit Pesan</h3>
+    <textarea id="editMsgInput" rows="3" class="w-full bg-navy-950 border border-navy-700 rounded-xl px-3 py-2 text-sm text-white outline-none focus:border-maroon-500">${oldText}</textarea>
+    <div class="flex gap-2 justify-end mt-3">
+      <button id="editCancelBtn" class="px-4 py-2 rounded-xl bg-navy-800 hover:bg-navy-700 text-sm text-white">Batal</button>
+      <button id="editSaveBtn" class="px-4 py-2 rounded-xl bg-maroon-600 hover:bg-maroon-500 text-sm text-white">Simpan</button>
+    </div>
+  `);
+  document.getElementById('editCancelBtn').addEventListener('click', closeModal);
+  document.getElementById('editSaveBtn').addEventListener('click', async ()=>{
+    const newText = document.getElementById('editMsgInput').value.trim();
+    if(!newText) return;
+    const ref = kind==='group'
+      ? db.collection('groups').doc(groupId).collection('messages').doc(mid)
+      : db.collection('chats').doc(chatId).collection('messages').doc(mid);
+    await ref.update({ text:newText, edited:true });
+    closeModal();
+  });
+});
+document.getElementById('ctxDeleteBtn').addEventListener('click', async ()=>{
+  if(!contextMenuTarget) return;
+  const mid = contextMenuTarget.getAttribute('data-mid');
+  const kind = contextMenuTarget.getAttribute('data-ctx');
+  const chatId = contextMenuTarget.getAttribute('data-chatid');
+  const groupId = contextMenuTarget.getAttribute('data-groupid');
+  document.getElementById('msgContextMenu').classList.add('hidden-force');
+  const ref = kind==='group'
+    ? db.collection('groups').doc(groupId).collection('messages').doc(mid)
+    : db.collection('chats').doc(chatId).collection('messages').doc(mid);
+  await ref.delete();
+});
+
+/* -------------------------------------------------------------------------
+   16. GROUP CHAT
+------------------------------------------------------------------------- */
+document.getElementById('createGroupBtn').addEventListener('click', ()=>{
+  openModal(`
+    <h3 class="text-lg font-bold text-white mb-3"><i class="fa-solid fa-users text-maroon-500 mr-2"></i>Buat Grup Baru</h3>
+    <div class="space-y-3">
+      <input id="newGroupName" type="text" placeholder="Nama grup" maxlength="40" class="w-full bg-navy-950 border border-navy-700 rounded-xl px-4 py-2.5 text-sm text-white outline-none focus:border-maroon-500">
+      <textarea id="newGroupDesc" rows="2" placeholder="Deskripsi singkat" maxlength="150" class="w-full bg-navy-950 border border-navy-700 rounded-xl px-4 py-2.5 text-sm text-white outline-none focus:border-maroon-500 resize-none"></textarea>
+      <div class="flex gap-2">
+        <label class="flex-1 flex items-center gap-2 bg-navy-950 border border-navy-700 rounded-xl px-3 py-2.5 cursor-pointer">
+          <input type="radio" name="gType" value="public" checked> <span class="text-sm text-white">Public</span>
+        </label>
+        <label class="flex-1 flex items-center gap-2 bg-navy-950 border border-navy-700 rounded-xl px-3 py-2.5 cursor-pointer">
+          <input type="radio" name="gType" value="private"> <span class="text-sm text-white">Private</span>
+        </label>
+      </div>
+      <button id="createGroupSubmit" class="w-full bg-maroon-600 hover:bg-maroon-500 text-white font-semibold py-2.5 rounded-xl text-sm">Buat Grup</button>
+    </div>
+  `);
+  document.getElementById('createGroupSubmit').addEventListener('click', async ()=>{
+    const name = document.getElementById('newGroupName').value.trim();
+    const desc = document.getElementById('newGroupDesc').value.trim();
+    const type = document.querySelector('input[name="gType"]:checked').value;
+    if(!name){ showToast('Nama grup wajib diisi', 'error'); return; }
+    const ref = await db.collection('groups').add({
+      name, nameLower: name.toLowerCase(), description: desc, photoURL:'', type,
+      ownerId: currentUser.uid, members: { [currentUser.uid]: 'admin' }, memberIds:[currentUser.uid],
+      pendingRequests: {}, createdAt: FieldValue.serverTimestamp()
+    });
+    closeModal(); showToast('Grup berhasil dibuat!', 'success');
+    loadMyGroups(); openGroupChat(ref.id);
+  });
+});
+
+document.getElementById('groupSearchInput').addEventListener('input', (e)=>{
+  clearTimeout(searchDebounce);
+  const term = e.target.value.trim().toLowerCase();
+  const el = document.getElementById('groupPublicResults');
+  if(!term){ el.innerHTML=''; return; }
+  searchDebounce = setTimeout(async ()=>{
+    const snap = await db.collection('groups').where('type','==','public')
+      .where('nameLower','>=',term).where('nameLower','<=',term+'\uf8ff').limit(8).get();
+    const rows = []; snap.forEach(d=>rows.push({id:d.id, ...d.data()}));
+    el.innerHTML = rows.length ? rows.map(g=>{
+      const isMember = (g.memberIds||[]).includes(currentUser.uid);
+      const isPending = g.pendingRequests && g.pendingRequests[currentUser.uid];
+      return `
+      <div class="flex items-center gap-2 p-2 rounded-xl hover:bg-navy-800">
+        <div class="w-8 h-8 rounded-lg bg-navy-700 flex items-center justify-center text-ash-400"><i class="fa-solid fa-users"></i></div>
+        <span class="flex-1 text-sm text-white truncate">${escapeHtml(g.name)}</span>
+        <button class="joinGroupBtn text-xs ${isMember?'bg-navy-700':'bg-maroon-600 hover:bg-maroon-500'} text-white px-3 py-1.5 rounded-lg" data-id="${g.id}" ${isMember?'disabled':''}>${isMember?'Anggota':(isPending?'Menunggu':'Gabung')}</button>
+      </div>`;
+    }).join('') : `<p class="text-xs text-ash-500 text-center py-3">Grup tidak ditemukan.</p>`;
+    document.querySelectorAll('.joinGroupBtn').forEach(btn=>{
+      btn.addEventListener('click', async ()=>{
+        if(btn.disabled) return;
+        const gid = btn.getAttribute('data-id');
+        await db.collection('groups').doc(gid).update({
+          [`pendingRequests.${currentUser.uid}`]: currentUserData.username
+        });
+        btn.textContent = 'Menunggu'; showToast('Permintaan bergabung dikirim ke admin.', 'success');
+      });
+    });
+  }, 350);
+});
+
+async function loadMyGroups(){
+  const snap = await db.collection('groups').where('memberIds','array-contains',currentUser.uid).get();
+  const groups = []; snap.forEach(d=>groups.push({id:d.id, ...d.data()}));
+  const el = document.getElementById('myGroupsList');
+  el.innerHTML = groups.length ? groups.map(g=>`
+    <div class="groupItem flex items-center gap-2 p-2 rounded-xl hover:bg-navy-800 cursor-pointer" data-id="${g.id}">
+      <div class="w-9 h-9 rounded-lg bg-navy-700 flex items-center justify-center text-ash-400 overflow-hidden">
+        ${g.photoURL ? `<img src="${g.photoURL}" class="w-full h-full object-cover">` : '<i class="fa-solid fa-users"></i>'}
+      </div>
+      <div class="flex-1 min-w-0">
+        <p class="text-sm font-medium text-white truncate">${escapeHtml(g.name)}</p>
+        <p class="text-[11px] text-ash-500 truncate">${g.type==='public'?'Publik':'Private'} · ${(g.memberIds||[]).length} anggota</p>
+      </div>
+    </div>
+  `).join('') : `<p class="text-xs text-ash-500 text-center py-4">Belum bergabung dengan grup manapun.</p>`;
+  document.querySelectorAll('.groupItem').forEach(el2=>{
+    el2.addEventListener('click', ()=> openGroupChat(el2.getAttribute('data-id')));
+  });
+}
+
+let groupMsgUnsub = null;
+let groupDocUnsub = null;
+async function openGroupChat(groupId){
+  if(chatMsgUnsub){ chatMsgUnsub(); chatMsgUnsub=null; }
+  if(groupMsgUnsub){ groupMsgUnsub(); groupMsgUnsub=null; }
+  if(groupDocUnsub){ groupDocUnsub(); groupDocUnsub=null; }
+  activeChat = { type:'group', groupId };
+  document.getElementById('chatEmptyState').classList.add('hidden-force');
+  document.getElementById('chatActiveWrap').classList.remove('hidden-force');
+
+  groupDocUnsub = db.collection('groups').doc(groupId).onSnapshot(doc=>{
+    if(!doc.exists) return;
+    const g = doc.data();
+    const myRole = g.members ? g.members[currentUser.uid] : null;
+    const pendingCount = g.pendingRequests ? Object.keys(g.pendingRequests).length : 0;
+    document.getElementById('chatHeader').innerHTML = `
+      <div class="flex items-center gap-2 min-w-0">
+        <div class="w-9 h-9 rounded-lg bg-navy-700 flex items-center justify-center text-ash-400 overflow-hidden shrink-0">
+          ${g.photoURL ? `<img src="${g.photoURL}" class="w-full h-full object-cover">` : '<i class="fa-solid fa-users"></i>'}
+        </div>
+        <div class="min-w-0">
+          <p class="text-sm font-semibold text-white truncate">${escapeHtml(g.name)}</p>
+          <p class="text-[11px] text-ash-500 truncate">${(g.memberIds||[]).length} anggota · ${g.type==='public'?'Publik':'Private'}</p>
+        </div>
+      </div>
+      <button id="groupInfoBtn" class="relative w-9 h-9 rounded-lg bg-navy-800 hover:bg-navy-700 flex items-center justify-center text-ash-300 shrink-0">
+        <i class="fa-solid fa-gear"></i>
+        ${myRole==='admin' && pendingCount>0 ? `<span class="absolute -top-1 -right-1 bg-maroon-500 text-white text-[10px] rounded-full w-4 h-4 flex items-center justify-center">${pendingCount}</span>` : ''}
+      </button>
+    `;
+    document.getElementById('groupInfoBtn').addEventListener('click', ()=> openGroupInfoModal(groupId, g, myRole));
+  });
+
+  const msgBox = document.getElementById('chatMessages');
+  msgBox.innerHTML = '<p class="text-center text-xs text-ash-500">Memuat pesan...</p>';
+  groupMsgUnsub = db.collection('groups').doc(groupId).collection('messages').orderBy('createdAt','asc').limit(200)
+    .onSnapshot(snap=>{
+      const msgs = []; snap.forEach(d=>msgs.push({id:d.id, ...d.data()}));
+      renderChatMessages(msgs, { kind:'group', groupId });
+    });
+
+  document.getElementById('chatSendBtn').onclick = ()=> sendGroupMessage(groupId);
+  document.getElementById('chatInput').onkeydown = (e)=>{ if(e.key==='Enter') sendGroupMessage(groupId); };
+}
+async function sendGroupMessage(groupId){
+  const input = document.getElementById('chatInput');
+  const text = input.value.trim();
+  if(!text) return;
+  input.value='';
+  await db.collection('groups').doc(groupId).collection('messages').add({
+    text, senderId: currentUser.uid, senderUsername: currentUserData.username,
+    createdAt: FieldValue.serverTimestamp(), edited:false
+  });
+}
+
+async function openGroupInfoModal(groupId, g, myRole){
+  const memberIds = g.memberIds || [];
+  const chunks = []; for(let i=0;i<memberIds.length;i+=10) chunks.push(memberIds.slice(i,i+10));
+  let members = [];
+  for(const c of chunks){
+    const snap = await db.collection('users').where(firebase.firestore.FieldPath.documentId(),'in',c).get();
+    snap.forEach(d=>members.push({id:d.id, ...d.data()}));
+  }
+  const pending = g.pendingRequests || {};
+  const isAdmin = myRole === 'admin';
+
+  openModal(`
+    <h3 class="text-lg font-bold text-white mb-3">${escapeHtml(g.name)}</h3>
+    ${isAdmin ? `
+      <div class="space-y-2 mb-4 bg-navy-950/60 rounded-xl p-3">
+        <p class="text-xs font-semibold text-ash-400 uppercase">Kelola Grup</p>
+        <input id="giName" type="text" value="${escapeHtml(g.name)}" class="w-full bg-navy-950 border border-navy-700 rounded-lg px-3 py-2 text-sm text-white outline-none">
+        <input id="giPhoto" type="text" placeholder="URL foto grup" value="${escapeHtml(g.photoURL||'')}" class="w-full bg-navy-950 border border-navy-700 rounded-lg px-3 py-2 text-sm text-white outline-none">
+        <textarea id="giDesc" rows="2" class="w-full bg-navy-950 border border-navy-700 rounded-lg px-3 py-2 text-sm text-white outline-none resize-none">${escapeHtml(g.description||'')}</textarea>
+        <button id="giSaveBtn" class="w-full bg-navy-700 hover:bg-navy-600 text-white text-sm font-semibold py-2 rounded-lg">Simpan Perubahan</button>
+      </div>
+    ` : `<p class="text-sm text-ash-400 mb-4">${escapeHtml(g.description||'Tidak ada deskripsi.')}</p>`}
+
+    ${isAdmin && Object.keys(pending).length>0 ? `
+      <p class="text-xs font-semibold text-ash-400 uppercase mb-2">Permintaan Bergabung</p>
+      <div class="space-y-1.5 mb-4">
+        ${Object.entries(pending).map(([uid,uname])=>`
+          <div class="flex items-center gap-2 p-2 rounded-lg bg-navy-800">
+            <span class="flex-1 text-sm text-white">${escapeHtml(uname)}</span>
+            <button class="approveMember text-xs bg-green-700 hover:bg-green-600 text-white px-2.5 py-1 rounded-lg" data-uid="${uid}">Terima</button>
+            <button class="rejectMember text-xs bg-navy-700 hover:bg-navy-600 text-white px-2.5 py-1 rounded-lg" data-uid="${uid}">Tolak</button>
+          </div>
+        `).join('')}
+      </div>
+    ` : ''}
+
+    <p class="text-xs font-semibold text-ash-400 uppercase mb-2">Anggota (${members.length})</p>
+    <div class="space-y-1.5 mb-2">
+      ${members.map(m=>`
+        <div class="flex items-center gap-2 p-2 rounded-lg hover:bg-navy-800">
+          <img src="${m.photoURL||defaultAvatar(m.username)}" class="w-7 h-7 rounded-full object-cover bg-navy-700">
+          <span class="flex-1 text-sm text-white truncate">${escapeHtml(m.username)}</span>
+          <span class="text-[11px] text-ash-500">${g.members[m.id]==='admin'?'Admin':'Member'}</span>
+          ${isAdmin && m.id!==currentUser.uid ? `
+            <button class="toggleAdminBtn text-[11px] text-ash-400 hover:text-white px-1.5" data-uid="${m.id}" data-role="${g.members[m.id]}">${g.members[m.id]==='admin'?'Demosi':'Promosi'}</button>
+            <button class="removeMemberBtn text-[11px] text-maroon-400 hover:text-maroon-300 px-1.5" data-uid="${m.id}">Keluarkan</button>
+          ` : ''}
+        </div>
+      `).join('')}
+    </div>
+    <button id="leaveGroupBtn" class="w-full mt-2 bg-maroon-600/20 hover:bg-maroon-600/30 text-maroon-400 text-sm font-medium py-2 rounded-xl">Keluar dari Grup</button>
+  `);
+
+  if(isAdmin){
+    document.getElementById('giSaveBtn')?.addEventListener('click', async ()=>{
+      const name = document.getElementById('giName').value.trim();
+      await db.collection('groups').doc(groupId).update({
+        name, nameLower:name.toLowerCase(), photoURL: document.getElementById('giPhoto').value.trim(), description: document.getElementById('giDesc').value.trim()
+      });
+      showToast('Grup diperbarui', 'success'); closeModal();
+    });
+    document.querySelectorAll('.approveMember').forEach(b=>{
+      b.addEventListener('click', async ()=>{
+        const uid = b.getAttribute('data-uid');
+        await db.collection('groups').doc(groupId).update({
+          [`members.${uid}`]: 'member',
+          memberIds: FieldValue.arrayUnion(uid),
+          [`pendingRequests.${uid}`]: FieldValue.delete()
+        });
+        await sendNotification(uid, 'group_invite', `Kamu diterima bergabung ke grup ${g.name}.`);
+        closeModal(); openGroupInfoModal(groupId, (await db.collection('groups').doc(groupId).get()).data(), 'admin');
+      });
+    });
+    document.querySelectorAll('.rejectMember').forEach(b=>{
+      b.addEventListener('click', async ()=>{
+        await db.collection('groups').doc(groupId).update({ [`pendingRequests.${b.getAttribute('data-uid')}`]: FieldValue.delete() });
+        closeModal(); openGroupInfoModal(groupId, (await db.collection('groups').doc(groupId).get()).data(), 'admin');
+      });
+    });
+    document.querySelectorAll('.toggleAdminBtn').forEach(b=>{
+      b.addEventListener('click', async ()=>{
+        const newRole = b.getAttribute('data-role')==='admin' ? 'member' : 'admin';
+        await db.collection('groups').doc(groupId).update({ [`members.${b.getAttribute('data-uid')}`]: newRole });
+        closeModal(); openGroupInfoModal(groupId, (await db.collection('groups').doc(groupId).get()).data(), 'admin');
+      });
+    });
+    document.querySelectorAll('.removeMemberBtn').forEach(b=>{
+      b.addEventListener('click', async ()=>{
+        const uid = b.getAttribute('data-uid');
+        await db.collection('groups').doc(groupId).update({
+          memberIds: FieldValue.arrayRemove(uid), [`members.${uid}`]: FieldValue.delete()
+        });
+        closeModal(); openGroupInfoModal(groupId, (await db.collection('groups').doc(groupId).get()).data(), 'admin');
+      });
+    });
+  }
+  document.getElementById('leaveGroupBtn').addEventListener('click', ()=>{
+    confirmDialog('Keluar dari grup?', 'Kamu perlu bergabung/diundang lagi untuk masuk.', async ()=>{
+      await db.collection('groups').doc(groupId).update({
+        memberIds: FieldValue.arrayRemove(currentUser.uid), [`members.${currentUser.uid}`]: FieldValue.delete()
+      });
+      loadMyGroups();
+      document.getElementById('chatActiveWrap').classList.add('hidden-force');
+      document.getElementById('chatEmptyState').classList.remove('hidden-force');
+    });
+  });
+}
+
+/* -------------------------------------------------------------------------
+   17. RESOURCE HUB
+------------------------------------------------------------------------- */
+let activeSubjectFilter = 'all';
+let allResourcesCache = [];
+function populateSubjectFilters(){
+  const wrap = document.getElementById('subjectFilters');
+  const chips = ['all', ...SUBJECTS];
+  wrap.innerHTML = chips.map(s=>`
+    <button class="subjectChip text-xs px-3 py-1.5 rounded-full border ${s==='all'?'bg-maroon-600 border-maroon-600 text-white':'border-navy-700 text-ash-400 hover:border-maroon-600'}" data-subject="${s}">
+      ${s==='all' ? 'Semua Bidang' : s}
+    </button>
+  `).join('');
+  wrap.querySelectorAll('.subjectChip').forEach(chip=>{
+    chip.addEventListener('click', ()=>{
+      activeSubjectFilter = chip.getAttribute('data-subject');
+      wrap.querySelectorAll('.subjectChip').forEach(c=>{
+        c.classList.remove('bg-maroon-600','border-maroon-600','text-white');
+        c.classList.add('border-navy-700','text-ash-400');
+      });
+      chip.classList.add('bg-maroon-600','border-maroon-600','text-white');
+      chip.classList.remove('border-navy-700','text-ash-400');
+      renderResourceList();
+    });
+  });
+}
+function populateSubjectSelect(){
+  document.getElementById('profileSubjectInput').innerHTML = SUBJECTS.map(s=>`<option value="${s}">${s}</option>`).join('');
+}
+
+function listenToResources(){
+  const unsub = db.collection('resources').orderBy('createdAt','desc').limit(100).onSnapshot(async (snap)=>{
+    const resources = []; snap.forEach(d=>resources.push({id:d.id, ...d.data()}));
+    // fetch this user's progress status per resource
+    for(const r of resources){
+      try{
+        const pDoc = await db.collection('resources').doc(r.id).collection('progress').doc(currentUser.uid).get();
+        r.myProgress = pDoc.exists ? pDoc.data().status : 'Belum diselesaikan';
+      }catch(e){ r.myProgress = 'Belum diselesaikan'; }
+    }
+    allResourcesCache = resources;
+    renderResourceList();
+  });
+  trackUnsub(unsub);
+}
+document.getElementById('resourceSearchInput').addEventListener('input', renderResourceList);
+function renderResourceList(){
+  const term = document.getElementById('resourceSearchInput').value.trim().toLowerCase();
+  let list = allResourcesCache;
+  if(activeSubjectFilter !== 'all') list = list.filter(r=>r.subject === activeSubjectFilter);
+  if(term) list = list.filter(r=>r.title.toLowerCase().includes(term));
+  const el = document.getElementById('resourceList');
+  document.getElementById('resourceEmpty').classList.toggle('hidden-force', list.length>0);
+  const statuses = ["Belum diselesaikan","Masih progress","Tandai akan dipelajari","Sudah selesai"];
+  const statusColor = { "Belum diselesaikan":"text-ash-400","Masih progress":"text-yellow-400","Tandai akan dipelajari":"text-blue-400","Sudah selesai":"text-green-400" };
+  el.innerHTML = list.map(r=>{
+    const liked = (r.likes||[]).includes(currentUser.uid);
+    return `
+    <div class="bg-navy-900 border border-navy-700 rounded-2xl p-4 flex flex-col gap-2">
+      <div class="flex items-start justify-between gap-2">
+        <div>
+          <span class="text-[11px] font-semibold text-maroon-400 uppercase">${escapeHtml(r.subject)}</span>
+          <h4 class="text-white font-semibold">${escapeHtml(r.title)}</h4>
+          <p class="text-[11px] text-ash-500">oleh ${escapeHtml(r.creatorUsername||'-')}</p>
+        </div>
+        <a href="${escapeHtml(r.link)}" target="_blank" rel="noopener" class="shrink-0 w-8 h-8 rounded-lg bg-navy-800 hover:bg-navy-700 flex items-center justify-center text-ash-300"><i class="fa-solid fa-arrow-up-right-from-square text-xs"></i></a>
+      </div>
+      <select class="progressSelect ${statusColor[r.myProgress]} bg-navy-950 border border-navy-700 rounded-lg px-2 py-1.5 text-xs" data-id="${r.id}">
+        ${statuses.map(s=>`<option value="${s}" ${r.myProgress===s?'selected':''}>${s}</option>`).join('')}
+      </select>
+      <div class="flex items-center gap-3 pt-1 border-t border-navy-800 mt-1">
+        <button class="likeBtn flex items-center gap-1.5 text-xs ${liked?'text-maroon-500':'text-ash-400 hover:text-maroon-400'}" data-id="${r.id}" data-liked="${liked}">
+          <i class="fa-${liked?'solid':'regular'} fa-heart"></i> ${(r.likes||[]).length}
+        </button>
+        <button class="commentToggleBtn flex items-center gap-1.5 text-xs text-ash-400 hover:text-white" data-id="${r.id}">
+          <i class="fa-regular fa-comment"></i> Komentar
+        </button>
+      </div>
+      <div class="commentSection hidden-force" data-id="${r.id}"></div>
+    </div>`;
+  }).join('');
+
+  el.querySelectorAll('.progressSelect').forEach(sel=>{
+    sel.addEventListener('change', async ()=>{
+      await db.collection('resources').doc(sel.getAttribute('data-id')).collection('progress').doc(currentUser.uid).set({status: sel.value});
+      showToast('Status progres diperbarui', 'success');
+    });
+  });
+  el.querySelectorAll('.likeBtn').forEach(btn=>{
+    btn.addEventListener('click', async ()=>{
+      const id = btn.getAttribute('data-id');
+      const liked = btn.getAttribute('data-liked') === 'true';
+      const ref = db.collection('resources').doc(id);
+      await ref.update({ likes: liked ? FieldValue.arrayRemove(currentUser.uid) : FieldValue.arrayUnion(currentUser.uid) });
+      if(!liked){
+        const r = allResourcesCache.find(x=>x.id===id);
+        if(r && r.createdBy) await sendNotification(r.createdBy, 'like', `${currentUserData.username} menyukai materi "${r.title}".`);
+      }
+    });
+  });
+  el.querySelectorAll('.commentToggleBtn').forEach(btn=>{
+    btn.addEventListener('click', ()=> toggleComments(btn.getAttribute('data-id')));
+  });
+}
+
+let openCommentUnsubs = {};
+function toggleComments(resourceId){
+  const section = document.querySelector(`.commentSection[data-id="${resourceId}"]`);
+  const isHidden = section.classList.contains('hidden-force');
+  if(!isHidden){ section.classList.add('hidden-force'); section.innerHTML=''; if(openCommentUnsubs[resourceId]){openCommentUnsubs[resourceId](); delete openCommentUnsubs[resourceId];} return; }
+  section.classList.remove('hidden-force');
+  section.innerHTML = `
+    <div class="commentList space-y-2 mb-2 max-h-40 overflow-y-auto scrollbar-thin"></div>
+    <div class="flex gap-2">
+      <input type="text" class="commentInput flex-1 bg-navy-950 border border-navy-700 rounded-lg px-3 py-1.5 text-xs text-white outline-none focus:border-maroon-500" placeholder="Tulis komentar...">
+      <button class="commentSendBtn bg-maroon-600 hover:bg-maroon-500 text-white text-xs px-3 rounded-lg">Kirim</button>
+    </div>`;
+  const unsub = db.collection('resources').doc(resourceId).collection('comments').orderBy('createdAt','asc').limit(100)
+    .onSnapshot(snap=>{
+      const listEl = section.querySelector('.commentList');
+      const rows = []; snap.forEach(d=>rows.push(d.data()));
+      listEl.innerHTML = rows.map(c=>`<p class="text-xs text-ash-300"><span class="font-semibold text-white">${escapeHtml(c.username)}:</span> ${escapeHtml(c.text)}</p>`).join('') || '<p class="text-xs text-ash-600">Belum ada komentar.</p>';
+      listEl.scrollTop = listEl.scrollHeight;
+    });
+  openCommentUnsubs[resourceId] = unsub;
+  const send = async ()=>{
+    const input = section.querySelector('.commentInput');
+    const text = input.value.trim(); if(!text) return; input.value='';
+    await db.collection('resources').doc(resourceId).collection('comments').add({
+      uid: currentUser.uid, username: currentUserData.username, text, createdAt: FieldValue.serverTimestamp()
+    });
+    const r = allResourcesCache.find(x=>x.id===resourceId);
+    if(r && r.createdBy) await sendNotification(r.createdBy, 'comment', `${currentUserData.username} mengomentari materi "${r.title}".`);
+  };
+  section.querySelector('.commentSendBtn').addEventListener('click', send);
+  section.querySelector('.commentInput').addEventListener('keydown', e=>{ if(e.key==='Enter') send(); });
+}
+
+document.getElementById('addResourceBtn').addEventListener('click', ()=>{
+  openModal(`
+    <h3 class="text-lg font-bold text-white mb-3"><i class="fa-solid fa-book text-maroon-500 mr-2"></i>Tambahkan Resource</h3>
+    <div class="space-y-3">
+      <input id="newResTitle" type="text" placeholder="Judul materi" maxlength="100" class="w-full bg-navy-950 border border-navy-700 rounded-xl px-4 py-2.5 text-sm text-white outline-none focus:border-maroon-500">
+      <input id="newResLink" type="url" placeholder="Link materi (https://...)" class="w-full bg-navy-950 border border-navy-700 rounded-xl px-4 py-2.5 text-sm text-white outline-none focus:border-maroon-500">
+      <select id="newResSubject" class="w-full bg-navy-950 border border-navy-700 rounded-xl px-4 py-2.5 text-sm text-white outline-none focus:border-maroon-500">
+        ${SUBJECTS.map(s=>`<option value="${s}">${s}</option>`).join('')}
+      </select>
+      <button id="submitResBtn" class="w-full bg-maroon-600 hover:bg-maroon-500 text-white font-semibold py-2.5 rounded-xl text-sm">Tambahkan</button>
+    </div>
+  `);
+  document.getElementById('submitResBtn').addEventListener('click', async ()=>{
+    const title = document.getElementById('newResTitle').value.trim();
+    const link = document.getElementById('newResLink').value.trim();
+    const subject = document.getElementById('newResSubject').value;
+    if(!title || !link){ showToast('Judul dan link wajib diisi', 'error'); return; }
+    await db.collection('resources').add({
+      title, link, subject, createdBy: currentUser.uid, creatorUsername: currentUserData.username,
+      likes: [], createdAt: FieldValue.serverTimestamp()
+    });
+    closeModal(); showToast('Materi berhasil ditambahkan!', 'success');
+  });
+});
+
+/* -------------------------------------------------------------------------
+   18. PROFILE
+------------------------------------------------------------------------- */
+function fillProfileForm(){
+  if(!currentUserData) return;
+  document.getElementById('profileCoverImg').src = currentUserData.coverURL || 'https://images.unsplash.com/photo-1519681393784-d120267933ba?w=1200&q=60';
+  document.getElementById('profileAvatarImg').src = currentUserData.photoURL || defaultAvatar(currentUserData.username);
+  document.getElementById('profileUsernameDisplay').textContent = currentUserData.username;
+  document.getElementById('profileSubjectDisplay').textContent = currentUserData.subject || '-';
+  document.getElementById('profileUsernameInput').value = currentUserData.username;
+  document.getElementById('profileSubjectInput').value = currentUserData.subject || SUBJECTS[0];
+  document.getElementById('profileBioInput').value = currentUserData.bio || '';
+
+  const history = (currentUserData.usernameChangeHistory || []).filter(ts=>{
+    const days = (Date.now() - (ts.toMillis ? ts.toMillis() : ts)) / 86400000;
+    return days <= 30;
+  });
+  const remaining = Math.max(0, 2 - history.length);
+  document.getElementById('usernameChangeNote').textContent = `Sisa kesempatan ganti username bulan ini: ${remaining}/2`;
+}
+document.getElementById('editCoverBtn').addEventListener('click', ()=> promptImageUrl('cover'));
+document.getElementById('editAvatarBtn').addEventListener('click', ()=> promptImageUrl('avatar'));
+function promptImageUrl(kind){
+  openModal(`
+    <h3 class="text-base font-bold text-white mb-3">${kind==='cover'?'Ubah Foto Cover':'Ubah Foto Profil'}</h3>
+    <input id="imgUrlInput" type="url" placeholder="Tempel link gambar (https://...)" class="w-full bg-navy-950 border border-navy-700 rounded-xl px-4 py-2.5 text-sm text-white outline-none focus:border-maroon-500 mb-3">
+    <button id="imgUrlSaveBtn" class="w-full bg-maroon-600 hover:bg-maroon-500 text-white font-semibold py-2.5 rounded-xl text-sm">Simpan</button>
+  `);
+  document.getElementById('imgUrlSaveBtn').addEventListener('click', async ()=>{
+    const url = document.getElementById('imgUrlInput').value.trim();
+    if(!url) return;
+    await db.collection('users').doc(currentUser.uid).update(kind==='cover' ? {coverURL:url} : {photoURL:url});
+    closeModal(); showToast('Foto berhasil diperbarui!', 'success'); fillProfileForm();
+  });
+}
+
+document.getElementById('saveProfileBtn').addEventListener('click', async ()=>{
+  const newUsername = document.getElementById('profileUsernameInput').value.trim();
+  const subject = document.getElementById('profileSubjectInput').value;
+  const bio = document.getElementById('profileBioInput').value.trim();
+  const updates = { subject, bio };
+
+  if(newUsername !== currentUserData.username){
+    if(!/^[a-zA-Z0-9_.]{3,20}$/.test(newUsername)){
+      showToast('Username tidak valid (3-20 karakter, huruf/angka/underscore/titik).', 'error'); return;
+    }
+    const history = (currentUserData.usernameChangeHistory || []).filter(ts=>{
+      const days = (Date.now() - (ts.toMillis ? ts.toMillis() : ts)) / 86400000;
+      return days <= 30;
+    });
+    if(history.length >= 2){
+      showToast('Kamu sudah mengganti username 2x dalam 30 hari terakhir.', 'error'); return;
+    }
+    const dup = await db.collection('users').where('usernameLower','==',newUsername.toLowerCase()).limit(1).get();
+    if(!dup.empty){ showToast('Username sudah digunakan.', 'error'); return; }
+    updates.username = newUsername;
+    updates.usernameLower = newUsername.toLowerCase();
+    updates.usernameChangeHistory = FieldValue.arrayUnion(Timestamp.now());
+  }
+  await db.collection('users').doc(currentUser.uid).update(updates);
+  showToast('Profil berhasil disimpan!', 'success');
+});
+
+/* -------------------------------------------------------------------------
+   19. SETTINGS
+------------------------------------------------------------------------- */
+document.getElementById('changePwBtn').addEventListener('click', async ()=>{
+  const currentPw = document.getElementById('currentPwInput').value;
+  const newPw = document.getElementById('newPwInput').value;
+  if(!currentPw || newPw.length < 6){ showToast('Isi password lama & baru (min 6 karakter).', 'error'); return; }
+  try{
+    const cred = firebase.auth.EmailAuthProvider.credential(currentUser.email, currentPw);
+    await currentUser.reauthenticateWithCredential(cred);
+    await currentUser.updatePassword(newPw);
+    showToast('Password berhasil diubah!', 'success');
+    document.getElementById('currentPwInput').value=''; document.getElementById('newPwInput').value='';
+  }catch(err){ showToast(mapAuthError(err), 'error'); }
+});
+
+document.getElementById('resetLocalBtn').addEventListener('click', ()=>{
+  confirmDialog('Reset data lokal?', 'Tema dan preferensi bahasa akan dikembalikan ke default.', ()=>{
+    localStorage.removeItem('lockin_theme'); localStorage.removeItem('lockin_lang');
+    applyTheme('dark'); currentLang='id'; applyI18n();
+    showToast('Data lokal direset.', 'success');
+  });
+});
+
+document.getElementById('deleteAccountBtn').addEventListener('click', ()=>{
+  openModal(`
+    <h3 class="text-lg font-bold text-maroon-400 mb-2"><i class="fa-solid fa-triangle-exclamation mr-2"></i>Hapus Akun Permanen</h3>
+    <p class="text-sm text-ash-400 mb-3">Tindakan ini tidak dapat dibatalkan. Masukkan password untuk konfirmasi.</p>
+    <input id="delPwInput" type="password" placeholder="Password" class="w-full bg-navy-950 border border-navy-700 rounded-xl px-4 py-2.5 text-sm text-white outline-none focus:border-maroon-500 mb-3">
+    <div class="flex gap-2 justify-end">
+      <button id="delCancelBtn" class="px-4 py-2 rounded-xl bg-navy-800 hover:bg-navy-700 text-sm text-white">Batal</button>
+      <button id="delConfirmBtn" class="px-4 py-2 rounded-xl bg-maroon-600 hover:bg-maroon-500 text-sm text-white">Hapus Akun</button>
+    </div>
+  `);
+  document.getElementById('delCancelBtn').addEventListener('click', closeModal);
+  document.getElementById('delConfirmBtn').addEventListener('click', async ()=>{
+    const pw = document.getElementById('delPwInput').value;
+    try{
+      const cred = firebase.auth.EmailAuthProvider.credential(currentUser.email, pw);
+      await currentUser.reauthenticateWithCredential(cred);
+      await db.collection('users').doc(currentUser.uid).delete();
+      await currentUser.delete();
+      closeModal(); showToast('Akun berhasil dihapus.', 'success');
+    }catch(err){ showToast(mapAuthError(err), 'error'); }
+  });
+});
+</script>
 </body>
 </html>
