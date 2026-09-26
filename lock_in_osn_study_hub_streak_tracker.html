@@ -1,0 +1,1003 @@
+<!DOCTYPE html>
+<html lang="id" class="dark">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Lock In OSN - Platform Belajar & Streak Siswa OSN</title>
+    
+    <!-- Tailwind CSS -->
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script>
+        tailwind.config = {
+            darkMode: 'class',
+            theme: {
+                extend: {
+                    colors: {
+                        osn: {
+                            bg: '#0B0F19',
+                            card: '#151C2C',
+                            border: '#2A354D',
+                            red: '#DC2626',
+                            redDark: '#991B1B',
+                            blue: '#2563EB',
+                            blueDark: '#1E40AF',
+                            accent: '#F59E0B'
+                        }
+                    },
+                    fontFamily: {
+                        sans: ['Inter', 'sans-serif']
+                    }
+                }
+            }
+        }
+    </script>
+    
+    <!-- Google Fonts & Font Awesome Icons -->
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+
+    <!-- Firebase Compat SDKs (v10) for seamlessly working script integration -->
+    <script src="https://www.gstatic.com/firebasejs/10.12.0/firebase-app-compat.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/10.12.0/firebase-auth-compat.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/10.12.0/firebase-firestore-compat.js"></script>
+
+    <style>
+        body {
+            font-family: 'Inter', sans-serif;
+            background-color: #0B0F19;
+            color: #F3F4F6;
+        }
+        
+        /* Custom Scrollbar */
+        ::-webkit-scrollbar {
+            width: 8px;
+            height: 8px;
+        }
+        ::-webkit-scrollbar-track {
+            background: #0B0F19;
+        }
+        ::-webkit-scrollbar-thumb {
+            background: #2A354D;
+            border-radius: 4px;
+        }
+        ::-webkit-scrollbar-thumb:hover {
+            background: #3B82F6;
+        }
+
+        .glass-panel {
+            background: rgba(21, 28, 44, 0.75);
+            backdrop-filter: blur(12px);
+            border: 1px solid rgba(42, 53, 77, 0.6);
+        }
+
+        .gradient-red-btn {
+            background: linear-gradient(135deg, #DC2626 0%, #991B1B 100%);
+            transition: all 0.2s ease-in-out;
+        }
+        .gradient-red-btn:hover {
+            background: linear-gradient(135deg, #EF4444 0%, #B91C1C 100%);
+            box-shadow: 0 4px 15px rgba(220, 38, 38, 0.4);
+        }
+
+        .active-tab {
+            border-bottom: 2px solid #DC2626;
+            color: #FFFFFF;
+        }
+    </style>
+</head>
+<body class="min-h-screen flex flex-col justify-between selection:bg-red-600 selection:text-white">
+
+    <!-- Toast Notification Container -->
+    <div id="toast-container" class="fixed top-5 right-5 z-50 flex flex-col gap-2 max-w-sm w-full pointer-events-none"></div>
+
+    <!-- AUTH SCREEN (Shown when user logged out) -->
+    <div id="auth-screen" class="min-h-screen flex items-center justify-center p-4 relative overflow-hidden">
+        <!-- Background Elements -->
+        <div class="absolute top-[-10%] left-[-10%] w-96 h-96 bg-red-900/20 rounded-full blur-3xl pointer-events-none"></div>
+        <div class="absolute bottom-[-10%] right-[-10%] w-96 h-96 bg-blue-900/20 rounded-full blur-3xl pointer-events-none"></div>
+
+        <div class="w-full max-w-md glass-panel p-8 rounded-2xl shadow-2xl relative z-10 border border-osn-border">
+            <!-- Brand Header -->
+            <div class="text-center mb-8">
+                <div class="inline-flex items-center justify-center w-16 h-16 rounded-2xl bg-gradient-to-br from-red-600 to-blue-700 text-white text-3xl font-extrabold mb-3 shadow-lg shadow-red-900/30">
+                    <i class="fa-solid fa-fire"></i>
+                </div>
+                <h1 class="text-3xl font-black tracking-tight text-white">LOCK IN <span class="text-red-500">OSN</span></h1>
+                <p class="text-gray-400 text-sm mt-1">Komunitas Belajar, Ambisi & Streak Calon Medalis</p>
+            </div>
+
+            <!-- Tab Switcher -->
+            <div class="flex border-b border-osn-border mb-6">
+                <button id="tab-login-btn" onclick="switchAuthTab('login')" class="flex-1 py-3 text-center font-semibold text-sm transition-colors text-red-500 border-b-2 border-red-500">
+                    <i class="fa-solid fa-right-to-bracket mr-2"></i>Masuk
+                </button>
+                <button id="tab-register-btn" onclick="switchAuthTab('register')" class="flex-1 py-3 text-center font-semibold text-sm transition-colors text-gray-400 hover:text-white">
+                    <i class="fa-solid fa-user-plus mr-2"></i>Daftar Akun
+                </button>
+            </div>
+
+            <!-- LOGIN FORM -->
+            <form id="login-form" onsubmit="handleLogin(event)" class="space-y-4">
+                <div>
+                    <label class="block text-xs font-semibold uppercase text-gray-400 mb-1">Email</label>
+                    <div class="relative">
+                        <span class="absolute inset-y-0 left-0 flex items-center pl-3 text-gray-500"><i class="fa-solid fa-envelope"></i></span>
+                        <input type="email" id="login-email" required class="w-full pl-10 pr-4 py-3 bg-osn-bg border border-osn-border rounded-xl focus:outline-none focus:border-red-500 text-sm text-white placeholder-gray-500" placeholder="nama@email.com">
+                    </div>
+                </div>
+                <div>
+                    <label class="block text-xs font-semibold uppercase text-gray-400 mb-1">Kata Sandi</label>
+                    <div class="relative">
+                        <span class="absolute inset-y-0 left-0 flex items-center pl-3 text-gray-500"><i class="fa-solid fa-lock"></i></span>
+                        <input type="password" id="login-password" required class="w-full pl-10 pr-4 py-3 bg-osn-bg border border-osn-border rounded-xl focus:outline-none focus:border-red-500 text-sm text-white placeholder-gray-500" placeholder="••••••••">
+                    </div>
+                </div>
+                <button type="submit" class="w-full py-3.5 px-4 gradient-red-btn text-white font-bold rounded-xl shadow-lg flex items-center justify-center gap-2 mt-2">
+                    <span>Masuk ke Dashboard</span>
+                    <i class="fa-solid fa-arrow-right"></i>
+                </button>
+            </form>
+
+            <!-- REGISTER FORM -->
+            <form id="register-form" onsubmit="handleRegister(event)" class="space-y-4 hidden">
+                <div>
+                    <label class="block text-xs font-semibold uppercase text-gray-400 mb-1">Nama Lengkap / Panggilan</label>
+                    <div class="relative">
+                        <span class="absolute inset-y-0 left-0 flex items-center pl-3 text-gray-500"><i class="fa-solid fa-user"></i></span>
+                        <input type="text" id="reg-name" required class="w-full pl-10 pr-4 py-3 bg-osn-bg border border-osn-border rounded-xl focus:outline-none focus:border-red-500 text-sm text-white placeholder-gray-500" placeholder="Contoh: Budi Medalis">
+                    </div>
+                </div>
+                <div>
+                    <label class="block text-xs font-semibold uppercase text-gray-400 mb-1">Email</label>
+                    <div class="relative">
+                        <span class="absolute inset-y-0 left-0 flex items-center pl-3 text-gray-500"><i class="fa-solid fa-envelope"></i></span>
+                        <input type="email" id="reg-email" required class="w-full pl-10 pr-4 py-3 bg-osn-bg border border-osn-border rounded-xl focus:outline-none focus:border-red-500 text-sm text-white placeholder-gray-500" placeholder="nama@email.com">
+                    </div>
+                </div>
+                <div>
+                    <label class="block text-xs font-semibold uppercase text-gray-400 mb-1">Target Bidang OSN</label>
+                    <div class="relative">
+                        <span class="absolute inset-y-0 left-0 flex items-center pl-3 text-gray-500"><i class="fa-solid fa-microscope"></i></span>
+                        <select id="reg-subject" required class="w-full pl-10 pr-4 py-3 bg-osn-bg border border-osn-border rounded-xl focus:outline-none focus:border-red-500 text-sm text-white">
+                            <option value="Matematika">Matematika</option>
+                            <option value="Fisika">Fisika</option>
+                            <option value="Kimia">Kimia</option>
+                            <option value="Biologi">Biologi</option>
+                            <option value="Informatika / Komputer">Informatika / Komputer</option>
+                            <option value="Astronomi">Astronomi</option>
+                            <option value="Ekonomi">Ekonomi</option>
+                            <option value="Kebumian">Kebumian</option>
+                            <option value="Geografi">Geografi</option>
+                            <option value="Kecerdasan Buatan (AI)">Kecerdasan Buatan (AI)</option>
+                        </select>
+                    </div>
+                </div>
+                <div>
+                    <label class="block text-xs font-semibold uppercase text-gray-400 mb-1">Kata Sandi</label>
+                    <div class="relative">
+                        <span class="absolute inset-y-0 left-0 flex items-center pl-3 text-gray-500"><i class="fa-solid fa-lock"></i></span>
+                        <input type="password" id="reg-password" minlength="6" required class="w-full pl-10 pr-4 py-3 bg-osn-bg border border-osn-border rounded-xl focus:outline-none focus:border-red-500 text-sm text-white placeholder-gray-500" placeholder="Minimal 6 karakter">
+                    </div>
+                </div>
+                <button type="submit" class="w-full py-3.5 px-4 gradient-red-btn text-white font-bold rounded-xl shadow-lg flex items-center justify-center gap-2 mt-2">
+                    <span>Buat Akun Sekarang</span>
+                    <i class="fa-solid fa-user-check"></i>
+                </button>
+            </form>
+
+            <div class="mt-6 text-center text-xs text-gray-500">
+                <p>Fitur Demo Offline aktif secara otomatis jika Firebase belum dikonfigurasi.</p>
+            </div>
+        </div>
+    </div>
+
+    <!-- MAIN DASHBOARD SCREEN (Shown when user logged in) -->
+    <div id="main-dashboard" class="min-h-screen flex flex-col md:flex-row hidden">
+        
+        <!-- SIDEBAR NAVIGATION -->
+        <aside class="w-full md:w-64 bg-osn-card border-r border-osn-border flex flex-col justify-between p-4 flex-shrink-0">
+            <div>
+                <!-- App Title -->
+                <div class="flex items-center gap-3 px-3 py-3 mb-6 border-b border-osn-border/50">
+                    <div class="w-10 h-10 rounded-xl bg-gradient-to-br from-red-600 to-blue-600 flex items-center justify-center text-white text-xl font-black shadow-md">
+                        <i class="fa-solid fa-fire"></i>
+                    </div>
+                    <div>
+                        <h2 class="font-extrabold text-white text-lg leading-none">LOCK IN <span class="text-red-500">OSN</span></h2>
+                        <span class="text-[10px] text-gray-400 uppercase tracking-widest font-semibold">National Edition</span>
+                    </div>
+                </div>
+
+                <!-- User Profile Mini Box -->
+                <div class="bg-osn-bg/70 p-3 rounded-xl border border-osn-border mb-6 flex items-center gap-3">
+                    <img id="user-avatar" src="https://api.dicebear.com/7.x/bottts/svg?seed=OSNUser" class="w-11 h-11 rounded-lg bg-osn-card border border-osn-border" alt="Avatar">
+                    <div class="overflow-hidden">
+                        <h4 id="user-name" class="font-bold text-sm text-white truncate">Pejuang OSN</h4>
+                        <div class="flex items-center gap-2 mt-0.5">
+                            <span id="user-subject-badge" class="text-[10px] bg-blue-900/60 text-blue-300 px-2 py-0.5 rounded-full font-medium truncate">Matematika</span>
+                            <span class="text-[11px] text-amber-400 font-bold flex items-center gap-1">
+                                <i class="fa-solid fa-fire"></i><span id="sidebar-streak-count">0</span>
+                            </span>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Nav Menu Buttons -->
+                <nav class="space-y-1.5">
+                    <button onclick="navigateTo('overview')" id="nav-overview" class="w-full flex items-center gap-3 px-4 py-3 rounded-xl text-sm font-semibold transition-colors bg-red-600 text-white shadow-md">
+                        <i class="fa-solid fa-chart-line w-5 text-center"></i>
+                        <span>Overview</span>
+                    </button>
+                    <button onclick="navigateTo('resources')" id="nav-resources" class="w-full flex items-center gap-3 px-4 py-3 rounded-xl text-sm font-semibold text-gray-400 hover:text-white hover:bg-osn-bg transition-colors">
+                        <i class="fa-solid fa-book-bookmark w-5 text-center"></i>
+                        <span>Resource Belajar</span>
+                    </button>
+                    <button onclick="navigateTo('streak')" id="nav-streak" class="w-full flex items-center gap-3 px-4 py-3 rounded-xl text-sm font-semibold text-gray-400 hover:text-white hover:bg-osn-bg transition-colors">
+                        <i class="fa-solid fa-fire-flame-curved w-5 text-center text-amber-500"></i>
+                        <span>Streak Hub</span>
+                    </button>
+                    <button onclick="navigateTo('chat')" id="nav-chat" class="w-full flex items-center gap-3 px-4 py-3 rounded-xl text-sm font-semibold text-gray-400 hover:text-white hover:bg-osn-bg transition-colors">
+                        <i class="fa-solid fa-comments w-5 text-center"></i>
+                        <span>Komunitas & Chat</span>
+                    </button>
+                    <button onclick="navigateTo('profile')" id="nav-profile" class="w-full flex items-center gap-3 px-4 py-3 rounded-xl text-sm font-semibold text-gray-400 hover:text-white hover:bg-osn-bg transition-colors">
+                        <i class="fa-solid fa-user-gear w-5 text-center"></i>
+                        <span>Pengaturan Profil</span>
+                    </button>
+                </nav>
+            </div>
+
+            <!-- Logout Section -->
+            <div class="pt-4 border-t border-osn-border mt-6">
+                <button onclick="handleLogout()" class="w-full flex items-center gap-3 px-4 py-3 rounded-xl text-sm font-semibold text-gray-400 hover:text-red-400 hover:bg-red-950/30 transition-colors">
+                    <i class="fa-solid fa-arrow-right-from-bracket w-5 text-center"></i>
+                    <span>Keluar Akun</span>
+                </button>
+            </div>
+        </aside>
+
+        <!-- MAIN CONTENT AREA -->
+        <main class="flex-1 p-4 md:p-8 overflow-y-auto max-w-7xl mx-auto w-full">
+            
+            <!-- SECTION 1: OVERVIEW -->
+            <section id="section-overview" class="space-y-6">
+                <!-- Header Banner -->
+                <div class="relative overflow-hidden rounded-2xl bg-gradient-to-r from-red-900/60 via-osn-card to-blue-900/60 p-6 md:p-8 border border-osn-border">
+                    <div class="relative z-10 max-w-2xl">
+                        <span class="px-3 py-1 bg-red-600/30 border border-red-500/40 text-red-300 text-xs font-bold rounded-full uppercase tracking-wider">
+                            Daily Motivation
+                        </span>
+                        <h2 class="text-2xl md:text-3xl font-extrabold text-white mt-3 leading-tight">
+                            "Konsistensi dikalahkan oleh keraguan, tapi dibangun oleh disiplin setiap hari."
+                        </h2>
+                        <p class="text-gray-300 text-sm mt-2">
+                            Targetkan medali Emas OSN. Selesaikan soal latihan hari ini dan amankan streak milikmu!
+                        </p>
+                        <div class="mt-5 flex flex-wrap items-center gap-3">
+                            <button onclick="triggerCheckIn()" class="gradient-red-btn px-5 py-2.5 rounded-xl font-bold text-sm text-white flex items-center gap-2 shadow-lg">
+                                <i class="fa-solid fa-fire text-amber-300"></i> Lock In & Check-in Hari Ini
+                            </button>
+                            <button onclick="navigateTo('resources')" class="px-5 py-2.5 bg-osn-bg/80 border border-osn-border rounded-xl font-bold text-sm text-gray-200 hover:text-white hover:bg-osn-bg transition-colors">
+                                <i class="fa-solid fa-magnifying-glass mr-1"></i> Cari Soal & Modul
+                            </button>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Stats Grid -->
+                <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
+                    <div class="bg-osn-card p-5 rounded-2xl border border-osn-border flex items-center gap-4">
+                        <div class="w-12 h-12 rounded-xl bg-amber-500/10 border border-amber-500/30 text-amber-500 flex items-center justify-center text-2xl font-bold">
+                            <i class="fa-solid fa-fire"></i>
+                        </div>
+                        <div>
+                            <p class="text-xs text-gray-400 font-semibold uppercase">Streak Aktif</p>
+                            <h3 id="dash-streak-val" class="text-2xl font-black text-white">0 Hari</h3>
+                        </div>
+                    </div>
+
+                    <div class="bg-osn-card p-5 rounded-2xl border border-osn-border flex items-center gap-4">
+                        <div class="w-12 h-12 rounded-xl bg-blue-500/10 border border-blue-500/30 text-blue-500 flex items-center justify-center text-2xl font-bold">
+                            <i class="fa-solid fa-book-open"></i>
+                        </div>
+                        <div>
+                            <p class="text-xs text-gray-400 font-semibold uppercase">Target Bidang</p>
+                            <h3 id="dash-subject-val" class="text-lg font-bold text-white truncate max-w-[130px]">Matematika</h3>
+                        </div>
+                    </div>
+
+                    <div class="bg-osn-card p-5 rounded-2xl border border-osn-border flex items-center gap-4">
+                        <div class="w-12 h-12 rounded-xl bg-green-500/10 border border-green-500/30 text-green-500 flex items-center justify-center text-2xl font-bold">
+                            <i class="fa-solid fa-check-double"></i>
+                        </div>
+                        <div>
+                            <p class="text-xs text-gray-400 font-semibold uppercase">Total Check-In</p>
+                            <h3 id="dash-total-checkins" class="text-2xl font-black text-white">0 Kali</h3>
+                        </div>
+                    </div>
+
+                    <div class="bg-osn-card p-5 rounded-2xl border border-osn-border flex items-center gap-4">
+                        <div class="w-12 h-12 rounded-xl bg-purple-500/10 border border-purple-500/30 text-purple-500 flex items-center justify-center text-2xl font-bold">
+                            <i class="fa-solid fa-users"></i>
+                        </div>
+                        <div>
+                            <p class="text-xs text-gray-400 font-semibold uppercase">Komunitas Belajar</p>
+                            <h3 class="text-2xl font-black text-white">10 Bidang</h3>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Recent Activity & Subject Fast Links -->
+                <div class="grid grid-cols-1 lg:grid-cols-3 gap-6">
+                    <div class="lg:col-span-2 bg-osn-card p-6 rounded-2xl border border-osn-border">
+                        <h3 class="font-bold text-lg text-white mb-4 flex items-center gap-2">
+                            <i class="fa-solid fa-clock-rotate-left text-red-500"></i> Riwayat Check-in Belajar
+                        </h3>
+                        <div id="checkin-history-list" class="space-y-3">
+                            <p class="text-gray-400 text-sm italic py-4 text-center">Belum ada aktivitas check-in. Klik "Lock In & Check-in Hari Ini" untuk memulai!</p>
+                        </div>
+                    </div>
+
+                    <div class="bg-osn-card p-6 rounded-2xl border border-osn-border flex flex-col justify-between">
+                        <div>
+                            <h3 class="font-bold text-lg text-white mb-3 flex items-center gap-2">
+                                <i class="fa-solid fa-bullseye text-blue-500"></i> Bidang OSN Populer
+                            </h3>
+                            <div class="space-y-2">
+                                <a href="#" onclick="filterResourceBySubject('Matematika'); navigateTo('resources');" class="flex items-center justify-between p-2.5 rounded-xl bg-osn-bg hover:border-osn-border border border-transparent text-sm font-medium text-gray-300 hover:text-white">
+                                    <span><i class="fa-solid fa-calculator text-red-400 mr-2"></i> Matematika</span>
+                                    <i class="fa-solid fa-chevron-right text-xs text-gray-500"></i>
+                                </a>
+                                <a href="#" onclick="filterResourceBySubject('Informatika / Komputer'); navigateTo('resources');" class="flex items-center justify-between p-2.5 rounded-xl bg-osn-bg hover:border-osn-border border border-transparent text-sm font-medium text-gray-300 hover:text-white">
+                                    <span><i class="fa-solid fa-code text-blue-400 mr-2"></i> Informatika</span>
+                                    <i class="fa-solid fa-chevron-right text-xs text-gray-500"></i>
+                                </a>
+                                <a href="#" onclick="filterResourceBySubject('Kecerdasan Buatan (AI)'); navigateTo('resources');" class="flex items-center justify-between p-2.5 rounded-xl bg-osn-bg hover:border-osn-border border border-transparent text-sm font-medium text-gray-300 hover:text-white">
+                                    <span><i class="fa-solid fa-robot text-purple-400 mr-2"></i> AI & Data Science</span>
+                                    <i class="fa-solid fa-chevron-right text-xs text-gray-500"></i>
+                                </a>
+                                <a href="#" onclick="filterResourceBySubject('Fisika'); navigateTo('resources');" class="flex items-center justify-between p-2.5 rounded-xl bg-osn-bg hover:border-osn-border border border-transparent text-sm font-medium text-gray-300 hover:text-white">
+                                    <span><i class="fa-solid fa-atom text-amber-400 mr-2"></i> Fisika</span>
+                                    <i class="fa-solid fa-chevron-right text-xs text-gray-500"></i>
+                                </a>
+                            </div>
+                        </div>
+                        <div class="mt-6 pt-4 border-t border-osn-border text-center">
+                            <button onclick="navigateTo('resources')" class="text-xs text-red-400 font-bold hover:underline">Lihat Semua 10 Bidang &rarr;</button>
+                        </div>
+                    </div>
+                </div>
+            </section>
+
+            <!-- SECTION 2: RESOURCE BELAJAR -->
+            <section id="section-resources" class="space-y-6 hidden">
+                <div class="flex flex-col md:flex-row md:items-center justify-between gap-4">
+                    <div>
+                        <h2 class="text-2xl font-black text-white">Resource Belajar OSN</h2>
+                        <p class="text-gray-400 text-sm">Modul, Pembahasan Soal, dan Catatan dari sesama kontestan OSN.</p>
+                    </div>
+                    <button onclick="openAddResourceModal()" class="gradient-red-btn px-4 py-2.5 rounded-xl text-sm font-bold text-white flex items-center gap-2 self-start md:self-auto shadow-md">
+                        <i class="fa-solid fa-plus"></i> Bagikan Modul / Soal
+                    </button>
+                </div>
+
+                <!-- Subject Category Pills -->
+                <div class="flex items-center gap-2 overflow-x-auto pb-2 scrollbar-none" id="subject-pills-container">
+                    <button onclick="filterResourceBySubject('Semua')" class="res-pill px-4 py-2 bg-red-600 text-white rounded-xl text-xs font-bold whitespace-nowrap">Semua Bidang</button>
+                    <button onclick="filterResourceBySubject('Matematika')" class="res-pill px-4 py-2 bg-osn-card border border-osn-border text-gray-300 hover:text-white rounded-xl text-xs font-semibold whitespace-nowrap">Matematika</button>
+                    <button onclick="filterResourceBySubject('Fisika')" class="res-pill px-4 py-2 bg-osn-card border border-osn-border text-gray-300 hover:text-white rounded-xl text-xs font-semibold whitespace-nowrap">Fisika</button>
+                    <button onclick="filterResourceBySubject('Kimia')" class="res-pill px-4 py-2 bg-osn-card border border-osn-border text-gray-300 hover:text-white rounded-xl text-xs font-semibold whitespace-nowrap">Kimia</button>
+                    <button onclick="filterResourceBySubject('Biologi')" class="res-pill px-4 py-2 bg-osn-card border border-osn-border text-gray-300 hover:text-white rounded-xl text-xs font-semibold whitespace-nowrap">Biologi</button>
+                    <button onclick="filterResourceBySubject('Informatika / Komputer')" class="res-pill px-4 py-2 bg-osn-card border border-osn-border text-gray-300 hover:text-white rounded-xl text-xs font-semibold whitespace-nowrap">Informatika</button>
+                    <button onclick="filterResourceBySubject('Astronomi')" class="res-pill px-4 py-2 bg-osn-card border border-osn-border text-gray-300 hover:text-white rounded-xl text-xs font-semibold whitespace-nowrap">Astronomi</button>
+                    <button onclick="filterResourceBySubject('Ekonomi')" class="res-pill px-4 py-2 bg-osn-card border border-osn-border text-gray-300 hover:text-white rounded-xl text-xs font-semibold whitespace-nowrap">Ekonomi</button>
+                    <button onclick="filterResourceBySubject('Kebumian')" class="res-pill px-4 py-2 bg-osn-card border border-osn-border text-gray-300 hover:text-white rounded-xl text-xs font-semibold whitespace-nowrap">Kebumian</button>
+                    <button onclick="filterResourceBySubject('Geografi')" class="res-pill px-4 py-2 bg-osn-card border border-osn-border text-gray-300 hover:text-white rounded-xl text-xs font-semibold whitespace-nowrap">Geografi</button>
+                    <button onclick="filterResourceBySubject('Kecerdasan Buatan (AI)')" class="res-pill px-4 py-2 bg-osn-card border border-osn-border text-gray-300 hover:text-white rounded-xl text-xs font-semibold whitespace-nowrap">AI & Data Science</button>
+                </div>
+
+                <!-- Resource Cards Grid -->
+                <div id="resources-grid" class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
+                    <!-- Populated dynamically -->
+                </div>
+            </section>
+
+            <!-- SECTION 3: STREAK HUB -->
+            <section id="section-streak" class="space-y-6 hidden">
+                <div class="bg-osn-card p-6 md:p-8 rounded-2xl border border-osn-border flex flex-col md:flex-row items-center justify-between gap-6">
+                    <div>
+                        <span class="text-amber-500 font-bold text-xs uppercase tracking-wider"><i class="fa-solid fa-fire mr-1"></i> Social Streak System</span>
+                        <h2 class="text-2xl md:text-3xl font-black text-white mt-1">Jaga Api Belajar Tetap Menyala</h2>
+                        <p class="text-gray-400 text-sm mt-1 max-w-xl">
+                            Lakukan check-in setiap hari saat kamu menyelesaikan latihan soal OSN. Jangan biarkan streak-mu terputus!
+                        </p>
+                    </div>
+
+                    <div class="text-center bg-osn-bg p-6 rounded-2xl border border-osn-border min-w-[200px]">
+                        <p class="text-xs text-gray-400 uppercase font-semibold">Streak Kamu Saat Ini</p>
+                        <div class="text-4xl font-black text-amber-500 my-2 flex items-center justify-center gap-2">
+                            <i class="fa-solid fa-fire animate-pulse"></i>
+                            <span id="streak-hub-val">0</span>
+                        </div>
+                        <button onclick="triggerCheckIn()" class="w-full gradient-red-btn px-4 py-2 rounded-xl text-xs font-bold text-white shadow-md">
+                            Check-In Hari Ini
+                        </button>
+                    </div>
+                </div>
+
+                <!-- Streak Leaderboard -->
+                <div class="bg-osn-card p-6 rounded-2xl border border-osn-border">
+                    <h3 class="font-bold text-lg text-white mb-4 flex items-center gap-2">
+                        <i class="fa-solid fa-trophy text-amber-400"></i> Leaderboard Streak Calon Medalis
+                    </h3>
+
+                    <div class="overflow-x-auto">
+                        <table class="w-full text-left border-collapse">
+                            <thead>
+                                <tr class="border-b border-osn-border text-xs uppercase text-gray-400 font-semibold">
+                                    <th class="py-3 px-4">Peringkat</th>
+                                    <th class="py-3 px-4">Kontestan</th>
+                                    <th class="py-3 px-4">Bidang Target</th>
+                                    <th class="py-3 px-4 text-right">Streak Belajar</th>
+                                </tr>
+                            </thead>
+                            <tbody id="leaderboard-body" class="divide-y divide-osn-border/50 text-sm">
+                                <!-- Populated dynamically -->
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+            </section>
+
+            <!-- SECTION 4: CHAT & KOMUNITAS -->
+            <section id="section-chat" class="space-y-6 hidden">
+                <div class="grid grid-cols-1 lg:grid-cols-3 gap-6 h-[600px]">
+                    <!-- Friend / Room Sidebar -->
+                    <div class="bg-osn-card p-4 rounded-2xl border border-osn-border flex flex-col justify-between">
+                        <div>
+                            <h3 class="font-bold text-white mb-3 px-2 flex items-center justify-between">
+                                <span>Ruang Diskusi OSN</span>
+                                <i class="fa-solid fa-users text-xs text-gray-400"></i>
+                            </h3>
+                            <div class="space-y-1">
+                                <button class="w-full p-3 rounded-xl bg-red-600/20 border border-red-500/40 text-left font-semibold text-sm text-white flex items-center gap-3">
+                                    <div class="w-8 h-8 rounded-lg bg-red-600 flex items-center justify-center text-white text-xs font-bold"><i class="fa-solid fa-globe"></i></div>
+                                    <div>
+                                        <p class="leading-none text-sm font-bold">Grup Umum National OSN</p>
+                                        <span class="text-[10px] text-gray-400">Semua Kontestan</span>
+                                    </div>
+                                </button>
+                            </div>
+
+                            <h4 class="font-semibold text-xs text-gray-400 uppercase tracking-wider mt-6 mb-2 px-2">Teman & Rival Belajar</h4>
+                            <div class="space-y-2 max-h-[300px] overflow-y-auto pr-1" id="friends-list">
+                                <p class="text-xs text-gray-500 italic px-2 py-2">Belum ada teman ditambahkan.</p>
+                            </div>
+                        </div>
+
+                        <!-- Add Friend Input -->
+                        <div class="pt-3 border-t border-osn-border">
+                            <form onsubmit="handleAddFriend(event)" class="flex gap-2">
+                                <input type="text" id="add-friend-input" placeholder="Nama / Email teman..." class="flex-1 bg-osn-bg border border-osn-border rounded-xl px-3 py-2 text-xs text-white focus:outline-none focus:border-red-500">
+                                <button type="submit" class="gradient-red-btn px-3 py-2 rounded-xl text-xs font-bold text-white">Tambah</button>
+                            </form>
+                        </div>
+                    </div>
+
+                    <!-- Chat Box -->
+                    <div class="lg:col-span-2 bg-osn-card rounded-2xl border border-osn-border flex flex-col overflow-hidden">
+                        <!-- Chat Header -->
+                        <div class="p-4 bg-osn-bg/80 border-b border-osn-border flex items-center justify-between">
+                            <div class="flex items-center gap-3">
+                                <div class="w-9 h-9 rounded-xl bg-gradient-to-br from-red-600 to-blue-600 flex items-center justify-center text-white font-bold text-sm">
+                                    <i class="fa-solid fa-comments"></i>
+                                </div>
+                                <div>
+                                    <h4 class="font-bold text-sm text-white">Grup Diskusi National OSN</h4>
+                                    <span class="text-[10px] text-green-400 font-medium"><i class="fa-solid fa-circle text-[8px] mr-1"></i> Live Chat Active</span>
+                                </div>
+                            </div>
+                        </div>
+
+                        <!-- Chat Messages Container -->
+                        <div id="chat-messages" class="flex-1 p-4 overflow-y-auto space-y-3">
+                            <!-- Messages populated dynamically -->
+                        </div>
+
+                        <!-- Chat Input Form -->
+                        <form onsubmit="handleSendMessage(event)" class="p-3 bg-osn-bg border-t border-osn-border flex gap-2">
+                            <input type="text" id="chat-input" required placeholder="Tulis pesan atau pertanyaan soal OSN..." class="flex-1 bg-osn-card border border-osn-border rounded-xl px-4 py-2.5 text-sm text-white focus:outline-none focus:border-red-500 placeholder-gray-500">
+                            <button type="submit" class="gradient-red-btn px-5 py-2.5 rounded-xl font-bold text-sm text-white flex items-center gap-2">
+                                <span>Kirim</span>
+                                <i class="fa-solid fa-paper-plane text-xs"></i>
+                            </button>
+                        </form>
+                    </div>
+                </div>
+            </section>
+
+            <!-- SECTION 5: PROFILE SETTINGS -->
+            <section id="section-profile" class="space-y-6 hidden">
+                <div class="max-w-2xl mx-auto bg-osn-card p-6 md:p-8 rounded-2xl border border-osn-border">
+                    <h2 class="text-2xl font-black text-white mb-6 flex items-center gap-3">
+                        <i class="fa-solid fa-user-gear text-red-500"></i> Pengaturan Profil Pejuang OSN
+                    </h2>
+
+                    <form onsubmit="handleSaveProfile(event)" class="space-y-4">
+                        <div>
+                            <label class="block text-xs font-semibold uppercase text-gray-400 mb-1">Nama Tampilan</label>
+                            <input type="text" id="profile-edit-name" required class="w-full px-4 py-3 bg-osn-bg border border-osn-border rounded-xl text-sm text-white focus:outline-none focus:border-red-500">
+                        </div>
+
+                        <div>
+                            <label class="block text-xs font-semibold uppercase text-gray-400 mb-1">Target Bidang OSN Utama</label>
+                            <select id="profile-edit-subject" required class="w-full px-4 py-3 bg-osn-bg border border-osn-border rounded-xl text-sm text-white focus:outline-none focus:border-red-500">
+                                <option value="Matematika">Matematika</option>
+                                <option value="Fisika">Fisika</option>
+                                <option value="Kimia">Kimia</option>
+                                <option value="Biologi">Biologi</option>
+                                <option value="Informatika / Komputer">Informatika / Komputer</option>
+                                <option value="Astronomi">Astronomi</option>
+                                <option value="Ekonomi">Ekonomi</option>
+                                <option value="Kebumian">Kebumian</option>
+                                <option value="Geografi">Geografi</option>
+                                <option value="Kecerdasan Buatan (AI)">Kecerdasan Buatan (AI)</option>
+                            </select>
+                        </div>
+
+                        <div>
+                            <label class="block text-xs font-semibold uppercase text-gray-400 mb-1">Bio / Motivasimu</label>
+                            <textarea id="profile-edit-bio" rows="3" placeholder="Tuliskan target medali atau kata-kata penyemangatmu..." class="w-full px-4 py-3 bg-osn-bg border border-osn-border rounded-xl text-sm text-white focus:outline-none focus:border-red-500 placeholder-gray-600"></textarea>
+                        </div>
+
+                        <button type="submit" class="w-full py-3.5 gradient-red-btn font-bold text-sm text-white rounded-xl shadow-lg">
+                            Simpan Perubahan Profil
+                        </button>
+                    </form>
+                </div>
+            </section>
+
+        </main>
+    </div>
+
+    <!-- MODAL: ADD RESOURCE -->
+    <div id="add-resource-modal" class="fixed inset-0 z-50 bg-black/80 backdrop-blur-sm flex items-center justify-center p-4 hidden">
+        <div class="bg-osn-card border border-osn-border p-6 rounded-2xl max-w-md w-full">
+            <div class="flex items-center justify-between mb-4">
+                <h3 class="font-bold text-lg text-white">Bagikan Modul / Soal OSN</h3>
+                <button onclick="closeAddResourceModal()" class="text-gray-400 hover:text-white"><i class="fa-solid fa-xmark text-lg"></i></button>
+            </div>
+            <form onsubmit="handleSaveResource(event)" class="space-y-4">
+                <div>
+                    <label class="block text-xs font-semibold uppercase text-gray-400 mb-1">Judul Materi / Soal</label>
+                    <input type="text" id="res-title" required placeholder="Contoh: Modul Kombinatorika OSN-K" class="w-full px-3 py-2 bg-osn-bg border border-osn-border rounded-xl text-sm text-white focus:outline-none focus:border-red-500">
+                </div>
+                <div>
+                    <label class="block text-xs font-semibold uppercase text-gray-400 mb-1">Bidang OSN</label>
+                    <select id="res-subject" required class="w-full px-3 py-2 bg-osn-bg border border-osn-border rounded-xl text-sm text-white focus:outline-none focus:border-red-500">
+                        <option value="Matematika">Matematika</option>
+                        <option value="Fisika">Fisika</option>
+                        <option value="Kimia">Kimia</option>
+                        <option value="Biologi">Biologi</option>
+                        <option value="Informatika / Komputer">Informatika / Komputer</option>
+                        <option value="Astronomi">Astronomi</option>
+                        <option value="Ekonomi">Ekonomi</option>
+                        <option value="Kebumian">Kebumian</option>
+                        <option value="Geografi">Geografi</option>
+                        <option value="Kecerdasan Buatan (AI)">Kecerdasan Buatan (AI)</option>
+                    </select>
+                </div>
+                <div>
+                    <label class="block text-xs font-semibold uppercase text-gray-400 mb-1">Tautan / Link Google Drive / PDF</label>
+                    <input type="url" id="res-link" required placeholder="https://drive.google.com/..." class="w-full px-3 py-2 bg-osn-bg border border-osn-border rounded-xl text-sm text-white focus:outline-none focus:border-red-500">
+                </div>
+                <button type="submit" class="w-full py-3 gradient-red-btn text-white font-bold text-sm rounded-xl">Posting Resource</button>
+            </form>
+        </div>
+    </div>
+
+    <script>
+        /* 
+           ==========================================================================
+           FIREBASE CONFIGURATION
+           Ganti nilai firebaseConfig di bawah ini dengan konfigurasi dari
+           Firebase Console milikmu jika ingin menyambungkan ke cloud nyata!
+           ==========================================================================
+        */
+        const firebaseConfig = {
+            apiKey: "AIzaSyDe9WhvdNVyVgHKCwZ09pBtaN7-o67429U",
+            authDomain: "lock-in-osn.firebaseapp.com",
+            projectId: "lock-in-osn",
+            storageBucket: "lock-in-osn.firebasestorage.app",
+            messagingSenderId: "986878305012",
+            appId: "1:986878305012:web:47c872c202a1a3333574a1",
+            measurementId: "G-G2ZLVJ4EPM"
+        };
+
+        // Global State Management
+        let isFirebaseActive = false;
+        let currentUser = null;
+        let appState = {
+            name: "Pejuang OSN",
+            email: "pejuang@osn.id",
+            subject: "Matematika",
+            bio: "Target Emas OSN 2026!",
+            streak: 1,
+            totalCheckIns: 1,
+            checkInDates: [],
+            friends: ["Budi (Fisika)", "Siti (Biologi)"]
+        };
+
+        // Sample Pre-populated Resources for 10 Subjects
+        let sampleResources = [
+            { id: 1, title: "Modul Diktat Kombinatorika & Teori Bilangan", subject: "Matematika", author: "Ahmad Medalis", link: "https://drive.google.com" },
+            { id: 2, title: "Kumpulan Soal Mekanika Klasik OSN-P", subject: "Fisika", author: "Dewi Fisika", link: "https://drive.google.com" },
+            { id: 3, title: "Cheat Sheet Kimia Organik Lengkap", subject: "Kimia", author: "Rian Kimia", link: "https://drive.google.com" },
+            { id: 4, title: "Guide Algoritma Graaf & Dynamic Programming", subject: "Informatika / Komputer", author: "Budi Coder", link: "https://drive.google.com" },
+            { id: 5, title: "Pengenalan Neural Network & Python OSN AI", subject: "Kecerdasan Buatan (AI)", author: "Priscilla", link: "https://drive.google.com" },
+            { id: 6, title: "Peta Bintang & Mekanika Celestial", subject: "Astronomi", author: "Astro Boy", link: "https://drive.google.com" }
+        ];
+
+        let sampleChatMessages = [
+            { sender: "Budi (Fisika)", text: "Halo kawan-kawan! Ada yang punya pembahasan OSN-K 2025?", time: "10:15" },
+            { sender: "Siti (Biologi)", text: "Coba cek di tab Resource Belajar, kemarin ada yang share modulnya di sana!", time: "10:18" }
+        ];
+
+        window.addEventListener('DOMContentLoaded', () => {
+            initFirebase();
+            loadLocalStorageData();
+            renderResources('Semua');
+            renderLeaderboard();
+            renderChatMessages();
+            renderFriendsList();
+        });
+
+        // Toast Notification System
+        function showToast(message, type = 'info') {
+            const container = document.getElementById('toast-container');
+            const toast = document.createElement('div');
+            
+            const bgClass = type === 'error' ? 'bg-red-600' : type === 'success' ? 'bg-green-600' : 'bg-blue-600';
+            toast.className = `${bgClass} text-white px-4 py-3 rounded-xl shadow-xl flex items-center gap-3 text-sm font-semibold transition-all duration-300 transform translate-y-2 pointer-events-auto`;
+            toast.innerHTML = `<i class="fa-solid ${type === 'error' ? 'fa-triangle-exclamation' : type === 'success' ? 'fa-circle-check' : 'fa-info-circle'}"></i> <span>${message}</span>`;
+
+            container.appendChild(toast);
+            setTimeout(() => {
+                toast.classList.add('opacity-0', 'translate-y-[-10px]');
+                setTimeout(() => toast.remove(), 300);
+            }, 3000);
+        }
+
+        // Initialize Firebase SDK Safely
+        function initFirebase() {
+            try {
+                if (firebaseConfig.apiKey && !firebaseConfig.apiKey.includes('YOUR_API_KEY')) {
+                    firebase.initializeApp(firebaseConfig);
+                    isFirebaseActive = true;
+                    
+                    firebase.auth().onAuthStateChanged((user) => {
+                        if (user) {
+                            currentUser = user;
+                            appState.email = user.email;
+                            if (user.displayName) appState.name = user.displayName;
+                            showDashboard();
+                            showToast(`Selamat datang kembali, ${appState.name}!`, 'success');
+                        } else {
+                            showAuthScreen();
+                        }
+                    });
+                } else {
+                    console.warn("Firebase belum dikonfigurasi dengan API Key nyata. Menggunakan mode Lokal / Demo.");
+                }
+            } catch (err) {
+                console.error("Firebase init error:", err);
+            }
+        }
+
+        // Local Storage Handlers for Offline / Demo Mode
+        function loadLocalStorageData() {
+            const saved = localStorage.getItem('lockin_osn_user');
+            if (saved) {
+                try {
+                    appState = { ...appState, ...JSON.parse(saved) };
+                } catch(e){}
+            }
+            updateUserUI();
+        }
+
+        function saveLocalStorageData() {
+            localStorage.setItem('lockin_osn_user', JSON.stringify(appState));
+            updateUserUI();
+        }
+
+        function updateUserUI() {
+            document.getElementById('user-name').innerText = appState.name;
+            document.getElementById('dash-subject-val').innerText = appState.subject;
+            document.getElementById('user-subject-badge').innerText = appState.subject;
+            document.getElementById('sidebar-streak-count').innerText = appState.streak;
+            document.getElementById('dash-streak-val').innerText = `${appState.streak} Hari`;
+            document.getElementById('streak-hub-val').innerText = appState.streak;
+            document.getElementById('dash-total-checkins').innerText = `${appState.totalCheckIns} Kali`;
+
+            document.getElementById('profile-edit-name').value = appState.name;
+            document.getElementById('profile-edit-subject').value = appState.subject;
+            document.getElementById('profile-edit-bio').value = appState.bio || '';
+        }
+
+        function switchAuthTab(tab) {
+            const loginForm = document.getElementById('login-form');
+            const regForm = document.getElementById('register-form');
+            const loginBtn = document.getElementById('tab-login-btn');
+            const regBtn = document.getElementById('tab-register-btn');
+
+            if (tab === 'login') {
+                loginForm.classList.remove('hidden');
+                regForm.classList.add('hidden');
+                loginBtn.className = "flex-1 py-3 text-center font-semibold text-sm transition-colors text-red-500 border-b-2 border-red-500";
+                regBtn.className = "flex-1 py-3 text-center font-semibold text-sm transition-colors text-gray-400 hover:text-white";
+            } else {
+                loginForm.classList.add('hidden');
+                regForm.classList.remove('hidden');
+                regBtn.className = "flex-1 py-3 text-center font-semibold text-sm transition-colors text-red-500 border-b-2 border-red-500";
+                loginBtn.className = "flex-1 py-3 text-center font-semibold text-sm transition-colors text-gray-400 hover:text-white";
+            }
+        }
+
+        function handleLogin(e) {
+            e.preventDefault();
+            const email = document.getElementById('login-email').value;
+            const pass = document.getElementById('login-password').value;
+
+            if (isFirebaseActive) {
+                firebase.auth().signInWithEmailAndPassword(email, pass)
+                    .catch((err) => showToast(err.message, 'error'));
+            } else {
+                appState.email = email;
+                showToast("Masuk berhasil (Demo Mode)", "success");
+                showDashboard();
+            }
+        }
+
+        function handleRegister(e) {
+            e.preventDefault();
+            const name = document.getElementById('reg-name').value;
+            const email = document.getElementById('reg-email').value;
+            const subject = document.getElementById('reg-subject').value;
+            const pass = document.getElementById('reg-password').value;
+
+            appState.name = name;
+            appState.email = email;
+            appState.subject = subject;
+
+            if (isFirebaseActive) {
+                firebase.auth().createUserWithEmailAndPassword(email, pass)
+                    .then((res) => {
+                        res.user.updateProfile({ displayName: name });
+                        saveLocalStorageData();
+                    })
+                    .catch((err) => showToast(err.message, 'error'));
+            } else {
+                saveLocalStorageData();
+                showToast("Registrasi berhasil!", "success");
+                showDashboard();
+            }
+        }
+
+        function handleLogout() {
+            if (isFirebaseActive) {
+                firebase.auth().signOut();
+            }
+            showAuthScreen();
+            showToast("Berhasil keluar akun.", "info");
+        }
+
+        function showDashboard() {
+            document.getElementById('auth-screen').classList.add('hidden');
+            document.getElementById('main-dashboard').classList.remove('hidden');
+            updateUserUI();
+        }
+
+        function showAuthScreen() {
+            document.getElementById('auth-screen').classList.remove('hidden');
+            document.getElementById('main-dashboard').classList.add('hidden');
+        }
+
+        // Navigation between sections
+        function navigateTo(sectionId) {
+            const sections = ['overview', 'resources', 'streak', 'chat', 'profile'];
+            sections.forEach(s => {
+                const secEl = document.getElementById(`section-${s}`);
+                const navBtn = document.getElementById(`nav-${s}`);
+                if (s === sectionId) {
+                    secEl.classList.remove('hidden');
+                    navBtn.className = "w-full flex items-center gap-3 px-4 py-3 rounded-xl text-sm font-semibold transition-colors bg-red-600 text-white shadow-md";
+                } else {
+                    secEl.classList.add('hidden');
+                    navBtn.className = "w-full flex items-center gap-3 px-4 py-3 rounded-xl text-sm font-semibold text-gray-400 hover:text-white hover:bg-osn-bg transition-colors";
+                }
+            });
+        }
+
+        function triggerCheckIn() {
+            const today = new Date().toLocaleDateString('id-ID');
+            if (!appState.checkInDates.includes(today)) {
+                appState.streak += 1;
+                appState.totalCheckIns += 1;
+                appState.checkInDates.push(today);
+                saveLocalStorageData();
+
+                // Add to history list UI
+                const histList = document.getElementById('checkin-history-list');
+                if (histList.querySelector('p')) histList.innerHTML = '';
+                
+                const item = document.createElement('div');
+                item.className = "p-3 rounded-xl bg-osn-bg border border-osn-border flex items-center justify-between text-xs";
+                item.innerHTML = `<span class="font-bold text-white"><i class="fa-solid fa-fire text-amber-500 mr-2"></i> Lock In Belajar ${appState.subject}</span><span class="text-gray-400">${today}</span>`;
+                histList.prepend(item);
+
+                showToast(`🔥 Streak bertambah! Sekarang ${appState.streak} hari.`, 'success');
+            } else {
+                showToast("Kamu sudah melakukan check-in hari ini! Pertahankan!", "info");
+            }
+        }
+
+        function renderResources(filterSubject) {
+            const grid = document.getElementById('resources-grid');
+            grid.innerHTML = '';
+
+            const filtered = filterSubject === 'Semua' 
+                ? sampleResources 
+                : sampleResources.filter(r => r.subject === filterSubject);
+
+            if (filtered.length === 0) {
+                grid.innerHTML = `<div class="col-span-full py-8 text-center text-gray-500 text-sm">Belum ada modul untuk bidang <b>${filterSubject}</b>. Jadi yang pertama membagikannya!</div>`;
+                return;
+            }
+
+            filtered.forEach(res => {
+                const card = document.createElement('div');
+                card.className = "bg-osn-card p-5 rounded-2xl border border-osn-border flex flex-col justify-between hover:border-red-500/50 transition-all";
+                card.innerHTML = `
+                    <div>
+                        <span class="text-[10px] bg-red-950/60 text-red-400 border border-red-800/40 px-2.5 py-0.5 rounded-full font-bold uppercase">${res.subject}</span>
+                        <h4 class="font-bold text-white text-base mt-3 leading-snug">${res.title}</h4>
+                        <p class="text-xs text-gray-400 mt-1">Oleh: <span class="text-gray-200 font-semibold">${res.author}</span></p>
+                    </div>
+                    <div class="mt-5 pt-3 border-t border-osn-border/60 flex items-center justify-between">
+                        <a href="${res.link}" target="_blank" class="text-xs text-blue-400 hover:text-blue-300 font-bold flex items-center gap-1">
+                            <span>Buka Modul</span> <i class="fa-solid fa-arrow-up-right-from-square text-[10px]"></i>
+                        </a>
+                        <button onclick="showToast('Modul disimpan!', 'success')" class="text-gray-500 hover:text-amber-400 text-xs"><i class="fa-solid fa-bookmark"></i></button>
+                    </div>
+                `;
+                grid.appendChild(card);
+            });
+        }
+
+        function filterResourceBySubject(subj) {
+            document.querySelectorAll('.res-pill').forEach(btn => {
+                if (btn.innerText.includes(subj) || (subj === 'Semua' && btn.innerText.includes('Semua'))) {
+                    btn.className = "res-pill px-4 py-2 bg-red-600 text-white rounded-xl text-xs font-bold whitespace-nowrap";
+                } else {
+                    btn.className = "res-pill px-4 py-2 bg-osn-card border border-osn-border text-gray-300 hover:text-white rounded-xl text-xs font-semibold whitespace-nowrap";
+                }
+            });
+            renderResources(subj);
+        }
+
+        function openAddResourceModal() { document.getElementById('add-resource-modal').classList.remove('hidden'); }
+        function closeAddResourceModal() { document.getElementById('add-resource-modal').classList.add('hidden'); }
+
+        function handleSaveResource(e) {
+            e.preventDefault();
+            const title = document.getElementById('res-title').value;
+            const subject = document.getElementById('res-subject').value;
+            const link = document.getElementById('res-link').value;
+
+            sampleResources.unshift({
+                id: Date.now(),
+                title: title,
+                subject: subject,
+                author: appState.name,
+                link: link
+            });
+
+            closeAddResourceModal();
+            renderResources('Semua');
+            showToast("Berhasil membagikan resource belajar!", "success");
+        }
+
+        function renderLeaderboard() {
+            const body = document.getElementById('leaderboard-body');
+            const mockUsers = [
+                { rank: 1, name: "Farhan Medalis", subject: "Informatika / Komputer", streak: 28 },
+                { rank: 2, name: "Annisa Rahma", subject: "Matematika", streak: 21 },
+                { rank: 3, name: appState.name + " (Kamu)", subject: appState.subject, streak: appState.streak },
+                { rank: 4, name: "Kevin Sanjaya", subject: "Fisika", streak: 14 }
+            ];
+
+            body.innerHTML = mockUsers.map(u => `
+                <tr class="hover:bg-osn-bg/40 transition-colors">
+                    <td class="py-3.5 px-4 font-bold text-amber-400">#${u.rank}</td>
+                    <td class="py-3.5 px-4 font-bold text-white">${u.name}</td>
+                    <td class="py-3.5 px-4"><span class="text-xs bg-osn-bg px-2.5 py-1 rounded-lg border border-osn-border text-gray-300">${u.subject}</span></td>
+                    <td class="py-3.5 px-4 text-right font-black text-amber-500"><i class="fa-solid fa-fire mr-1"></i> ${u.streak} Hari</td>
+                </tr>
+            `).join('');
+        }
+
+        function renderChatMessages() {
+            const box = document.getElementById('chat-messages');
+            box.innerHTML = sampleChatMessages.map(m => `
+                <div class="bg-osn-bg p-3 rounded-xl border border-osn-border max-w-lg">
+                    <div class="flex items-center justify-between text-[11px] mb-1">
+                        <span class="font-bold text-red-400">${m.sender}</span>
+                        <span class="text-gray-500">${m.time}</span>
+                    </div>
+                    <p class="text-sm text-gray-200">${m.text}</p>
+                </div>
+            `).join('');
+            box.scrollTop = box.scrollHeight;
+        }
+
+        function handleSendMessage(e) {
+            e.preventDefault();
+            const input = document.getElementById('chat-input');
+            const txt = input.value.trim();
+            if (!txt) return;
+
+            const now = new Date();
+            const timeStr = `${now.getHours()}:${now.getMinutes() < 10 ? '0' : ''}${now.getMinutes()}`;
+
+            sampleChatMessages.push({
+                sender: `${appState.name} (${appState.subject})`,
+                text: txt,
+                time: timeStr
+            });
+
+            input.value = '';
+            renderChatMessages();
+        }
+
+        function renderFriendsList() {
+            const container = document.getElementById('friends-list');
+            if (appState.friends.length === 0) {
+                container.innerHTML = '<p class="text-xs text-gray-500 italic px-2 py-2">Belum ada teman ditambahkan.</p>';
+                return;
+            }
+            container.innerHTML = appState.friends.map(f => `
+                <div class="flex items-center justify-between p-2 rounded-xl bg-osn-bg border border-osn-border text-xs">
+                    <span class="font-medium text-gray-300"><i class="fa-solid fa-user-check text-green-400 mr-2"></i> ${f}</span>
+                    <span class="text-amber-500 font-bold"><i class="fa-solid fa-fire"></i></span>
+                </div>
+            `).join('');
+        }
+
+        function handleAddFriend(e) {
+            e.preventDefault();
+            const input = document.getElementById('add-friend-input');
+            const val = input.value.trim();
+            if (val) {
+                appState.friends.push(val);
+                saveLocalStorageData();
+                renderFriendsList();
+                input.value = '';
+                showToast(`Teman ${val} berhasil ditambahkan!`, 'success');
+            }
+        }
+
+        function handleSaveProfile(e) {
+            e.preventDefault();
+            appState.name = document.getElementById('profile-edit-name').value;
+            appState.subject = document.getElementById('profile-edit-subject').value;
+            appState.bio = document.getElementById('profile-edit-bio').value;
+
+            saveLocalStorageData();
+            renderLeaderboard();
+            showToast("Profil berhasil diperbarui!", "success");
+        }
+    </script>
+</body>
+</html>
