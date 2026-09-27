@@ -3,17 +3,13 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>Lock In OSN</title>
+<title>Lockino — Naik Level Setiap Hari</title>
 
-<!-- Tailwind CDN -->
 <script src="https://cdn.tailwindcss.com"></script>
-<!-- Font Awesome -->
 <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css">
-<!-- Google Font -->
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800&display=swap" rel="stylesheet">
 
-<!-- Firebase (Compat mode, no ES modules) -->
 <script src="https://www.gstatic.com/firebasejs/10.12.2/firebase-app-compat.js"></script>
 <script src="https://www.gstatic.com/firebasejs/10.12.2/firebase-auth-compat.js"></script>
 <script src="https://www.gstatic.com/firebasejs/10.12.2/firebase-firestore-compat.js"></script>
@@ -27,7 +23,7 @@
         colors: {
           navy:   { 950:'#050810', 900:'#0a0f1e', 850:'#0d1428', 800:'#101a33', 700:'#16233f', 600:'#1c2c4d', 500:'#28406b' },
           maroon: { 700:'#7a1224', 600:'#8f1729', 500:'#a81d31', 400:'#c8394d' },
-          ash:    { 950:'#0b0d12', 900:'#12151c', 800:'#1b202b', 700:'#262d3a', 600:'#3a4356', 500:'#5b6478', 400:'#8890a0', 300:'#b3b9c6', 200:'#dde0e6' }
+          ash:    { 950:'#0b0d12', 900:'#12151c', 800:'#1b202b', 700:'#262d3a', 600:'#3a4356', 500:'#5b6478', 400:'#8890a0', 300:'#b3b9c6', 200:'#dde0e6', 100:'#eef0f4' }
         },
         boxShadow: { glow: '0 0 0 1px rgba(168,29,49,0.25), 0 8px 24px -8px rgba(0,0,0,0.6)' }
       }
@@ -43,43 +39,87 @@
   .light ::-webkit-scrollbar-thumb { background:#c7cbd4; }
   .fade-in { animation: fadeIn .25s ease both; }
   @keyframes fadeIn { from{opacity:0; transform:translateY(6px);} to{opacity:1; transform:translateY(0);} }
-  .flame-pulse { animation: flamePulse 2.2s ease-in-out infinite; }
-  @keyframes flamePulse { 0%,100%{ transform:scale(1); } 50%{ transform:scale(1.12); } }
+
+  @keyframes flameFlicker {
+    0%   { transform:scale(1) rotate(-1deg);   filter:drop-shadow(0 0 5px rgba(200,57,77,.8)) drop-shadow(0 0 10px rgba(168,29,49,.5)); }
+    22%  { transform:scale(1.08) rotate(1.5deg); filter:drop-shadow(0 0 9px rgba(200,57,77,1)) drop-shadow(0 0 16px rgba(168,29,49,.7)); }
+    45%  { transform:scale(0.95) rotate(-2deg); filter:drop-shadow(0 0 4px rgba(200,57,77,.6)) drop-shadow(0 0 8px rgba(168,29,49,.4)); }
+    68%  { transform:scale(1.05) rotate(2deg);  filter:drop-shadow(0 0 11px rgba(200,57,77,1)) drop-shadow(0 0 18px rgba(168,29,49,.8)); }
+    100% { transform:scale(1) rotate(-1deg);    filter:drop-shadow(0 0 5px rgba(200,57,77,.8)) drop-shadow(0 0 10px rgba(168,29,49,.5)); }
+  }
+  .flame-logo { animation: flameFlicker 1.6s ease-in-out infinite; display:inline-block; }
+
   .hidden-force { display:none !important; }
   .msg-bubble:hover .msg-actions { opacity:1; }
   .scrollbar-thin { scrollbar-width: thin; }
-  [contenteditable]:focus { outline:none; }
-  .status-dot { box-shadow:0 0 0 2px var(--dotring); }
   .tab-active { border-bottom:2px solid #a81d31; color:#fff; }
   .light .tab-active { color:#0a0f1e; }
   .toast { animation: toastIn .25s ease both; }
   @keyframes toastIn { from{opacity:0; transform:translateY(-10px);} to{opacity:1; transform:translateY(0);} }
+
+  @keyframes checkPop { 0%{transform:scale(1);} 40%{transform:scale(1.3);} 100%{transform:scale(1);} }
+  .check-pop { animation: checkPop .35s ease; }
+  .strike-anim { transition: all .25s ease; }
+
+  .progress-bar-bg { background: rgba(148,163,184,.15); }
+  .progress-bar-fill { transition: width .4s ease; }
 </style>
 </head>
 <body class="dark bg-navy-950 text-ash-200 min-h-screen transition-colors">
 
-<!-- ===================== TOASTS ===================== -->
 <div id="toastContainer" class="fixed top-4 right-4 z-[9999] flex flex-col gap-2 items-end"></div>
 
 <!-- ===================== AUTH VIEW ===================== -->
 <div id="authView" class="min-h-screen flex items-center justify-center px-4 bg-gradient-to-br from-navy-950 via-navy-900 to-navy-850">
   <div class="w-full max-w-md">
-    <div class="flex flex-col items-center mb-8">
+    <div class="flex flex-col items-center mb-6">
       <div class="w-16 h-16 rounded-2xl bg-maroon-600/20 border border-maroon-600/40 flex items-center justify-center mb-3">
-        <i class="fa-solid fa-fire text-3xl text-maroon-500 flame-pulse"></i>
+        <i class="fa-solid fa-fire flame-logo text-3xl text-maroon-500"></i>
       </div>
-      <h1 class="text-2xl font-extrabold text-white tracking-tight">Lock In <span class="text-maroon-500">OSN</span></h1>
-      <p class="text-ash-400 text-sm mt-1" data-i18n="auth.tagline">Konsisten hari ini, medali di masa depan.</p>
+      <h1 class="text-2xl font-extrabold text-white tracking-tight">Lockino</h1>
+      <p class="text-ash-400 text-sm mt-1 text-center" data-i18n="auth.tagline">Tempatmu Untuk Naik Level Setiap Hari</p>
     </div>
 
     <div class="bg-navy-900/70 border border-navy-700 rounded-2xl shadow-glow p-6 backdrop-blur">
-      <div class="flex mb-6 rounded-xl bg-navy-950/60 p-1">
-        <button id="tabLoginBtn" class="flex-1 py-2 rounded-lg text-sm font-semibold bg-maroon-600 text-white transition" data-i18n="auth.login">Masuk</button>
-        <button id="tabRegisterBtn" class="flex-1 py-2 rounded-lg text-sm font-semibold text-ash-300 transition" data-i18n="auth.register">Daftar</button>
+      <div class="flex mb-5 rounded-xl bg-navy-950/60 p-1">
+        <button id="tabRegisterBtn" class="flex-1 py-2 rounded-lg text-sm font-semibold bg-maroon-600 text-white transition" data-i18n="auth.register">Daftar</button>
+        <button id="tabLoginBtn" class="flex-1 py-2 rounded-lg text-sm font-semibold text-ash-300 transition" data-i18n="auth.login">Masuk</button>
       </div>
 
+      <button id="googleAuthBtn" class="w-full flex items-center justify-center gap-2 bg-white hover:bg-ash-100 text-navy-900 font-semibold py-2.5 rounded-xl transition text-sm mb-4">
+        <svg width="18" height="18" viewBox="0 0 48 48"><path fill="#FFC107" d="M43.6 20.5H42V20H24v8h11.3C33.9 32.4 29.4 35.5 24 35.5c-6.9 0-12.5-5.6-12.5-12.5S17.1 10.5 24 10.5c3.1 0 6 1.2 8.2 3.1l6-6C34.5 4.1 29.5 2 24 2 11.9 2 2 11.9 2 24s9.9 22 22 22 22-9.9 22-22c0-1.2-.1-2.4-.4-3.5z"/><path fill="#FF3D00" d="M6.3 14.7l6.6 4.8C14.5 15.9 18.9 13 24 13c3.1 0 6 1.2 8.2 3.1l6-6C34.5 6.1 29.5 4 24 4c-7.6 0-14.1 4.3-17.7 10.7z"/><path fill="#4CAF50" d="M24 46c5.3 0 10.2-2 13.9-5.4l-6.4-5.4c-2.1 1.5-4.8 2.4-7.5 2.4-5.4 0-10-3.6-11.6-8.6l-6.6 5.1C9.9 41.7 16.4 46 24 46z"/><path fill="#1976D2" d="M43.6 20.5H42V20H24v8h11.3c-.7 2-2 3.7-3.7 5l6.4 5.4C41.4 35.9 44 30.4 44 24c0-1.2-.1-2.4-.4-3.5z"/></svg>
+        <span data-i18n="auth.google">Masuk dengan Google</span>
+      </button>
+      <div class="flex items-center gap-3 mb-4"><div class="flex-1 h-px bg-navy-700"></div><span class="text-[11px] text-ash-500">atau</span><div class="flex-1 h-px bg-navy-700"></div></div>
+
+      <!-- REGISTER FORM (default) -->
+      <form id="registerForm" class="space-y-3">
+        <div>
+          <label class="text-xs font-semibold text-ash-400" data-i18n="auth.username">Username</label>
+          <input type="text" id="regUsername" required minlength="3" maxlength="20" class="mt-1 w-full bg-navy-950 border border-navy-700 rounded-xl px-4 py-2.5 text-sm text-white focus:border-maroon-500 outline-none" placeholder="username_kamu">
+          <p class="text-[11px] text-ash-500 mt-1" data-i18n="auth.usernameNote">Username dapat diganti di profil.</p>
+        </div>
+        <div>
+          <label class="text-xs font-semibold text-ash-400" data-i18n="auth.email">Email</label>
+          <input type="email" id="regEmail" required class="mt-1 w-full bg-navy-950 border border-navy-700 rounded-xl px-4 py-2.5 text-sm text-white focus:border-maroon-500 outline-none" placeholder="kamu@email.com">
+        </div>
+        <div>
+          <label class="text-xs font-semibold text-ash-400" data-i18n="auth.password">Kata Sandi</label>
+          <div class="relative mt-1">
+            <input type="password" id="regPassword" required minlength="6" class="w-full bg-navy-950 border border-navy-700 rounded-xl px-4 py-2.5 text-sm text-white focus:border-maroon-500 outline-none pr-10" placeholder="Minimal 6 karakter">
+            <button type="button" data-target="regPassword" class="togglePw absolute right-3 top-1/2 -translate-y-1/2 text-ash-400 hover:text-white"><i class="fa-solid fa-eye"></i></button>
+          </div>
+        </div>
+        <div>
+          <label class="text-xs font-semibold text-ash-400" data-i18n="auth.subject">Mapel Utama</label>
+          <select id="regSubject" required class="mt-1 w-full bg-navy-950 border border-navy-700 rounded-xl px-4 py-2.5 text-sm text-white focus:border-maroon-500 outline-none"></select>
+        </div>
+        <p id="registerError" class="text-xs text-maroon-400 hidden-force"></p>
+        <button type="submit" class="w-full bg-maroon-600 hover:bg-maroon-500 text-white font-semibold py-2.5 rounded-xl transition" data-i18n="auth.registerBtn">Buat Akun</button>
+      </form>
+
       <!-- LOGIN FORM -->
-      <form id="loginForm" class="space-y-4">
+      <form id="loginForm" class="space-y-3 hidden-force">
         <div>
           <label class="text-xs font-semibold text-ash-400" data-i18n="auth.email">Email</label>
           <input type="email" id="loginEmail" required class="mt-1 w-full bg-navy-950 border border-navy-700 rounded-xl px-4 py-2.5 text-sm text-white focus:border-maroon-500 outline-none" placeholder="kamu@email.com">
@@ -94,49 +134,30 @@
         <p id="loginError" class="text-xs text-maroon-400 hidden-force"></p>
         <button type="submit" class="w-full bg-maroon-600 hover:bg-maroon-500 text-white font-semibold py-2.5 rounded-xl transition" data-i18n="auth.loginBtn">Masuk Sekarang</button>
       </form>
-
-      <!-- REGISTER FORM -->
-      <form id="registerForm" class="space-y-4 hidden-force">
-        <div>
-          <label class="text-xs font-semibold text-ash-400" data-i18n="auth.username">Username</label>
-          <input type="text" id="regUsername" required minlength="3" maxlength="20" class="mt-1 w-full bg-navy-950 border border-navy-700 rounded-xl px-4 py-2.5 text-sm text-white focus:border-maroon-500 outline-none" placeholder="username_kamu">
-          <p class="text-[11px] text-ash-500 mt-1" data-i18n="auth.usernameNote">Username dapat diganti nanti di profil.</p>
-        </div>
-        <div>
-          <label class="text-xs font-semibold text-ash-400" data-i18n="auth.email">Email</label>
-          <input type="email" id="regEmail" required class="mt-1 w-full bg-navy-950 border border-navy-700 rounded-xl px-4 py-2.5 text-sm text-white focus:border-maroon-500 outline-none" placeholder="kamu@email.com">
-        </div>
-        <div>
-          <label class="text-xs font-semibold text-ash-400" data-i18n="auth.password">Kata Sandi</label>
-          <div class="relative mt-1">
-            <input type="password" id="regPassword" required minlength="6" class="w-full bg-navy-950 border border-navy-700 rounded-xl px-4 py-2.5 text-sm text-white focus:border-maroon-500 outline-none pr-10" placeholder="Minimal 6 karakter">
-            <button type="button" data-target="regPassword" class="togglePw absolute right-3 top-1/2 -translate-y-1/2 text-ash-400 hover:text-white"><i class="fa-solid fa-eye"></i></button>
-          </div>
-        </div>
-        <p id="registerError" class="text-xs text-maroon-400 hidden-force"></p>
-        <button type="submit" class="w-full bg-maroon-600 hover:bg-maroon-500 text-white font-semibold py-2.5 rounded-xl transition" data-i18n="auth.registerBtn">Buat Akun</button>
-      </form>
     </div>
-    <p class="text-center text-ash-600 text-xs mt-6">Lock In OSN &copy; 2026</p>
+    <p class="text-center text-ash-600 text-xs mt-6">Lockino &copy; 2026</p>
   </div>
 </div>
 
 <!-- ===================== APP VIEW ===================== -->
 <div id="appView" class="hidden-force min-h-screen flex flex-col">
 
-  <!-- TOP NAV -->
   <header class="sticky top-0 z-40 bg-navy-900/90 backdrop-blur border-b border-navy-700 px-4 md:px-6 py-3 flex items-center justify-between gap-3">
     <div class="flex items-center gap-2 shrink-0">
-      <i class="fa-solid fa-fire text-maroon-500 text-xl flame-pulse"></i>
-      <span class="font-extrabold text-white text-lg hidden sm:inline">Lock In <span class="text-maroon-500">OSN</span></span>
+      <i class="fa-solid fa-fire flame-logo text-maroon-500 text-xl"></i>
+      <div class="hidden sm:block leading-tight">
+        <span class="font-extrabold text-white text-lg block">Lockino</span>
+        <span class="text-[10px] text-ash-500 -mt-1 block" data-i18n="auth.tagline">Tempatmu Untuk Naik Level Setiap Hari</span>
+      </div>
     </div>
 
-    <nav class="hidden md:flex items-center gap-1 bg-navy-950/50 rounded-xl p-1">
-      <button class="navBtn px-3 py-1.5 rounded-lg text-sm font-medium" data-view="dashboard"><i class="fa-solid fa-gauge-high mr-1.5"></i><span data-i18n="nav.dashboard">Dashboard</span></button>
-      <button class="navBtn px-3 py-1.5 rounded-lg text-sm font-medium" data-view="friends"><i class="fa-solid fa-user-group mr-1.5"></i><span data-i18n="nav.friends">Teman</span></button>
-      <button class="navBtn px-3 py-1.5 rounded-lg text-sm font-medium" data-view="resources"><i class="fa-solid fa-book mr-1.5"></i><span data-i18n="nav.resources">Materi</span></button>
-      <button class="navBtn px-3 py-1.5 rounded-lg text-sm font-medium" data-view="profile"><i class="fa-solid fa-id-card mr-1.5"></i><span data-i18n="nav.profile">Profil</span></button>
-      <button class="navBtn px-3 py-1.5 rounded-lg text-sm font-medium" data-view="settings"><i class="fa-solid fa-gear mr-1.5"></i><span data-i18n="nav.settings">Pengaturan</span></button>
+    <nav class="hidden lg:flex items-center gap-1 bg-navy-950/50 rounded-xl p-1 overflow-x-auto">
+      <button class="navBtn px-3 py-1.5 rounded-lg text-sm font-medium whitespace-nowrap" data-view="dashboard"><i class="fa-solid fa-gauge-high mr-1.5"></i><span data-i18n="nav.dashboard">Dashboard</span></button>
+      <button class="navBtn px-3 py-1.5 rounded-lg text-sm font-medium whitespace-nowrap" data-view="friends"><i class="fa-solid fa-user-group mr-1.5"></i><span data-i18n="nav.friends">Teman</span></button>
+      <button class="navBtn px-3 py-1.5 rounded-lg text-sm font-medium whitespace-nowrap" data-view="competitions"><i class="fa-solid fa-trophy mr-1.5"></i><span data-i18n="nav.competitions">Info Kompetisi</span></button>
+      <button class="navBtn px-3 py-1.5 rounded-lg text-sm font-medium whitespace-nowrap" data-view="resources"><i class="fa-solid fa-book mr-1.5"></i><span data-i18n="nav.resources">Materi</span></button>
+      <button class="navBtn px-3 py-1.5 rounded-lg text-sm font-medium whitespace-nowrap" data-view="profile"><i class="fa-solid fa-id-card mr-1.5"></i><span data-i18n="nav.profile">Profil</span></button>
+      <button class="navBtn px-3 py-1.5 rounded-lg text-sm font-medium whitespace-nowrap" data-view="settings"><i class="fa-solid fa-gear mr-1.5"></i><span data-i18n="nav.settings">Pengaturan</span></button>
     </nav>
 
     <div class="flex items-center gap-2 md:gap-3">
@@ -156,21 +177,21 @@
     </div>
   </header>
 
-  <!-- MOBILE NAV -->
-  <nav class="md:hidden flex items-center justify-around bg-navy-900 border-b border-navy-700 px-1 py-1.5 sticky top-[57px] z-30">
-    <button class="navBtn flex flex-col items-center text-[10px] gap-0.5 px-2 py-1 rounded-lg" data-view="dashboard"><i class="fa-solid fa-gauge-high"></i>Home</button>
-    <button class="navBtn flex flex-col items-center text-[10px] gap-0.5 px-2 py-1 rounded-lg" data-view="friends"><i class="fa-solid fa-user-group"></i>Teman</button>
-    <button class="navBtn flex flex-col items-center text-[10px] gap-0.5 px-2 py-1 rounded-lg" data-view="resources"><i class="fa-solid fa-book"></i>Materi</button>
-    <button class="navBtn flex flex-col items-center text-[10px] gap-0.5 px-2 py-1 rounded-lg" data-view="profile"><i class="fa-solid fa-id-card"></i>Profil</button>
-    <button class="navBtn flex flex-col items-center text-[10px] gap-0.5 px-2 py-1 rounded-lg" data-view="settings"><i class="fa-solid fa-gear"></i>Setel</button>
+  <nav class="lg:hidden flex items-center gap-1 bg-navy-900 border-b border-navy-700 px-1 py-1.5 sticky top-[57px] z-30 overflow-x-auto">
+    <button class="navBtn flex flex-col items-center text-[10px] gap-0.5 px-3 py-1 rounded-lg shrink-0" data-view="dashboard"><i class="fa-solid fa-gauge-high"></i>Home</button>
+    <button class="navBtn flex flex-col items-center text-[10px] gap-0.5 px-3 py-1 rounded-lg shrink-0" data-view="friends"><i class="fa-solid fa-user-group"></i>Teman</button>
+    <button class="navBtn flex flex-col items-center text-[10px] gap-0.5 px-3 py-1 rounded-lg shrink-0" data-view="competitions"><i class="fa-solid fa-trophy"></i>Lomba</button>
+    <button class="navBtn flex flex-col items-center text-[10px] gap-0.5 px-3 py-1 rounded-lg shrink-0" data-view="resources"><i class="fa-solid fa-book"></i>Materi</button>
+    <button class="navBtn flex flex-col items-center text-[10px] gap-0.5 px-3 py-1 rounded-lg shrink-0" data-view="profile"><i class="fa-solid fa-id-card"></i>Profil</button>
+    <button class="navBtn flex flex-col items-center text-[10px] gap-0.5 px-3 py-1 rounded-lg shrink-0" data-view="settings"><i class="fa-solid fa-gear"></i>Setel</button>
   </nav>
 
   <main class="flex-1 px-3 md:px-6 py-5 max-w-7xl w-full mx-auto">
 
-    <!-- ============ DASHBOARD VIEW ============ -->
+    <!-- ============ DASHBOARD ============ -->
     <section id="view-dashboard" class="viewSection space-y-5 fade-in">
       <div class="grid grid-cols-1 lg:grid-cols-3 gap-5">
-        <!-- Streak card -->
+        <!-- Streak -->
         <div class="bg-navy-900 border border-navy-700 rounded-2xl p-5 flex flex-col items-center text-center">
           <p class="text-xs uppercase tracking-wider text-ash-500 font-semibold mb-2" data-i18n="dash.streakTitle">Streak Belajar</p>
           <div class="relative w-24 h-24 flex items-center justify-center mb-3">
@@ -180,22 +201,57 @@
           <button id="checkinBtn" class="w-full bg-maroon-600 hover:bg-maroon-500 disabled:bg-navy-700 disabled:text-ash-500 text-white font-semibold py-2.5 rounded-xl transition text-sm" data-i18n="dash.checkinBtn">Check-in Belajar Hari Ini</button>
         </div>
 
-        <!-- Quote widget -->
-        <div class="bg-navy-900 border border-navy-700 rounded-2xl p-5 lg:col-span-2 flex flex-col justify-center">
-          <p class="text-xs uppercase tracking-wider text-ash-500 font-semibold mb-3"><i class="fa-solid fa-quote-left mr-1"></i> <span data-i18n="dash.quoteTitle">Motivasi Hari Ini</span></p>
-          <p id="quoteText" class="text-lg text-white font-medium italic leading-relaxed">"..."</p>
-          <p id="quoteAuthor" class="text-sm text-maroon-400 mt-2 font-semibold">-</p>
-          <button id="newQuoteBtn" class="mt-3 self-start text-xs text-ash-400 hover:text-white"><i class="fa-solid fa-arrows-rotate mr-1"></i><span data-i18n="dash.anotherQuote">Kutipan lain</span></button>
+        <!-- Countdown -->
+        <div class="bg-navy-900 border border-navy-700 rounded-2xl p-5 lg:col-span-2 flex flex-col">
+          <div class="flex items-center justify-between mb-2">
+            <p class="text-xs uppercase tracking-wider text-ash-500 font-semibold"><i class="fa-solid fa-hourglass-half mr-1"></i><span data-i18n="dash.countdownTitle">Countdown Target Kompetisi</span></p>
+            <button id="editCountdownBtn" class="text-xs text-ash-400 hover:text-white"><i class="fa-solid fa-pen mr-1"></i><span data-i18n="dash.set">Atur</span></button>
+          </div>
+          <div id="countdownEmpty" class="flex-1 flex items-center justify-center text-ash-500 text-sm py-4" data-i18n="dash.countdownEmpty">Belum ada target kompetisi. Klik "Atur" untuk memulai.</div>
+          <div id="countdownActive" class="hidden-force flex-1">
+            <p id="countdownLabel" class="text-white font-semibold mb-2">-</p>
+            <div class="grid grid-cols-4 gap-2 text-center">
+              <div class="bg-navy-950 rounded-xl py-2"><p id="cdDays" class="text-2xl font-extrabold text-maroon-500">0</p><p class="text-[10px] text-ash-500 uppercase">Hari</p></div>
+              <div class="bg-navy-950 rounded-xl py-2"><p id="cdHours" class="text-2xl font-extrabold text-maroon-500">0</p><p class="text-[10px] text-ash-500 uppercase">Jam</p></div>
+              <div class="bg-navy-950 rounded-xl py-2"><p id="cdMins" class="text-2xl font-extrabold text-maroon-500">0</p><p class="text-[10px] text-ash-500 uppercase">Menit</p></div>
+              <div class="bg-navy-950 rounded-xl py-2"><p id="cdSecs" class="text-2xl font-extrabold text-maroon-500">0</p><p class="text-[10px] text-ash-500 uppercase">Detik</p></div>
+            </div>
+          </div>
         </div>
       </div>
 
-      <!-- Daily focus -->
-      <div class="bg-navy-900 border border-navy-700 rounded-2xl p-5">
-        <p class="text-sm font-semibold text-white mb-2"><i class="fa-solid fa-bullseye text-maroon-500 mr-1.5"></i><span data-i18n="dash.focusTitle">Apa yang akan kamu pelajari sekarang?</span></p>
-        <div class="flex gap-2">
-          <input id="focusInput" type="text" maxlength="120" class="flex-1 bg-navy-950 border border-navy-700 rounded-xl px-4 py-2.5 text-sm text-white focus:border-maroon-500 outline-none" placeholder="Contoh: Integral lipat dua - Kalkulus">
-          <button id="saveFocusBtn" class="bg-navy-700 hover:bg-navy-600 text-white text-sm font-semibold px-4 rounded-xl"><span data-i18n="dash.save">Simpan</span></button>
+      <div class="grid grid-cols-1 lg:grid-cols-3 gap-5">
+        <!-- Checklist -->
+        <div class="bg-navy-900 border border-navy-700 rounded-2xl p-5">
+          <p class="text-sm font-semibold text-white mb-3"><i class="fa-solid fa-list-check text-maroon-500 mr-1.5"></i><span data-i18n="dash.checklistTitle">Target Belajar Hari Ini</span></p>
+          <div id="checklistItems" class="space-y-2"></div>
         </div>
+
+        <!-- Pomodoro -->
+        <div class="bg-navy-900 border border-navy-700 rounded-2xl p-5 flex flex-col items-center text-center">
+          <p class="text-sm font-semibold text-white mb-2 self-start"><i class="fa-solid fa-stopwatch text-maroon-500 mr-1.5"></i><span data-i18n="dash.timerTitle">Timer Belajar</span></p>
+          <p id="timerDisplay" class="text-3xl font-extrabold text-white my-3 tabular-nums">00:00:00</p>
+          <div class="flex gap-2 w-full">
+            <button id="timerToggleBtn" class="flex-1 bg-maroon-600 hover:bg-maroon-500 text-white font-semibold py-2 rounded-xl text-sm"><i class="fa-solid fa-play mr-1"></i><span data-i18n="dash.start">Mulai</span></button>
+            <button id="timerResetBtn" class="px-3 bg-navy-800 hover:bg-navy-700 text-white rounded-xl text-sm"><i class="fa-solid fa-rotate-left"></i></button>
+          </div>
+          <p class="text-[11px] text-ash-500 mt-2"><span data-i18n="dash.totalToday">Total hari ini:</span> <span id="totalStudyToday" class="text-ash-300 font-medium">0j 0m</span></p>
+        </div>
+
+        <!-- Scratchpad -->
+        <div class="bg-navy-900 border border-navy-700 rounded-2xl p-5 flex flex-col">
+          <p class="text-sm font-semibold text-white mb-2"><i class="fa-solid fa-note-sticky text-maroon-500 mr-1.5"></i><span data-i18n="dash.scratchTitle">Quick Scratchpad</span></p>
+          <textarea id="scratchpadInput" rows="4" maxlength="1000" class="flex-1 w-full bg-navy-950 border border-navy-700 rounded-xl px-3 py-2 text-sm text-white outline-none focus:border-maroon-500 resize-none" placeholder="Coret-coret cepat di sini..."></textarea>
+          <p id="scratchpadSavedNote" class="text-[10px] text-ash-500 mt-1 text-right">-</p>
+        </div>
+      </div>
+
+      <!-- Quote -->
+      <div class="bg-navy-900 border border-navy-700 rounded-2xl p-5">
+        <p class="text-xs uppercase tracking-wider text-ash-500 font-semibold mb-3"><i class="fa-solid fa-quote-left mr-1"></i> <span data-i18n="dash.quoteTitle">Motivasi Hari Ini</span></p>
+        <p id="quoteText" class="text-lg text-white font-medium italic leading-relaxed">"..."</p>
+        <p id="quoteAuthor" class="text-sm text-maroon-400 mt-2 font-semibold">-</p>
+        <button id="newQuoteBtn" class="mt-3 self-start text-xs text-ash-400 hover:text-white"><i class="fa-solid fa-arrows-rotate mr-1"></i><span data-i18n="dash.anotherQuote">Kutipan lain</span></button>
       </div>
 
       <!-- Online friends -->
@@ -206,10 +262,9 @@
       </div>
     </section>
 
-    <!-- ============ FRIENDS & CHAT VIEW ============ -->
+    <!-- ============ FRIENDS & CHAT ============ -->
     <section id="view-friends" class="viewSection hidden-force fade-in">
       <div class="grid grid-cols-1 lg:grid-cols-3 gap-5 h-full">
-        <!-- Left: friend list & search -->
         <div class="bg-navy-900 border border-navy-700 rounded-2xl p-4 flex flex-col lg:col-span-1 max-h-[75vh]">
           <div class="flex items-center gap-2 mb-3">
             <div class="relative flex-1">
@@ -244,7 +299,6 @@
           </div>
         </div>
 
-        <!-- Right: chat panel -->
         <div class="bg-navy-900 border border-navy-700 rounded-2xl flex flex-col lg:col-span-2 max-h-[75vh]">
           <div id="chatEmptyState" class="flex-1 flex flex-col items-center justify-center text-ash-500 gap-2">
             <i class="fa-regular fa-comments text-4xl"></i>
@@ -253,6 +307,7 @@
 
           <div id="chatActiveWrap" class="hidden-force flex flex-col h-full">
             <div id="chatHeader" class="flex items-center justify-between gap-3 p-4 border-b border-navy-700"></div>
+            <div id="callWrap" class="hidden-force border-b border-navy-700 bg-black"></div>
             <div id="chatMessages" class="flex-1 overflow-y-auto scrollbar-thin p-4 space-y-3"></div>
             <div class="p-3 border-t border-navy-700 flex items-center gap-2">
               <input id="chatInput" type="text" placeholder="Tulis pesan..." class="flex-1 bg-navy-950 border border-navy-700 rounded-xl px-4 py-2.5 text-sm text-white focus:border-maroon-500 outline-none">
@@ -263,7 +318,20 @@
       </div>
     </section>
 
-    <!-- ============ RESOURCE HUB VIEW ============ -->
+    <!-- ============ COMPETITIONS ============ -->
+    <section id="view-competitions" class="viewSection hidden-force fade-in space-y-4">
+      <div class="bg-navy-900 border border-navy-700 rounded-2xl p-4 space-y-3">
+        <div class="flex flex-col sm:flex-row gap-2">
+          <p class="flex-1 text-sm text-ash-400 flex items-center"><i class="fa-solid fa-circle-info mr-2"></i><span data-i18n="comp.desc">Info kompetisi dibagikan secara anonim oleh sesama pejuang OSN.</span></p>
+          <button id="addCompBtn" class="bg-maroon-600 hover:bg-maroon-500 text-white text-sm font-semibold px-4 py-2.5 rounded-xl whitespace-nowrap"><i class="fa-solid fa-plus mr-1.5"></i><span data-i18n="comp.add">Tambah Info Kompetisi</span></button>
+        </div>
+        <div id="compSubjectFilters" class="flex flex-wrap gap-2"></div>
+      </div>
+      <div id="compList" class="grid grid-cols-1 md:grid-cols-2 gap-4"></div>
+      <p id="compEmpty" class="text-center text-ash-500 py-10 hidden-force" data-i18n="comp.empty">Belum ada info kompetisi. Jadilah yang pertama membagikan!</p>
+    </section>
+
+    <!-- ============ RESOURCE HUB ============ -->
     <section id="view-resources" class="viewSection hidden-force fade-in space-y-4">
       <div class="bg-navy-900 border border-navy-700 rounded-2xl p-4 space-y-3">
         <div class="flex flex-col sm:flex-row gap-2">
@@ -271,31 +339,41 @@
             <i class="fa-solid fa-magnifying-glass absolute left-3 top-1/2 -translate-y-1/2 text-ash-500 text-xs"></i>
             <input id="resourceSearchInput" type="text" placeholder="Cari judul materi..." class="w-full bg-navy-950 border border-navy-700 rounded-xl pl-8 pr-3 py-2.5 text-sm text-white focus:border-maroon-500 outline-none">
           </div>
+          <button id="bookmarkFilterBtn" class="bg-navy-800 hover:bg-navy-700 text-ash-300 text-sm font-semibold px-4 py-2.5 rounded-xl whitespace-nowrap"><i class="fa-regular fa-bookmark mr-1.5"></i><span data-i18n="res.myBookmarks">Bookmark Saya</span></button>
           <button id="addResourceBtn" class="bg-maroon-600 hover:bg-maroon-500 text-white text-sm font-semibold px-4 py-2.5 rounded-xl whitespace-nowrap"><i class="fa-solid fa-plus mr-1.5"></i><span data-i18n="res.add">Tambahkan Resource</span></button>
         </div>
-        <div id="subjectFilters" class="flex flex-wrap gap-2"></div>
+        <div id="resSubjectFilters" class="flex flex-wrap gap-2"></div>
+        <div class="flex items-center gap-3 bg-navy-950/50 rounded-xl p-3">
+          <p class="text-xs text-ash-400 font-semibold shrink-0" id="resSubjectProgressLabel">Progress Matematika</p>
+          <div class="flex-1 h-2.5 rounded-full progress-bar-bg overflow-hidden">
+            <div id="resSubjectProgressBar" class="h-full bg-maroon-500 progress-bar-fill" style="width:0%"></div>
+          </div>
+          <span id="resSubjectProgressPct" class="text-xs text-ash-300 font-semibold shrink-0">0%</span>
+        </div>
       </div>
-      <div id="resourceList" class="grid grid-cols-1 md:grid-cols-2 gap-4"></div>
-      <p id="resourceEmpty" class="text-center text-ash-500 py-10 hidden-force" data-i18n="res.empty">Belum ada materi. Jadilah yang pertama menambahkan!</p>
+      <div id="topicFolders" class="space-y-3"></div>
     </section>
 
-    <!-- ============ PROFILE VIEW ============ -->
-    <section id="view-profile" class="viewSection hidden-force fade-in">
+    <!-- ============ PROFILE ============ -->
+    <section id="view-profile" class="viewSection hidden-force fade-in space-y-4">
       <div class="bg-navy-900 border border-navy-700 rounded-2xl overflow-hidden">
         <div class="h-40 bg-navy-700 relative">
           <img id="profileCoverImg" src="" class="w-full h-full object-cover">
           <button id="editCoverBtn" class="absolute top-3 right-3 bg-navy-950/70 hover:bg-navy-950 text-white text-xs px-3 py-1.5 rounded-lg"><i class="fa-solid fa-camera mr-1"></i><span data-i18n="profile.editCover">Ubah Cover</span></button>
         </div>
         <div class="px-5 pb-5">
-          <div class="flex items-end gap-4 -mt-10">
-            <div class="relative">
-              <img id="profileAvatarImg" src="" class="w-24 h-24 rounded-2xl object-cover border-4 border-navy-900 bg-navy-700">
-              <button id="editAvatarBtn" class="absolute -bottom-1 -right-1 w-7 h-7 rounded-full bg-maroon-600 hover:bg-maroon-500 text-white flex items-center justify-center text-xs"><i class="fa-solid fa-camera"></i></button>
+          <div class="flex items-end justify-between gap-4 -mt-10">
+            <div class="flex items-end gap-4">
+              <div class="relative">
+                <img id="profileAvatarImg" src="" class="w-24 h-24 rounded-2xl object-cover border-4 border-navy-900 bg-navy-700">
+                <button id="editAvatarBtn" class="absolute -bottom-1 -right-1 w-7 h-7 rounded-full bg-maroon-600 hover:bg-maroon-500 text-white flex items-center justify-center text-xs"><i class="fa-solid fa-camera"></i></button>
+              </div>
+              <div class="pb-1">
+                <p id="profileUsernameDisplay" class="text-xl font-bold text-white">-</p>
+                <p id="profileSubjectDisplay" class="text-sm text-maroon-400 font-medium">-</p>
+              </div>
             </div>
-            <div class="pb-1">
-              <p id="profileUsernameDisplay" class="text-xl font-bold text-white">-</p>
-              <p id="profileSubjectDisplay" class="text-sm text-maroon-400 font-medium">-</p>
-            </div>
+            <button id="exportStudyCardBtn" class="pb-1 bg-navy-800 hover:bg-navy-700 text-white text-xs font-semibold px-3 py-2 rounded-xl whitespace-nowrap"><i class="fa-solid fa-share-nodes mr-1.5"></i><span data-i18n="profile.export">Export Study Card</span></button>
           </div>
 
           <div class="grid grid-cols-1 md:grid-cols-2 gap-4 mt-6">
@@ -318,13 +396,14 @@
       </div>
     </section>
 
-    <!-- ============ SETTINGS VIEW ============ -->
+    <!-- ============ SETTINGS ============ -->
     <section id="view-settings" class="viewSection hidden-force fade-in space-y-4 max-w-xl">
       <div class="bg-navy-900 border border-navy-700 rounded-2xl p-5 space-y-3">
         <p class="text-sm font-semibold text-white" data-i18n="settings.changePw">Ubah Kata Sandi</p>
         <input id="currentPwInput" type="password" placeholder="Password saat ini" class="w-full bg-navy-950 border border-navy-700 rounded-xl px-4 py-2.5 text-sm text-white focus:border-maroon-500 outline-none">
         <input id="newPwInput" type="password" placeholder="Password baru (min 6 karakter)" class="w-full bg-navy-950 border border-navy-700 rounded-xl px-4 py-2.5 text-sm text-white focus:border-maroon-500 outline-none">
         <button id="changePwBtn" class="bg-navy-700 hover:bg-navy-600 text-white text-sm font-semibold px-4 py-2.5 rounded-xl w-full"><span data-i18n="settings.changePwBtn">Ubah Password</span></button>
+        <p id="googleAccNote" class="text-[11px] text-ash-500 hidden-force">Akun ini masuk via Google, password dikelola oleh Google.</p>
       </div>
 
       <div class="bg-navy-900 border border-navy-700 rounded-2xl p-5 space-y-3">
@@ -347,13 +426,11 @@
   </main>
 </div>
 
-<!-- ===================== GENERIC MODAL ROOT ===================== -->
 <div id="modalRoot" class="hidden-force fixed inset-0 z-[999] flex items-center justify-center p-4">
   <div id="modalBackdrop" class="absolute inset-0 bg-black/60 backdrop-blur-sm"></div>
   <div id="modalBox" class="relative bg-navy-900 border border-navy-700 rounded-2xl w-full max-w-lg max-h-[85vh] overflow-y-auto scrollbar-thin p-5 fade-in"></div>
 </div>
 
-<!-- ===================== CONTEXT MENU (chat message) ===================== -->
 <div id="msgContextMenu" class="hidden-force fixed z-[1000] bg-navy-800 border border-navy-600 rounded-xl shadow-lg overflow-hidden text-sm">
   <button id="ctxEditBtn" class="block w-full text-left px-4 py-2 hover:bg-navy-700 text-white"><i class="fa-solid fa-pen mr-2"></i>Edit</button>
   <button id="ctxDeleteBtn" class="block w-full text-left px-4 py-2 hover:bg-navy-700 text-maroon-400"><i class="fa-solid fa-trash mr-2"></i>Hapus</button>
@@ -361,15 +438,15 @@
 
 <script>
 /* =========================================================================
-   LOCK IN OSN — APP LOGIC
+   LOCKINO — APP LOGIC
    Firebase Compat SDK v10 (Auth + Firestore)
    ========================================================================= */
 
 /* -------------------------------------------------------------------------
-   1. FIREBASE CONFIG
-   Ganti nilai di bawah ini dengan kredensial project Firebase kamu sendiri
-   (Firebase Console > Project Settings > General > Your apps > SDK setup).
-   Aktifkan Authentication (Email/Password) dan Cloud Firestore di project.
+   1. FIREBASE CONFIG — ganti dengan kredensial project Firebase kamu sendiri.
+   Aktifkan: Authentication (Email/Password + Google), Cloud Firestore.
+   Untuk Google Sign-In, tambahkan domain hosting kamu di Firebase Console >
+   Authentication > Settings > Authorized domains.
 ------------------------------------------------------------------------- */
 const firebaseConfig = {
   apiKey: "AIzaSyDe9WhvdNVyVgHKCwZ09pBtaN7-o67429U",
@@ -386,77 +463,98 @@ const auth = firebase.auth();
 const db = firebase.firestore();
 const FieldValue = firebase.firestore.FieldValue;
 const Timestamp = firebase.firestore.Timestamp;
+const googleProvider = new firebase.auth.GoogleAuthProvider();
 
 /* -------------------------------------------------------------------------
    2. i18n
 ------------------------------------------------------------------------- */
 const I18N = {
   id: {
-    "auth.tagline": "Konsisten hari ini, medali di masa depan.",
-    "auth.login": "Masuk", "auth.register": "Daftar",
-    "auth.email": "Email", "auth.password": "Kata Sandi", "auth.username": "Username",
-    "auth.usernameNote": "Username dapat diganti nanti di profil.",
+    "auth.tagline": "Tempatmu Untuk Naik Level Setiap Hari",
+    "auth.login": "Masuk", "auth.register": "Daftar", "auth.google": "Masuk dengan Google",
+    "auth.email": "Email", "auth.password": "Kata Sandi", "auth.username": "Username", "auth.subject": "Mapel Utama",
+    "auth.usernameNote": "Username dapat diganti di profil.",
     "auth.loginBtn": "Masuk Sekarang", "auth.registerBtn": "Buat Akun",
-    "nav.dashboard": "Dashboard", "nav.friends": "Teman", "nav.resources": "Materi",
+    "nav.dashboard": "Dashboard", "nav.friends": "Teman", "nav.competitions": "Info Kompetisi", "nav.resources": "Materi",
     "nav.profile": "Profil", "nav.settings": "Pengaturan",
-    "dash.streakTitle": "Streak Belajar", "dash.checkinBtn": "Check-in Belajar Hari Ini",
-    "dash.checkinDone": "Sudah Check-in Hari Ini",
+    "dash.streakTitle": "Streak Belajar", "dash.checkinBtn": "Check-in Belajar Hari Ini", "dash.checkinDone": "Sudah Check-in Hari Ini",
+    "dash.countdownTitle": "Countdown Target Kompetisi", "dash.set": "Atur", "dash.countdownEmpty": "Belum ada target kompetisi. Klik \"Atur\" untuk memulai.",
+    "dash.checklistTitle": "Target Belajar Hari Ini",
+    "dash.timerTitle": "Timer Belajar", "dash.start": "Mulai", "dash.pause": "Jeda", "dash.totalToday": "Total hari ini:",
+    "dash.scratchTitle": "Quick Scratchpad",
     "dash.quoteTitle": "Motivasi Hari Ini", "dash.anotherQuote": "Kutipan lain",
-    "dash.focusTitle": "Apa yang akan kamu pelajari sekarang?", "dash.save": "Simpan",
     "dash.onlineTitle": "Teman Sedang Online", "dash.onlineEmpty": "Belum ada teman yang online sekarang.",
     "friends.direct": "Pribadi", "friends.groups": "Grup", "friends.myGroups": "Grup Saya",
     "friends.empty": "Belum punya teman. Cari username di atas!",
     "chat.selectPrompt": "Pilih teman atau grup untuk mulai chat",
-    "res.add": "Tambahkan Resource", "res.empty": "Belum ada materi. Jadilah yang pertama menambahkan!",
+    "comp.desc": "Info kompetisi dibagikan secara anonim oleh sesama pejuang OSN.",
+    "comp.add": "Tambah Info Kompetisi", "comp.empty": "Belum ada info kompetisi. Jadilah yang pertama membagikan!",
+    "res.add": "Tambahkan Resource", "res.myBookmarks": "Bookmark Saya",
     "profile.editCover": "Ubah Cover", "profile.username": "Username", "profile.subject": "Mapel Fokus OSN",
-    "profile.bio": "Bio", "profile.save": "Simpan Perubahan",
+    "profile.bio": "Bio", "profile.save": "Simpan Perubahan", "profile.export": "Export Study Card",
     "settings.changePw": "Ubah Kata Sandi", "settings.changePwBtn": "Ubah Password",
     "settings.account": "Akun", "settings.logout": "Keluar Akun", "settings.switch": "Pindah Akun",
     "settings.danger": "Zona Berbahaya", "settings.resetLocal": "Reset Data Lokal (tema & bahasa)",
     "settings.deleteAccount": "Hapus Akun Permanen"
   },
   en: {
-    "auth.tagline": "Stay consistent today, win medals tomorrow.",
-    "auth.login": "Login", "auth.register": "Register",
-    "auth.email": "Email", "auth.password": "Password", "auth.username": "Username",
+    "auth.tagline": "Your Place To Level Up Every Day",
+    "auth.login": "Login", "auth.register": "Register", "auth.google": "Sign in with Google",
+    "auth.email": "Email", "auth.password": "Password", "auth.username": "Username", "auth.subject": "Main Subject",
     "auth.usernameNote": "Username can be changed later in your profile.",
     "auth.loginBtn": "Log In", "auth.registerBtn": "Create Account",
-    "nav.dashboard": "Dashboard", "nav.friends": "Friends", "nav.resources": "Resources",
+    "nav.dashboard": "Dashboard", "nav.friends": "Friends", "nav.competitions": "Competitions", "nav.resources": "Resources",
     "nav.profile": "Profile", "nav.settings": "Settings",
-    "dash.streakTitle": "Study Streak", "dash.checkinBtn": "Check-in For Today",
-    "dash.checkinDone": "Checked In Today",
+    "dash.streakTitle": "Study Streak", "dash.checkinBtn": "Check-in For Today", "dash.checkinDone": "Checked In Today",
+    "dash.countdownTitle": "Competition Countdown", "dash.set": "Set", "dash.countdownEmpty": "No competition target yet. Click \"Set\" to start.",
+    "dash.checklistTitle": "Today's Study Targets",
+    "dash.timerTitle": "Study Timer", "dash.start": "Start", "dash.pause": "Pause", "dash.totalToday": "Total today:",
+    "dash.scratchTitle": "Quick Scratchpad",
     "dash.quoteTitle": "Today's Motivation", "dash.anotherQuote": "Another quote",
-    "dash.focusTitle": "What will you study now?", "dash.save": "Save",
     "dash.onlineTitle": "Friends Online Now", "dash.onlineEmpty": "No friends online right now.",
     "friends.direct": "Direct", "friends.groups": "Groups", "friends.myGroups": "My Groups",
     "friends.empty": "No friends yet. Search a username above!",
     "chat.selectPrompt": "Pick a friend or group to start chatting",
-    "res.add": "Add Resource", "res.empty": "No resources yet. Be the first to add one!",
+    "comp.desc": "Competition info shared anonymously by fellow olympiad students.",
+    "comp.add": "Add Competition Info", "comp.empty": "No competitions yet. Be the first to share one!",
+    "res.add": "Add Resource", "res.myBookmarks": "My Bookmarks",
     "profile.editCover": "Edit Cover", "profile.username": "Username", "profile.subject": "OSN Focus Subject",
-    "profile.bio": "Bio", "profile.save": "Save Changes",
+    "profile.bio": "Bio", "profile.save": "Save Changes", "profile.export": "Export Study Card",
     "settings.changePw": "Change Password", "settings.changePwBtn": "Change Password",
     "settings.account": "Account", "settings.logout": "Log Out", "settings.switch": "Switch Account",
     "settings.danger": "Danger Zone", "settings.resetLocal": "Reset Local Data (theme & language)",
     "settings.deleteAccount": "Permanently Delete Account"
   }
 };
-let currentLang = localStorage.getItem('lockin_lang') || 'id';
+let currentLang = localStorage.getItem('lockino_lang') || 'id';
 function t(key){ return (I18N[currentLang] && I18N[currentLang][key]) || key; }
 function applyI18n(){
-  document.querySelectorAll('[data-i18n]').forEach(el=>{
-    el.textContent = t(el.getAttribute('data-i18n'));
-  });
+  document.querySelectorAll('[data-i18n]').forEach(el=>{ el.textContent = t(el.getAttribute('data-i18n')); });
   document.getElementById('langBtn').textContent = currentLang.toUpperCase();
   updateCheckinButtonLabel();
+  updateTimerToggleLabel();
 }
 
 /* -------------------------------------------------------------------------
-   3. SUBJECTS (10 bidang OSN)
+   3. SUBJECTS & SYLLABUS (folder topik per mapel)
 ------------------------------------------------------------------------- */
 const SUBJECTS = ["Matematika","Fisika","Kimia","Biologi","Geografi","Kebumian","Ekonomi","Astronomi","Informatika/Komputer","AI & Data Science"];
 
+const SYLLABUS = {
+  "Matematika": ["Aljabar - Ketaksamaan & Barisan","Aljabar - Polinom & Fungsi","Geometri - Segitiga & Lingkaran","Geometri - Angle Chasing","Kombinatorika - Basic Counting","Kombinatorika - Peluang & Himpunan","Teori Bilangan - Keterbagian","Teori Bilangan - Kongruensi Modulo"],
+  "Fisika": ["Mekanika","Listrik & Magnet","Termodinamika","Fisika Modern","Praktikum Mekanika","Praktikum Listrik Magnet"],
+  "Kimia": ["Struktur Atom & Konfigurasi Elektron","Ikatan Kimia & Struktur Molekul","Stoikiometri","Kesetimbangan & Asam Basa","Elektrokimia & Kinetika","Termokimia","Kimia Analitik (Titrasi)","Kimia Organik Dasar & Stereokimia","Reaksi Organik","Biomolekul & Polimer","Praktikum Laboratorium"],
+  "Biologi": ["Biologi Sel & Molekuler","Anatomi & Fisiologi Tumbuhan","Anatomi & Fisiologi Hewan","Genetika & Evolusi","Ekologi","Etologi","Biosistematika","Praktikum Biokimia & Bioinformatika"],
+  "Geografi": ["Iklim & Perubahan Iklim","Kebencanaan & Manajemen Bencana","Sumber Daya Alam","Geografi Lingkungan","Geologi & Geomorfologi","Geografi Pertanian & Pangan","Kependudukan","Geografi Ekonomi & Globalisasi","Geografi Kota & Perencanaan","Pariwisata","Geografi Budaya","Perpetaan & Geospasial"],
+  "Kebumian": ["Bumi sebagai Sistem Dinamis","Interaksi & Siklus Sistem Bumi","Skala Ruang & Waktu Geologi","Keterampilan Analisis Data","Keterampilan Lapangan & Investigatif","Pemetaan & Analisis Spasial"],
+  "Ekonomi": ["Mikroekonomi & Pasar","Ekonomi Internasional & Game Theory","Makroekonomi & Kebijakan Fiskal","Ekonomi Moneter & Perbankan","Personal Finance & Investasi","Blockchain & Cryptocurrency"],
+  "Astronomi": ["Astrofisika Dasar","Metode Matematika","Sistem Koordinat & Waktu","Tata Surya","Bintang & Evolusinya","Sistem Bintang & Galaksi","Kosmologi Dasar","Instrumentasi","Praktikum Observasi","Praktikum Analisis Data"],
+  "Informatika/Komputer": ["Dasar Pemrograman","Operasi Logika & Bitwise","Aritmetika & Teori Bilangan","Kombinatorika Dasar","Rekursi & Backtracking","Pencarian & Pengurutan","Strategi Pemecahan Masalah","Struktur Data","Graf & Tree","Geometri Dasar"],
+  "AI & Data Science": ["Pemikiran Komputasional","Pemrograman Python","Representasi & Visualisasi Data","Aljabar Dasar","Probabilitas","Statistika","Aljabar Linear & Matriks","Kalkulus & Optimisasi"]
+};
+
 /* -------------------------------------------------------------------------
-   4. QUOTES (kutipan motivasi belajar)
+   4. QUOTES
 ------------------------------------------------------------------------- */
 const QUOTES = [
   {text:"Pendidikan adalah senjata paling mematikan di dunia, karena dengan pendidikan Anda dapat mengubah dunia.", author:"Nelson Mandela"},
@@ -465,86 +563,75 @@ const QUOTES = [
   {text:"Masa depan adalah milik mereka yang mempersiapkannya hari ini.", author:"Malcolm X"},
   {text:"Hiduplah seolah-olah kamu akan mati besok. Belajarlah seolah-olah kamu akan hidup selamanya.", author:"Mahatma Gandhi"},
   {text:"Proses belajar tidak pernah selesai; ia adalah perjalanan seumur hidup.", author:"Albert Einstein"},
-  {text:"Semakin banyak yang Anda baca, semakin banyak hal yang akan Anda ketahui.", author:"Dr. Seuss"},
   {text:"Perjalanan ribuan mil dimulai dengan satu langkah kecil.", author:"Lao Tzu"},
   {text:"Akar pendidikan memang pahit, tetapi buahnya manis.", author:"Aristoteles"},
-  {text:"Keindahan belajar adalah tidak ada seorang pun yang bisa mengambilnya darimu.", author:"B.B. King"},
   {text:"Disiplin adalah jembatan antara tujuan dan pencapaian.", author:"Jim Rohn"},
   {text:"Pengetahuan adalah kekuatan.", author:"Francis Bacon"},
-  {text:"Satu-satunya hal yang menghalangi pembelajaran saya adalah pendidikan saya.", author:"Albert Einstein"},
   {text:"Jangan tunggu peluang datang, ciptakan peluang itu.", author:"George Bernard Shaw"},
   {text:"Fokuslah pada proses, bukan hanya pada hasil.", author:"Carol Dweck"},
-  {text:"Pikiran bukanlah bejana yang harus diisi, melainkan api yang harus dinyalakan.", author:"Plutarch"},
   {text:"Kamu tidak harus hebat untuk memulai, tapi kamu harus memulai untuk menjadi hebat.", author:"Zig Ziglar"},
   {text:"Kegagalan adalah kesempatan untuk memulai lagi dengan lebih cerdas.", author:"Henry Ford"},
-  {text:"Waktu terbaik untuk menanam pohon adalah 20 tahun yang lalu. Waktu terbaik kedua adalah sekarang.", author:"Pepatah Tiongkok"},
-  {text:"Hambatan terbesar dalam belajar adalah rasa takut akan kegagalan.", author:"John C. Maxwell"},
   {text:"Rahasia untuk maju adalah memulai.", author:"Mark Twain"},
   {text:"Kesuksesan adalah jumlah dari upaya kecil yang diulangi hari demi hari.", author:"Robert Collier"},
   {text:"Genius adalah 1% inspirasi dan 99% keringat.", author:"Thomas Edison"},
   {text:"Saya belum gagal. Saya hanya menemukan 10.000 cara yang tidak berhasil.", author:"Thomas Edison"},
-  {text:"Bukan berarti saya sangat pintar, hanya saja saya bertahan pada masalah lebih lama.", author:"Albert Einstein"},
   {text:"Keberhasilan bukanlah akhir, kegagalan bukanlah fatal: keberanian untuk melanjutkannyalah yang terpenting.", author:"Winston Churchill"},
   {text:"Usaha yang gigih akan mengalahkan bakat ketika bakat tidak bekerja keras.", author:"Tim Notke"},
-  {text:"Kesabaran dan ketekunan memiliki efek magis di mana kesulitan menghilang dan rintangan lenyap.", author:"John Quincy Adams"},
   {text:"Cara terbaik untuk memprediksi masa depan adalah dengan menciptakannya.", author:"Abraham Lincoln"},
   {text:"Setiap master pernah menjadi seorang pemula.", author:"Helen Hayes"},
-  {text:"Jika kamu tidak sanggup menahan lelahnya belajar, kamu harus sanggup menahan perihnya kebodohan.", author:"Imam Syafi'i"},
   {text:"Jangan berhenti saat kamu lelah; berhentilah saat kamu selesai.", author:"David Goggins"},
   {text:"Konsistensi adalah apa yang mengubah yang biasa menjadi luar biasa.", author:"Tony Robbins"},
-  {text:"Gagal dalam merencanakan berarti merencanakan untuk gagal.", author:"Benjamin Franklin"},
   {text:"Keunggulan bukanlah sebuah tindakan, melainkan sebuah kebiasaan.", author:"Aristoteles"},
   {text:"Kamu tidak akan pernah rugi dengan berinvestasi pada dirimu sendiri.", author:"Warren Buffett"},
-  {text:"Rasa sakit karena belajar hanya bersifat sementara. Rasa sakit karena tidak belajar adalah seumur hidup.", author:"Anonim"},
   {text:"Percayalah kamu bisa, dan kamu sudah separuh jalan menuju ke sana.", author:"Theodore Roosevelt"},
   {text:"Pendidikan adalah senjata terbaik untuk mengubah dunia.", author:"Malala Yousafzai"},
   {text:"Impian tidak menjadi kenyataan melalui sihir; itu membutuhkan keringat, tekad, dan kerja keras.", author:"Colin Powell"},
   {text:"Saya tidak memiliki bakat khusus. Saya hanya sangat ingin tahu.", author:"Albert Einstein"},
   {text:"Tetaplah lapar, tetaplah bodoh.", author:"Steve Jobs"},
-  {text:"Inovasi membedakan antara seorang pemimpin dan pengikut.", author:"Steve Jobs"},
-  {text:"Imajinasi lebih penting daripada pengetahuan. Pengetahuan terbatas, imajinasi mengelilingi dunia.", author:"Albert Einstein"},
   {text:"Kreativitas adalah kecerdasan yang bersenang-senang.", author:"Albert Einstein"},
-  {text:"Orang yang membaca buku hidup dalam seribu kehidupan sebelum dia mati.", author:"George R.R. Martin"},
   {text:"Kegagalan hanyalah batu loncatan menuju keberhasilan.", author:"C.S. Lewis"},
   {text:"Disiplin adalah memilih antara apa yang kamu inginkan sekarang dan apa yang paling kamu inginkan.", author:"Abraham Lincoln"},
-  {text:"Jika kamu mendengar suara di dalam dirimu yang berkata 'kamu tidak bisa melukis', maka melukislah, dan suara itu akan bungkam.", author:"Vincent van Gogh"},
   {text:"Rasa sakit karena disiplin beratnya beberapa gram, rasa sakit karena penyesalan beratnya beberapa ton.", author:"Jim Rohn"},
   {text:"Kegagalan tidak terjadi saat kamu jatuh, tapi saat kamu menolak untuk bangkit.", author:"Vince Lombardi"},
   {text:"Kelemahan terbesar kita terletak pada menyerah. Cara paling pasti untuk sukses adalah selalu mencoba satu kali lagi.", author:"Thomas Edison"},
   {text:"Semua impian kita bisa menjadi kenyataan jika kita memiliki keberanian untuk mengejarnya.", author:"Walt Disney"},
-  {text:"Pendidikan yang sejati tidak hanya mengasah otak, tetapi juga membentuk karakter.", author:"Martin Luther King Jr."},
   {text:"Pengetahuan memberimu kekuatan, tetapi karakter memberimu rasa hormat.", author:"Bruce Lee"},
   {text:"Kerendahan hati adalah awal dari kebijaksanaan.", author:"Socrates"},
   {text:"Setiap orang adalah guru, setiap tempat adalah sekolah.", author:"Ki Hajar Dewantara"},
-  {text:"Pendidikan adalah hiasan dalam kemakmuran dan tempat berlindung dalam kemalangan.", author:"Aristoteles"},
   {text:"Kemampuan untuk fokus adalah kekuatan super di dunia modern.", author:"Cal Newport"},
   {text:"Masa depan tergantung pada apa yang kita pelajari dan kerjakan hari ini.", author:"Mahatma Gandhi"},
   {text:"Pemimpin sejati adalah pembelajar sejati.", author:"John C. Maxwell"},
-  {text:"Keinginan untuk sukses harus lebih besar daripada ketakutan akan kegagalan.", author:"Bill Cosby"},
   {text:"Siapa yang belajar hari ini akan memimpin esok hari.", author:"W.E.B. Du Bois"},
-  {text:"Pendidikan adalah perhiasan di saat senang dan tempat berlindung di saat susah.", author:"Aristoteles"},
   {text:"Ilmu tanpa agama adalah lumpuh, agama tanpa ilmu adalah buta.", author:"Albert Einstein"},
-  {text:"Belajarlah dari kesalahan orang lain. Kamu tak akan hidup cukup lama untuk melakukan semuanya sendiri.", author:"Eleanor Roosevelt"},
   {text:"Semakin banyak kamu belajar, semakin kamu sadar betapa sedikitnya yang kamu ketahui.", author:"Socrates"},
-  {text:"Satu buku dapat mengubah cara pandangmu terhadap dunia.", author:"Anonim"},
-  {text:"Pendidikan membuatmu tidak mudah dibohongi.", author:"Anonim"},
   {text:"Jangan menyerah saat materi terasa sulit, itulah tanda otakmu sedang berkembang.", author:"Anonim"},
-  {text:"Teruslah bertanya sampai kamu benar-benar paham.", author:"Anonim"},
   {text:"Belajar adalah investasi yang tidak akan pernah mengalami inflasi.", author:"Anonim"},
-  {text:"Jangan takut gagal dalam menjawab, takutlah jika kamu tidak mau mencoba.", author:"Anonim"},
   {text:"Hari ini adalah kesempatan baru untuk belajar hal luar biasa. Jangan sia-siakan!", author:"Anonim"}
 ];
 
 /* -------------------------------------------------------------------------
    5. GLOBAL STATE
 ------------------------------------------------------------------------- */
-let currentUser = null;      // firebase auth user
-let currentUserData = null;  // firestore users/{uid} doc data (live)
-let activeChat = null;       // { type:'private'|'group', id, otherUid?, groupId? }
-let unsubscribers = [];      // active onSnapshot detachers to clean up on logout
-let friendsCache = [];       // array of accepted friend uids
+let currentUser = null;
+let currentUserData = null;
+let unsubscribers = [];
+let friendsCache = [];
 let contextMenuTarget = null;
 let heartbeatInterval = null;
+let timerInterval = null;
+let timerRunning = false;
+let timerStartedAt = null;
+let timerBaseSeconds = 0;
+let countdownInterval = null;
+let selectedResSubject = SUBJECTS[0];
+let bookmarkFilterOn = false;
+let expandedTopic = null;
+let allResourcesCache = [];
+let myProgressCache = {};
+let activeCompSubjectFilter = 'all';
+let allCompCache = [];
+let chatMsgUnsub = null, groupMsgUnsub = null, groupDocUnsub = null, chatDocUnsub = null;
+let pendingGoogleUser = null;
 
 function trackUnsub(fn){ unsubscribers.push(fn); }
 function clearAllListeners(){ unsubscribers.forEach(u=>{ try{u();}catch(e){} }); unsubscribers = []; }
@@ -591,6 +678,14 @@ function formatDuration(ms){
   const hrs = Math.floor(mins/60);
   return `${hrs}j ${mins%60}m`;
 }
+function formatHM(totalSeconds){
+  const h = Math.floor(totalSeconds/3600), m = Math.floor((totalSeconds%3600)/60);
+  return `${h}j ${m}m`;
+}
+function formatHMS(totalSeconds){
+  const h = Math.floor(totalSeconds/3600), m = Math.floor((totalSeconds%3600)/60), s = Math.floor(totalSeconds%60);
+  return `${String(h).padStart(2,'0')}:${String(m).padStart(2,'0')}:${String(s).padStart(2,'0')}`;
+}
 function timeAgo(ts){
   if(!ts) return '-';
   const ms = Date.now() - (ts.toMillis ? ts.toMillis() : ts);
@@ -601,9 +696,12 @@ function timeAgo(ts){
   const d = Math.floor(h/24); return `${d}h lalu`;
 }
 function pairId(a,b){ return [a,b].sort().join('_'); }
+function defaultAvatar(name){
+  return `https://api.dicebear.com/7.x/initials/svg?seed=${encodeURIComponent(name||'U')}&backgroundColor=7a1224,101a33&fontFamily=Arial`;
+}
 
 /* -------------------------------------------------------------------------
-   7. THEME & LANGUAGE TOGGLES
+   7. THEME & LANGUAGE
 ------------------------------------------------------------------------- */
 function applyTheme(mode){
   const html = document.documentElement;
@@ -616,7 +714,7 @@ function applyTheme(mode){
     document.body.className = document.body.className.replace('bg-ash-100 text-navy-900','bg-navy-950 text-ash-200');
     document.getElementById('themeBtn').innerHTML = '<i class="fa-solid fa-moon"></i>';
   }
-  localStorage.setItem('lockin_theme', mode);
+  localStorage.setItem('lockino_theme', mode);
 }
 document.getElementById('themeBtn').addEventListener('click', ()=>{
   const isLight = document.documentElement.classList.contains('light');
@@ -624,30 +722,37 @@ document.getElementById('themeBtn').addEventListener('click', ()=>{
 });
 document.getElementById('langBtn').addEventListener('click', ()=>{
   currentLang = currentLang === 'id' ? 'en' : 'id';
-  localStorage.setItem('lockin_lang', currentLang);
+  localStorage.setItem('lockino_lang', currentLang);
   applyI18n();
 });
-applyTheme(localStorage.getItem('lockin_theme') || 'dark');
+applyTheme(localStorage.getItem('lockino_theme') || 'dark');
 
 /* -------------------------------------------------------------------------
-   8. AUTH: tab switching + show/hide password
+   8. AUTH: tabs, show/hide password, subject select population
 ------------------------------------------------------------------------- */
-document.getElementById('tabLoginBtn').addEventListener('click', ()=>{
-  document.getElementById('tabLoginBtn').classList.add('bg-maroon-600','text-white');
-  document.getElementById('tabLoginBtn').classList.remove('text-ash-300');
-  document.getElementById('tabRegisterBtn').classList.remove('bg-maroon-600','text-white');
-  document.getElementById('tabRegisterBtn').classList.add('text-ash-300');
-  document.getElementById('loginForm').classList.remove('hidden-force');
-  document.getElementById('registerForm').classList.add('hidden-force');
-});
-document.getElementById('tabRegisterBtn').addEventListener('click', ()=>{
-  document.getElementById('tabRegisterBtn').classList.add('bg-maroon-600','text-white');
-  document.getElementById('tabRegisterBtn').classList.remove('text-ash-300');
-  document.getElementById('tabLoginBtn').classList.remove('bg-maroon-600','text-white');
-  document.getElementById('tabLoginBtn').classList.add('text-ash-300');
-  document.getElementById('registerForm').classList.remove('hidden-force');
-  document.getElementById('loginForm').classList.add('hidden-force');
-});
+function populateAuthSubjectSelect(){
+  document.getElementById('regSubject').innerHTML = SUBJECTS.map(s=>`<option value="${s}">${s}</option>`).join('');
+}
+populateAuthSubjectSelect();
+
+document.getElementById('tabLoginBtn').addEventListener('click', ()=> switchAuthTab('login'));
+document.getElementById('tabRegisterBtn').addEventListener('click', ()=> switchAuthTab('register'));
+function switchAuthTab(tab){
+  const loginBtn = document.getElementById('tabLoginBtn'), regBtn = document.getElementById('tabRegisterBtn');
+  if(tab === 'login'){
+    loginBtn.classList.add('bg-maroon-600','text-white'); loginBtn.classList.remove('text-ash-300');
+    regBtn.classList.remove('bg-maroon-600','text-white'); regBtn.classList.add('text-ash-300');
+    document.getElementById('loginForm').classList.remove('hidden-force');
+    document.getElementById('registerForm').classList.add('hidden-force');
+  } else {
+    regBtn.classList.add('bg-maroon-600','text-white'); regBtn.classList.remove('text-ash-300');
+    loginBtn.classList.remove('bg-maroon-600','text-white'); loginBtn.classList.add('text-ash-300');
+    document.getElementById('registerForm').classList.remove('hidden-force');
+    document.getElementById('loginForm').classList.add('hidden-force');
+  }
+}
+switchAuthTab('register'); // default landing = tab Daftar
+
 document.querySelectorAll('.togglePw').forEach(btn=>{
   btn.addEventListener('click', ()=>{
     const input = document.getElementById(btn.getAttribute('data-target'));
@@ -658,7 +763,7 @@ document.querySelectorAll('.togglePw').forEach(btn=>{
 });
 
 /* -------------------------------------------------------------------------
-   9. AUTH: register / login / logout
+   9. AUTH: register / login / google / logout
 ------------------------------------------------------------------------- */
 document.getElementById('registerForm').addEventListener('submit', async (e)=>{
   e.preventDefault();
@@ -667,6 +772,7 @@ document.getElementById('registerForm').addEventListener('submit', async (e)=>{
   const username = document.getElementById('regUsername').value.trim();
   const email = document.getElementById('regEmail').value.trim();
   const password = document.getElementById('regPassword').value;
+  const subject = document.getElementById('regSubject').value;
   const usernameLower = username.toLowerCase();
 
   if(!/^[a-zA-Z0-9_.]{3,20}$/.test(username)){
@@ -680,16 +786,8 @@ document.getElementById('registerForm').addEventListener('submit', async (e)=>{
       errEl.classList.remove('hidden-force'); return;
     }
     const cred = await auth.createUserWithEmailAndPassword(email, password);
-    await db.collection('users').doc(cred.user.uid).set({
-      username, usernameLower, email,
-      photoURL: '', coverURL: '', subject: SUBJECTS[0], bio: '',
-      streak: 0, lastCheckIn: '', currentFocus: '',
-      usernameChangeHistory: [],
-      friends: [],
-      lastActive: FieldValue.serverTimestamp(),
-      createdAt: FieldValue.serverTimestamp()
-    });
-    showToast('Akun berhasil dibuat! Selamat datang 🎉', 'success');
+    await createUserDoc(cred.user, { username, usernameLower, subject, authProvider:'password' });
+    showToast('Akun berhasil dibuat! Selamat datang di Lockino 🎉', 'success');
   }catch(err){
     errEl.textContent = mapAuthError(err);
     errEl.classList.remove('hidden-force');
@@ -702,13 +800,72 @@ document.getElementById('loginForm').addEventListener('submit', async (e)=>{
   errEl.classList.add('hidden-force');
   const email = document.getElementById('loginEmail').value.trim();
   const password = document.getElementById('loginPassword').value;
+  try{ await auth.signInWithEmailAndPassword(email, password); }
+  catch(err){ errEl.textContent = mapAuthError(err); errEl.classList.remove('hidden-force'); }
+});
+
+document.getElementById('googleAuthBtn').addEventListener('click', async ()=>{
   try{
-    await auth.signInWithEmailAndPassword(email, password);
+    const result = await auth.signInWithPopup(googleProvider);
+    const user = result.user;
+    const existing = await db.collection('users').doc(user.uid).get();
+    if(existing.exists) return; // onAuthStateChanged will handle the rest
+    pendingGoogleUser = user;
+    openGoogleCompleteProfileModal(user);
   }catch(err){
-    errEl.textContent = mapAuthError(err);
-    errEl.classList.remove('hidden-force');
+    showToast(mapAuthError(err), 'error');
   }
 });
+
+function openGoogleCompleteProfileModal(user){
+  const suggested = (user.displayName || 'user').replace(/[^a-zA-Z0-9_.]/g,'').slice(0,20) || ('user'+Math.floor(Math.random()*9999));
+  openModal(`
+    <h3 class="text-lg font-bold text-white mb-1">Lengkapi Profil Kamu</h3>
+    <p class="text-sm text-ash-400 mb-4">Sedikit lagi! Pilih username dan mapel utamamu.</p>
+    <div class="space-y-3">
+      <div class="flex items-center gap-3 mb-1">
+        <img src="${user.photoURL||defaultAvatar(user.displayName)}" class="w-12 h-12 rounded-full object-cover bg-navy-700">
+        <div><p class="text-sm text-white font-semibold">${escapeHtml(user.displayName||'')}</p><p class="text-xs text-ash-500">${escapeHtml(user.email||'')}</p></div>
+      </div>
+      <input id="gUsername" type="text" value="${escapeHtml(suggested)}" maxlength="20" class="w-full bg-navy-950 border border-navy-700 rounded-xl px-4 py-2.5 text-sm text-white outline-none focus:border-maroon-500" placeholder="Username">
+      <select id="gSubject" class="w-full bg-navy-950 border border-navy-700 rounded-xl px-4 py-2.5 text-sm text-white outline-none focus:border-maroon-500">
+        ${SUBJECTS.map(s=>`<option value="${s}">${s}</option>`).join('')}
+      </select>
+      <p id="gErr" class="text-xs text-maroon-400 hidden-force"></p>
+      <button id="gCompleteBtn" class="w-full bg-maroon-600 hover:bg-maroon-500 text-white font-semibold py-2.5 rounded-xl text-sm">Selesaikan Pendaftaran</button>
+    </div>
+  `);
+  document.getElementById('gCompleteBtn').addEventListener('click', async ()=>{
+    const username = document.getElementById('gUsername').value.trim();
+    const subject = document.getElementById('gSubject').value;
+    const errEl = document.getElementById('gErr');
+    if(!/^[a-zA-Z0-9_.]{3,20}$/.test(username)){
+      errEl.textContent = 'Username tidak valid (3-20 karakter).'; errEl.classList.remove('hidden-force'); return;
+    }
+    const dup = await db.collection('users').where('usernameLower','==',username.toLowerCase()).limit(1).get();
+    if(!dup.empty){ errEl.textContent = 'Username sudah digunakan.'; errEl.classList.remove('hidden-force'); return; }
+    await createUserDoc(pendingGoogleUser, {
+      username, usernameLower: username.toLowerCase(), subject, authProvider:'google',
+      photoURL: pendingGoogleUser.photoURL || ''
+    });
+    closeModal(); showToast('Akun Google berhasil terhubung! Selamat datang 🎉', 'success');
+  });
+}
+
+async function createUserDoc(user, extra){
+  await db.collection('users').doc(user.uid).set({
+    username: extra.username, usernameLower: extra.usernameLower, email: user.email || '',
+    photoURL: extra.photoURL || '', coverURL: '', subject: extra.subject, bio: '',
+    authProvider: extra.authProvider || 'password',
+    streak: 0, lastCheckIn: '',
+    competitionTarget: null,
+    dailyChecklist: { date: todayStr(), items: [ {text:'',done:false}, {text:'',done:false}, {text:'',done:false} ] },
+    studyTimer: { date: todayStr(), totalSeconds: 0 },
+    scratchpad: '', currentFocus: '',
+    usernameChangeHistory: [], friends: [],
+    lastActive: FieldValue.serverTimestamp(), createdAt: FieldValue.serverTimestamp()
+  }, { merge:true });
+}
 
 function mapAuthError(err){
   const map = {
@@ -718,32 +875,29 @@ function mapAuthError(err){
     'auth/user-not-found': 'Email atau password salah.',
     'auth/wrong-password': 'Email atau password salah.',
     'auth/invalid-credential': 'Email atau password salah.',
+    'auth/popup-closed-by-user': 'Jendela Google ditutup sebelum selesai.',
     'auth/too-many-requests': 'Terlalu banyak percobaan. Coba lagi nanti.'
   };
   return map[err.code] || (err.message || 'Terjadi kesalahan.');
 }
 
 document.getElementById('logoutBtn').addEventListener('click', ()=>{
-  confirmDialog('Keluar dari akun?', 'Kamu bisa masuk kembali kapan saja.', async ()=>{
-    await doLogout();
-  });
+  confirmDialog('Keluar dari akun?', 'Kamu bisa masuk kembali kapan saja.', async ()=>{ await doLogout(); });
 });
 document.getElementById('switchAccountBtn').addEventListener('click', ()=>{
-  confirmDialog('Pindah Akun', 'Kamu akan keluar dari akun ini agar bisa masuk dengan akun lain.', async ()=>{
-    await doLogout();
-  });
+  confirmDialog('Pindah Akun', 'Kamu akan keluar dari akun ini agar bisa masuk dengan akun lain.', async ()=>{ await doLogout(); });
 });
 async function doLogout(){
   if(heartbeatInterval) clearInterval(heartbeatInterval);
+  if(timerInterval) clearInterval(timerInterval);
+  if(countdownInterval) clearInterval(countdownInterval);
+  await persistStudyTimerIfRunning();
   clearAllListeners();
   try{
-    if(currentUser){
-      await db.collection('users').doc(currentUser.uid).update({ lastActive: FieldValue.serverTimestamp() });
-    }
+    if(currentUser) await db.collection('users').doc(currentUser.uid).update({ lastActive: FieldValue.serverTimestamp() });
   }catch(e){}
   await auth.signOut();
 }
-
 function confirmDialog(title, desc, onConfirm){
   openModal(`
     <h3 class="text-lg font-bold text-white mb-2">${escapeHtml(title)}</h3>
@@ -758,18 +912,24 @@ function confirmDialog(title, desc, onConfirm){
 }
 
 /* -------------------------------------------------------------------------
-   10. AUTH STATE LISTENER — main entry point
+   10. AUTH STATE LISTENER
 ------------------------------------------------------------------------- */
 auth.onAuthStateChanged(async (user)=>{
   if(user){
+    const doc = await db.collection('users').doc(user.uid).get();
+    if(!doc.exists){
+      // Google user mid-onboarding: wait for modal completion, don't enter app yet
+      if(pendingGoogleUser && pendingGoogleUser.uid === user.uid) return;
+    }
     currentUser = user;
     document.getElementById('authView').classList.add('hidden-force');
     document.getElementById('appView').classList.remove('hidden-force');
     await initApp();
   } else {
-    currentUser = null; currentUserData = null;
+    currentUser = null; currentUserData = null; pendingGoogleUser = null;
     document.getElementById('appView').classList.add('hidden-force');
     document.getElementById('authView').classList.remove('hidden-force');
+    switchAuthTab('register');
     document.getElementById('loginForm').reset();
     document.getElementById('registerForm').reset();
   }
@@ -778,6 +938,7 @@ auth.onAuthStateChanged(async (user)=>{
 async function initApp(){
   applyI18n();
   populateSubjectFilters();
+  populateCompSubjectFilters();
   populateSubjectSelect();
   pickRandomQuote();
   listenToOwnUserDoc();
@@ -785,23 +946,15 @@ async function initApp(){
   listenToNotifications();
   listenToFriendsList();
   listenToResources();
+  listenToCompetitions();
   startHeartbeat();
+  startCountdownClock();
   goToView('dashboard');
 }
-
 function startHeartbeat(){
-  const beat = ()=>{
-    if(currentUser){
-      db.collection('users').doc(currentUser.uid).update({ lastActive: FieldValue.serverTimestamp() }).catch(()=>{});
-    }
-  };
+  const beat = ()=>{ if(currentUser) db.collection('users').doc(currentUser.uid).update({ lastActive: FieldValue.serverTimestamp() }).catch(()=>{}); };
   beat();
   heartbeatInterval = setInterval(beat, 45000);
-  window.addEventListener('beforeunload', ()=>{
-    if(currentUser){
-      navigator.sendBeacon && db.collection('users').doc(currentUser.uid).update({ lastActive: firebase.firestore.Timestamp.fromMillis(Date.now()-200000) });
-    }
-  });
 }
 
 /* -------------------------------------------------------------------------
@@ -815,25 +968,25 @@ function goToView(name){
     else { b.classList.remove('bg-maroon-600','text-white'); b.classList.add('text-ash-300'); }
   });
   if(name === 'profile') fillProfileForm();
+  if(name === 'resources') renderTopicFolders();
 }
-document.querySelectorAll('.navBtn').forEach(btn=>{
-  btn.addEventListener('click', ()=> goToView(btn.getAttribute('data-view')));
-});
+document.querySelectorAll('.navBtn').forEach(btn=>{ btn.addEventListener('click', ()=> goToView(btn.getAttribute('data-view'))); });
 
 /* -------------------------------------------------------------------------
-   12. OWN USER DOC LISTENER + STREAK LOGIC
+   12. OWN USER DOC LISTENER + STREAK
 ------------------------------------------------------------------------- */
 function listenToOwnUserDoc(){
   const unsub = db.collection('users').doc(currentUser.uid).onSnapshot(async (doc)=>{
     if(!doc.exists) return;
     const data = doc.data();
-    const prevStreak = currentUserData ? currentUserData.streak : undefined;
     currentUserData = data;
     renderTopBar(data);
     renderStreakUI(data);
-    document.getElementById('focusInput').value = data.currentFocus || '';
+    renderCountdownUI(data);
+    renderChecklistUI(data);
+    renderScratchpadUI(data);
+    renderTimerBaseline(data);
 
-    // Check for streak death on load: if lastCheckIn exists and gap > 1 day
     const today = todayStr();
     if(data.lastCheckIn && data.lastCheckIn !== today){
       const gap = daysBetweenStr(data.lastCheckIn, today);
@@ -846,16 +999,12 @@ function listenToOwnUserDoc(){
   });
   trackUnsub(unsub);
 }
-
 function renderTopBar(data){
   document.getElementById('topUsername').textContent = data.username;
   document.getElementById('topSubject').textContent = data.subject || '-';
   document.getElementById('topAvatar').src = data.photoURL || defaultAvatar(data.username);
+  if(data.authProvider === 'google') document.getElementById('googleAccNote').classList.remove('hidden-force');
 }
-function defaultAvatar(name){
-  return `https://api.dicebear.com/7.x/initials/svg?seed=${encodeURIComponent(name||'U')}&backgroundColor=7a1224,101a33&fontFamily=Arial`;
-}
-
 function renderStreakUI(data){
   document.getElementById('streakCount').textContent = data.streak || 0;
   updateCheckinButtonLabel();
@@ -867,7 +1016,6 @@ function updateCheckinButtonLabel(){
   btn.disabled = done;
   btn.textContent = done ? t('dash.checkinDone') : t('dash.checkinBtn');
 }
-
 function showStreakDeathAlert(){
   openModal(`
     <div class="text-center py-2">
@@ -879,7 +1027,6 @@ function showStreakDeathAlert(){
   `);
   document.getElementById('streakDeathOk').addEventListener('click', closeModal);
 }
-
 document.getElementById('checkinBtn').addEventListener('click', async ()=>{
   const today = todayStr();
   if(currentUserData.lastCheckIn === today) return;
@@ -891,7 +1038,6 @@ document.getElementById('checkinBtn').addEventListener('click', async ()=>{
   showToast('Check-in berhasil! Tetap semangat 🔥', 'success');
   await propagateCheckinToFriendships(today, yStr);
 });
-
 async function propagateCheckinToFriendships(today, yStr){
   const snap = await db.collection('friendships').where('users','array-contains', currentUser.uid).get();
   const batch = db.batch();
@@ -903,7 +1049,6 @@ async function propagateCheckinToFriendships(today, yStr){
     let streak = fs.streak || 0;
     let lastBothDate = fs.lastBothDate || '';
     if(checkins[otherUid] === today){
-      // both checked in today
       if(lastBothDate === today){ /* already counted */ }
       else if(lastBothDate === yStr){ streak += 1; }
       else { streak = 1; }
@@ -913,7 +1058,6 @@ async function propagateCheckinToFriendships(today, yStr){
   });
   await batch.commit().catch(()=>{});
 }
-
 document.getElementById('newQuoteBtn').addEventListener('click', pickRandomQuote);
 function pickRandomQuote(){
   const q = QUOTES[Math.floor(Math.random()*QUOTES.length)];
@@ -921,25 +1065,204 @@ function pickRandomQuote(){
   document.getElementById('quoteAuthor').textContent = `— ${q.author}`;
 }
 
-document.getElementById('saveFocusBtn').addEventListener('click', async ()=>{
-  const val = document.getElementById('focusInput').value.trim();
-  await db.collection('users').doc(currentUser.uid).update({ currentFocus: val });
-  showToast('Target belajar disimpan!', 'success');
+/* -------------------------------------------------------------------------
+   13. COUNTDOWN WIDGET (custom, opsional, diatur user sendiri)
+------------------------------------------------------------------------- */
+function renderCountdownUI(data){
+  const target = data.competitionTarget;
+  if(!target || !target.datetime){
+    document.getElementById('countdownEmpty').classList.remove('hidden-force');
+    document.getElementById('countdownActive').classList.add('hidden-force');
+    return;
+  }
+  document.getElementById('countdownEmpty').classList.add('hidden-force');
+  document.getElementById('countdownActive').classList.remove('hidden-force');
+  document.getElementById('countdownLabel').textContent = target.label || 'Target Kompetisi';
+}
+function startCountdownClock(){
+  if(countdownInterval) clearInterval(countdownInterval);
+  countdownInterval = setInterval(()=>{
+    if(!currentUserData || !currentUserData.competitionTarget || !currentUserData.competitionTarget.datetime) return;
+    const targetMs = new Date(currentUserData.competitionTarget.datetime).getTime();
+    let diff = targetMs - Date.now();
+    if(diff < 0) diff = 0;
+    const days = Math.floor(diff/86400000);
+    const hours = Math.floor((diff%86400000)/3600000);
+    const mins = Math.floor((diff%3600000)/60000);
+    const secs = Math.floor((diff%60000)/1000);
+    document.getElementById('cdDays').textContent = days;
+    document.getElementById('cdHours').textContent = hours;
+    document.getElementById('cdMins').textContent = mins;
+    document.getElementById('cdSecs').textContent = secs;
+  }, 1000);
+}
+document.getElementById('editCountdownBtn').addEventListener('click', ()=>{
+  const target = currentUserData.competitionTarget;
+  let defaultLocal = '';
+  if(target && target.datetime){
+    const d = new Date(target.datetime);
+    defaultLocal = `${d.getFullYear()}-${String(d.getMonth()+1).padStart(2,'0')}-${String(d.getDate()).padStart(2,'0')}T${String(d.getHours()).padStart(2,'0')}:${String(d.getMinutes()).padStart(2,'0')}`;
+  }
+  openModal(`
+    <h3 class="text-lg font-bold text-white mb-3"><i class="fa-solid fa-hourglass-half text-maroon-500 mr-2"></i>Atur Target Kompetisi</h3>
+    <div class="space-y-3">
+      <input id="cdLabelInput" type="text" placeholder='Contoh: "OSN-K Kimia 2027"' value="${escapeHtml(target ? target.label||'' : '')}" maxlength="60" class="w-full bg-navy-950 border border-navy-700 rounded-xl px-4 py-2.5 text-sm text-white outline-none focus:border-maroon-500">
+      <input id="cdDateInput" type="datetime-local" value="${defaultLocal}" class="w-full bg-navy-950 border border-navy-700 rounded-xl px-4 py-2.5 text-sm text-white outline-none focus:border-maroon-500">
+      <div class="flex gap-2">
+        <button id="cdSaveBtn" class="flex-1 bg-maroon-600 hover:bg-maroon-500 text-white font-semibold py-2.5 rounded-xl text-sm">Simpan</button>
+        ${target ? `<button id="cdRemoveBtn" class="px-4 bg-navy-800 hover:bg-navy-700 text-white rounded-xl text-sm">Hapus</button>` : ''}
+      </div>
+    </div>
+  `);
+  document.getElementById('cdSaveBtn').addEventListener('click', async ()=>{
+    const label = document.getElementById('cdLabelInput').value.trim();
+    const dateVal = document.getElementById('cdDateInput').value;
+    if(!label || !dateVal){ showToast('Isi nama kompetisi dan tanggal/jam.', 'error'); return; }
+    await db.collection('users').doc(currentUser.uid).update({
+      competitionTarget: { label, datetime: new Date(dateVal).toISOString() }
+    });
+    closeModal(); showToast('Target kompetisi disimpan!', 'success');
+  });
+  document.getElementById('cdRemoveBtn')?.addEventListener('click', async ()=>{
+    await db.collection('users').doc(currentUser.uid).update({ competitionTarget: null });
+    closeModal(); showToast('Target kompetisi dihapus.', 'success');
+  });
 });
 
 /* -------------------------------------------------------------------------
-   13. NOTIFICATIONS
+   14. DAILY CHECKLIST (3 mini target, dgn animasi)
+------------------------------------------------------------------------- */
+function getTodaysChecklist(data){
+  const cl = data.dailyChecklist;
+  if(!cl || cl.date !== todayStr()) return { date: todayStr(), items:[{text:'',done:false},{text:'',done:false},{text:'',done:false}] };
+  return cl;
+}
+function renderChecklistUI(data){
+  const cl = getTodaysChecklist(data);
+  const wrap = document.getElementById('checklistItems');
+  wrap.innerHTML = cl.items.map((item, i)=>`
+    <div class="flex items-center gap-2">
+      <button class="checklistToggle w-6 h-6 rounded-lg border-2 flex items-center justify-center shrink-0 ${item.done ? 'bg-maroon-600 border-maroon-600' : 'border-navy-600'}" data-idx="${i}">
+        ${item.done ? '<i class="fa-solid fa-check text-white text-xs"></i>' : ''}
+      </button>
+      <input type="text" class="checklistInput flex-1 bg-navy-950 border border-navy-700 rounded-lg px-3 py-1.5 text-sm strike-anim ${item.done ? 'text-ash-500 line-through' : 'text-white'} outline-none focus:border-maroon-500" data-idx="${i}" maxlength="80" placeholder="Target belajar #${i+1}" value="${escapeHtml(item.text)}">
+    </div>
+  `).join('');
+  wrap.querySelectorAll('.checklistToggle').forEach(btn=>{
+    btn.addEventListener('click', async ()=>{
+      const idx = parseInt(btn.getAttribute('data-idx'));
+      const cl2 = getTodaysChecklist(currentUserData);
+      cl2.items[idx].done = !cl2.items[idx].done;
+      btn.classList.add('check-pop');
+      await db.collection('users').doc(currentUser.uid).update({ dailyChecklist: cl2 });
+      const doneTexts = cl2.items.filter(x=>x.done===false && x.text).map(x=>x.text);
+      await db.collection('users').doc(currentUser.uid).update({ currentFocus: doneTexts.slice(0,2).join(', ') || (cl2.items.find(x=>x.text)?.text || '') });
+    });
+  });
+  let inputDebounce = {};
+  wrap.querySelectorAll('.checklistInput').forEach(inp=>{
+    inp.addEventListener('input', ()=>{
+      const idx = parseInt(inp.getAttribute('data-idx'));
+      clearTimeout(inputDebounce[idx]);
+      inputDebounce[idx] = setTimeout(async ()=>{
+        const cl2 = getTodaysChecklist(currentUserData);
+        cl2.items[idx].text = inp.value;
+        await db.collection('users').doc(currentUser.uid).update({ dailyChecklist: cl2 });
+        const focusText = cl2.items.filter(x=>x.text).map(x=>x.text).slice(0,2).join(', ');
+        await db.collection('users').doc(currentUser.uid).update({ currentFocus: focusText });
+      }, 600);
+    });
+  });
+}
+
+/* -------------------------------------------------------------------------
+   15. STUDY TIMER / POMODORO
+------------------------------------------------------------------------- */
+function getTodaysStudySeconds(data){
+  const st = data.studyTimer;
+  if(!st || st.date !== todayStr()) return 0;
+  return st.totalSeconds || 0;
+}
+function renderTimerBaseline(data){
+  if(!timerRunning){
+    timerBaseSeconds = getTodaysStudySeconds(data);
+    document.getElementById('timerDisplay').textContent = formatHMS(timerBaseSeconds);
+  }
+  document.getElementById('totalStudyToday').textContent = formatHM(getTodaysStudySeconds(data));
+}
+function updateTimerToggleLabel(){
+  const btn = document.getElementById('timerToggleBtn');
+  if(timerRunning) btn.innerHTML = `<i class="fa-solid fa-pause mr-1"></i>${t('dash.pause')}`;
+  else btn.innerHTML = `<i class="fa-solid fa-play mr-1"></i>${t('dash.start')}`;
+}
+document.getElementById('timerToggleBtn').addEventListener('click', async ()=>{
+  if(!timerRunning){
+    timerRunning = true; timerStartedAt = Date.now();
+    updateTimerToggleLabel();
+    timerInterval = setInterval(()=>{
+      const elapsed = Math.floor((Date.now()-timerStartedAt)/1000);
+      document.getElementById('timerDisplay').textContent = formatHMS(timerBaseSeconds + elapsed);
+    }, 1000);
+  } else {
+    await persistStudyTimerIfRunning();
+    updateTimerToggleLabel();
+  }
+});
+async function persistStudyTimerIfRunning(){
+  if(!timerRunning) return;
+  clearInterval(timerInterval);
+  const elapsed = Math.floor((Date.now()-timerStartedAt)/1000);
+  timerRunning = false;
+  const newTotal = timerBaseSeconds + elapsed;
+  timerBaseSeconds = newTotal;
+  if(currentUser){
+    await db.collection('users').doc(currentUser.uid).update({ studyTimer: { date: todayStr(), totalSeconds: newTotal } }).catch(()=>{});
+  }
+}
+document.getElementById('timerResetBtn').addEventListener('click', ()=>{
+  confirmDialog('Reset timer hari ini?', 'Total jam belajar hari ini akan dikembalikan ke 0.', async ()=>{
+    if(timerRunning){ clearInterval(timerInterval); timerRunning=false; updateTimerToggleLabel(); }
+    timerBaseSeconds = 0;
+    await db.collection('users').doc(currentUser.uid).update({ studyTimer: { date: todayStr(), totalSeconds: 0 } });
+    document.getElementById('timerDisplay').textContent = '00:00:00';
+  });
+});
+window.addEventListener('beforeunload', ()=>{
+  if(timerRunning && currentUser){
+    const elapsed = Math.floor((Date.now()-timerStartedAt)/1000);
+    navigator.sendBeacon && db.collection('users').doc(currentUser.uid).update({ studyTimer: { date: todayStr(), totalSeconds: timerBaseSeconds+elapsed } });
+  }
+});
+
+/* -------------------------------------------------------------------------
+   16. SCRATCHPAD
+------------------------------------------------------------------------- */
+let scratchpadDebounce = null;
+function renderScratchpadUI(data){
+  const input = document.getElementById('scratchpadInput');
+  if(document.activeElement !== input) input.value = data.scratchpad || '';
+}
+document.getElementById('scratchpadInput').addEventListener('input', (e)=>{
+  clearTimeout(scratchpadDebounce);
+  document.getElementById('scratchpadSavedNote').textContent = 'Menyimpan...';
+  scratchpadDebounce = setTimeout(async ()=>{
+    await db.collection('users').doc(currentUser.uid).update({ scratchpad: e.target.value });
+    document.getElementById('scratchpadSavedNote').textContent = 'Tersimpan otomatis ✓';
+  }, 700);
+});
+
+/* -------------------------------------------------------------------------
+   17. NOTIFICATIONS
 ------------------------------------------------------------------------- */
 function listenToNotifications(){
   const unsub = db.collection('notifications').doc(currentUser.uid).collection('items')
     .orderBy('createdAt','desc').limit(50)
     .onSnapshot(snap=>{
-      let unread = 0;
-      const items = [];
+      let unread = 0; const items = [];
       snap.forEach(d=>{ const data = d.data(); if(!data.read) unread++; items.push({id:d.id, ...data}); });
       const badge = document.getElementById('notifBadge');
       if(unread > 0){ badge.textContent = unread > 9 ? '9+' : unread; badge.classList.remove('hidden-force'); }
-      else { badge.classList.add('hidden-force'); }
+      else badge.classList.add('hidden-force');
       window.__notifItems = items;
     });
   trackUnsub(unsub);
@@ -955,9 +1278,7 @@ document.getElementById('notifBtn').addEventListener('click', ()=>{
   const items = window.__notifItems || [];
   const html = items.length ? items.map(n=>`
     <div class="flex items-start gap-3 p-3 rounded-xl ${n.read ? 'bg-navy-800/40' : 'bg-navy-800'} mb-2">
-      <div class="w-8 h-8 rounded-full bg-maroon-600/20 flex items-center justify-center text-maroon-400 shrink-0">
-        <i class="fa-solid ${notifIcon(n.type)}"></i>
-      </div>
+      <div class="w-8 h-8 rounded-full bg-maroon-600/20 flex items-center justify-center text-maroon-400 shrink-0"><i class="fa-solid ${notifIcon(n.type)}"></i></div>
       <div class="flex-1 min-w-0">
         <p class="text-sm text-white">${escapeHtml(n.message)}</p>
         <p class="text-[11px] text-ash-500 mt-0.5">${timeAgo(n.createdAt)}</p>
@@ -974,11 +1295,11 @@ document.getElementById('notifBtn').addEventListener('click', ()=>{
   });
 });
 function notifIcon(type){
-  return { like:'fa-heart', comment:'fa-comment', friend_request:'fa-user-plus', friend_accept:'fa-user-check', group_invite:'fa-users' }[type] || 'fa-bell';
+  return { like:'fa-heart', comment:'fa-comment', friend_request:'fa-user-plus', friend_accept:'fa-user-check', group_invite:'fa-users', comp_like:'fa-trophy', comp_comment:'fa-comment' }[type] || 'fa-bell';
 }
 
 /* -------------------------------------------------------------------------
-   14. FRIENDS: search users, send/accept/reject requests, friend list
+   18. FRIENDS: search, requests, list, online widget, mutual friends
 ------------------------------------------------------------------------- */
 let searchDebounce = null;
 document.getElementById('userSearchInput').addEventListener('input', (e)=>{
@@ -987,10 +1308,8 @@ document.getElementById('userSearchInput').addEventListener('input', (e)=>{
   const resultsEl = document.getElementById('userSearchResults');
   if(!term){ resultsEl.innerHTML=''; return; }
   searchDebounce = setTimeout(async ()=>{
-    const snap = await db.collection('users')
-      .where('usernameLower','>=',term).where('usernameLower','<=',term+'\uf8ff').limit(8).get();
-    const rows = [];
-    snap.forEach(d=>{ if(d.id !== currentUser.uid) rows.push({id:d.id, ...d.data()}); });
+    const snap = await db.collection('users').where('usernameLower','>=',term).where('usernameLower','<=',term+'\uf8ff').limit(8).get();
+    const rows = []; snap.forEach(d=>{ if(d.id !== currentUser.uid) rows.push({id:d.id, ...d.data()}); });
     resultsEl.innerHTML = rows.length ? rows.map(u=>`
       <div class="flex items-center gap-2 p-2 rounded-xl hover:bg-navy-800">
         <img src="${u.photoURL || defaultAvatar(u.username)}" class="w-8 h-8 rounded-full object-cover bg-navy-700">
@@ -1002,8 +1321,7 @@ document.getElementById('userSearchInput').addEventListener('input', (e)=>{
       btn.addEventListener('click', async ()=>{
         const toUid = btn.getAttribute('data-uid');
         btn.disabled = true; btn.textContent = '...';
-        const existing = await db.collection('friendRequests')
-          .where('from','==',currentUser.uid).where('to','==',toUid).where('status','==','pending').limit(1).get();
+        const existing = await db.collection('friendRequests').where('from','==',currentUser.uid).where('to','==',toUid).where('status','==','pending').limit(1).get();
         if(!existing.empty){ btn.textContent='Terkirim'; return; }
         await db.collection('friendRequests').add({
           from: currentUser.uid, to: toUid, fromUsername: currentUserData.username, toUsername: btn.getAttribute('data-uname'),
@@ -1015,15 +1333,13 @@ document.getElementById('userSearchInput').addEventListener('input', (e)=>{
     });
   }, 350);
 });
-
 function listenToFriendRequests(){
   const unsub = db.collection('friendRequests').where('to','==',currentUser.uid).where('status','==','pending')
     .onSnapshot(snap=>{
       const badge = document.getElementById('friendReqBadge');
       if(snap.size > 0){ badge.textContent = snap.size; badge.classList.remove('hidden-force'); }
       else badge.classList.add('hidden-force');
-      window.__pendingRequests = [];
-      snap.forEach(d=> window.__pendingRequests.push({id:d.id, ...d.data()}));
+      window.__pendingRequests = []; snap.forEach(d=> window.__pendingRequests.push({id:d.id, ...d.data()}));
     });
   trackUnsub(unsub);
 }
@@ -1052,10 +1368,7 @@ document.getElementById('friendReqBtn').addEventListener('click', ()=>{
     });
   });
   document.querySelectorAll('.rejectReq').forEach(b=>{
-    b.addEventListener('click', async ()=>{
-      await db.collection('friendRequests').doc(b.getAttribute('data-id')).update({status:'rejected'});
-      closeModal();
-    });
+    b.addEventListener('click', async ()=>{ await db.collection('friendRequests').doc(b.getAttribute('data-id')).update({status:'rejected'}); closeModal(); });
   });
 });
 
@@ -1078,8 +1391,7 @@ async function renderFriendList(){
     return;
   }
   emptyEl.classList.add('hidden-force');
-  const chunks = [];
-  for(let i=0;i<friendsCache.length;i+=10) chunks.push(friendsCache.slice(i,i+10));
+  const chunks = []; for(let i=0;i<friendsCache.length;i+=10) chunks.push(friendsCache.slice(i,i+10));
   let allFriends = [];
   for(const chunk of chunks){
     const snap = await db.collection('users').where(firebase.firestore.FieldPath.documentId(),'in',chunk).get();
@@ -1101,23 +1413,20 @@ async function renderFriendList(){
       <button class="viewProfileBtn text-ash-500 hover:text-white px-1" data-uid="${f.id}"><i class="fa-solid fa-circle-info"></i></button>
     </div>
   `).join('');
-
   document.querySelectorAll('.friendItem').forEach(el=>{
-    el.addEventListener('click',(ev)=>{
-      if(ev.target.closest('.viewProfileBtn')) return;
-      openPrivateChat(el.getAttribute('data-uid'), el.getAttribute('data-uname'));
-    });
+    el.addEventListener('click',(ev)=>{ if(ev.target.closest('.viewProfileBtn')) return; openPrivateChat(el.getAttribute('data-uid'), el.getAttribute('data-uname')); });
   });
   document.querySelectorAll('.viewProfileBtn').forEach(el=>{
     el.addEventListener('click',(ev)=>{ ev.stopPropagation(); openFriendProfileModal(el.getAttribute('data-uid')); });
   });
 
   const onlineFriends = allFriends.filter(f=>f.isOnline);
-  if(onlineFriends.length === 0){
-    onlineContainer.innerHTML=''; onlineEmpty.classList.remove('hidden-force');
-  } else {
+  if(onlineFriends.length === 0){ onlineContainer.innerHTML=''; onlineEmpty.classList.remove('hidden-force'); }
+  else {
     onlineEmpty.classList.add('hidden-force');
-    onlineContainer.innerHTML = onlineFriends.map(f=>`
+    onlineContainer.innerHTML = onlineFriends.map(f=>{
+      const secs = f.studyTimer && f.studyTimer.date === todayStr() ? f.studyTimer.totalSeconds : 0;
+      return `
       <div class="flex items-center gap-3 p-2.5 rounded-xl bg-navy-950/50">
         <div class="relative shrink-0">
           <img src="${f.photoURL || defaultAvatar(f.username)}" class="w-9 h-9 rounded-full object-cover bg-navy-700">
@@ -1127,12 +1436,11 @@ async function renderFriendList(){
           <p class="text-sm font-semibold text-white truncate">${escapeHtml(f.username)}</p>
           <p class="text-[11px] text-ash-400 truncate">${f.currentFocus ? `sedang mempelajari: ${escapeHtml(f.currentFocus)}` : 'belum mengisi target belajar'}</p>
         </div>
-        <span class="text-[11px] text-ash-500 shrink-0">${f.lastActive ? formatDuration(Date.now()-f.lastActive.toMillis()) : ''}</span>
-      </div>
-    `).join('');
+        <span class="text-[11px] text-maroon-400 shrink-0 font-semibold"><i class="fa-solid fa-stopwatch mr-1"></i>${formatHM(secs)}</span>
+      </div>`;
+    }).join('');
   }
 }
-
 async function openFriendProfileModal(uid){
   const doc = await db.collection('users').doc(uid).get();
   if(!doc.exists) return;
@@ -1161,16 +1469,10 @@ async function openFriendProfileModal(uid){
     }
     openModal(`
       <h3 class="text-lg font-bold text-white mb-3">Teman Bersama (${people.length})</h3>
-      ${people.map(p=>`
-        <div class="flex items-center gap-2 p-2 rounded-xl hover:bg-navy-800">
-          <img src="${p.photoURL || defaultAvatar(p.username)}" class="w-8 h-8 rounded-full object-cover bg-navy-700">
-          <span class="text-sm text-white">${escapeHtml(p.username)}</span>
-        </div>
-      `).join('')}
+      ${people.map(p=>`<div class="flex items-center gap-2 p-2 rounded-xl hover:bg-navy-800"><img src="${p.photoURL || defaultAvatar(p.username)}" class="w-8 h-8 rounded-full object-cover bg-navy-700"><span class="text-sm text-white">${escapeHtml(p.username)}</span></div>`).join('')}
     `);
   });
 }
-
 document.querySelectorAll('.friendsTabBtn').forEach(btn=>{
   btn.addEventListener('click', ()=>{
     document.querySelectorAll('.friendsTabBtn').forEach(b=>{ b.classList.remove('tab-active'); b.classList.add('text-ash-400'); });
@@ -1183,56 +1485,81 @@ document.querySelectorAll('.friendsTabBtn').forEach(btn=>{
 });
 
 /* -------------------------------------------------------------------------
-   15. PRIVATE CHAT
+   19. JITSI CALL EMBED (shared helper for private & group chat)
 ------------------------------------------------------------------------- */
-let chatMsgUnsub = null;
+function renderCallControl(kind, id, activeCall){
+  return `
+    <button id="callToggleBtn" class="w-9 h-9 rounded-lg ${activeCall ? 'bg-maroon-600' : 'bg-navy-800 hover:bg-navy-700'} flex items-center justify-center text-white shrink-0" title="${activeCall ? 'Akhiri Call' : 'Mulai Call'}">
+      <i class="fa-solid ${activeCall ? 'fa-phone-slash' : 'fa-video'}"></i>
+    </button>
+  `;
+}
+function mountCallIframe(roomName){
+  const wrap = document.getElementById('callWrap');
+  wrap.classList.remove('hidden-force');
+  wrap.innerHTML = `<iframe src="https://meet.jit.si/${encodeURIComponent(roomName)}" style="width:100%; height:340px; border:0;" allow="camera; microphone; fullscreen; display-capture; autoplay"></iframe>`;
+}
+function unmountCallIframe(){
+  const wrap = document.getElementById('callWrap');
+  wrap.innerHTML = '';
+  wrap.classList.add('hidden-force');
+}
+
+/* -------------------------------------------------------------------------
+   20. PRIVATE CHAT
+------------------------------------------------------------------------- */
 async function openPrivateChat(otherUid, otherUname){
-  if(chatMsgUnsub){ chatMsgUnsub(); chatMsgUnsub = null; }
-  activeChat = { type:'private', otherUid };
+  if(chatMsgUnsub){ chatMsgUnsub(); chatMsgUnsub=null; }
+  if(groupMsgUnsub){ groupMsgUnsub(); groupMsgUnsub=null; }
+  if(groupDocUnsub){ groupDocUnsub(); groupDocUnsub=null; }
+  if(chatDocUnsub){ chatDocUnsub(); chatDocUnsub=null; }
+  unmountCallIframe();
   document.getElementById('chatEmptyState').classList.add('hidden-force');
   document.getElementById('chatActiveWrap').classList.remove('hidden-force');
 
-  const friendshipDoc = await db.collection('friendships').doc(pairId(currentUser.uid, otherUid)).get();
-  const fs = friendshipDoc.exists ? friendshipDoc.data() : { streak:0 };
+  const chatId = pairId(currentUser.uid, otherUid);
   const otherDoc = await db.collection('users').doc(otherUid).get();
   const otherData = otherDoc.data();
 
-  document.getElementById('chatHeader').innerHTML = `
-    <div class="flex items-center gap-2 min-w-0">
-      <img src="${otherData.photoURL || defaultAvatar(otherData.username)}" class="w-9 h-9 rounded-full object-cover bg-navy-700">
-      <div class="min-w-0">
-        <p class="text-sm font-semibold text-white truncate">${escapeHtml(otherUname)}</p>
-        <p class="text-[11px] text-ash-500 truncate">${otherData.subject || ''}</p>
+  chatDocUnsub = db.collection('chats').doc(chatId).onSnapshot(async (chatDoc)=>{
+    const chatData = chatDoc.exists ? chatDoc.data() : { activeCall:false };
+    const friendshipDoc = await db.collection('friendships').doc(chatId).get();
+    const fs = friendshipDoc.exists ? friendshipDoc.data() : { streak:0 };
+    document.getElementById('chatHeader').innerHTML = `
+      <div class="flex items-center gap-2 min-w-0">
+        <img src="${otherData.photoURL || defaultAvatar(otherData.username)}" class="w-9 h-9 rounded-full object-cover bg-navy-700">
+        <div class="min-w-0">
+          <p class="text-sm font-semibold text-white truncate">${escapeHtml(otherUname)}</p>
+          <p class="text-[11px] text-ash-500 truncate">${otherData.subject || ''}</p>
+        </div>
       </div>
-    </div>
-    <div class="flex items-center gap-1 text-maroon-400 text-sm font-semibold shrink-0">
-      <i class="fa-solid fa-fire"></i><span>${fs.streak || 0}</span>
-    </div>
-  `;
+      <div class="flex items-center gap-2 shrink-0">
+        <div class="flex items-center gap-1 text-maroon-400 text-sm font-semibold"><i class="fa-solid fa-fire"></i><span>${fs.streak || 0}</span></div>
+        ${renderCallControl('private', chatId, chatData.activeCall)}
+      </div>
+    `;
+    if(chatData.activeCall) mountCallIframe(`Lockino-${chatId}`); else unmountCallIframe();
+    document.getElementById('callToggleBtn').addEventListener('click', async ()=>{
+      await db.collection('chats').doc(chatId).set({ activeCall: !chatData.activeCall }, { merge:true });
+    });
+  });
 
-  const chatId = pairId(currentUser.uid, otherUid);
   const msgBox = document.getElementById('chatMessages');
   msgBox.innerHTML = '<p class="text-center text-xs text-ash-500">Memuat pesan...</p>';
   chatMsgUnsub = db.collection('chats').doc(chatId).collection('messages').orderBy('createdAt','asc').limit(200)
-    .onSnapshot(snap=>{
-      const msgs = []; snap.forEach(d=>msgs.push({id:d.id, ...d.data()}));
-      renderChatMessages(msgs, { kind:'private', chatId });
-    });
+    .onSnapshot(snap=>{ const msgs = []; snap.forEach(d=>msgs.push({id:d.id, ...d.data()})); renderChatMessages(msgs, { kind:'private', chatId }); });
 
   document.getElementById('chatSendBtn').onclick = ()=> sendPrivateMessage(chatId);
   document.getElementById('chatInput').onkeydown = (e)=>{ if(e.key==='Enter') sendPrivateMessage(chatId); };
 }
 async function sendPrivateMessage(chatId){
   const input = document.getElementById('chatInput');
-  const text = input.value.trim();
-  if(!text) return;
+  const text = input.value.trim(); if(!text) return;
   input.value='';
   await db.collection('chats').doc(chatId).collection('messages').add({
-    text, senderId: currentUser.uid, senderUsername: currentUserData.username,
-    createdAt: FieldValue.serverTimestamp(), edited:false
+    text, senderId: currentUser.uid, senderUsername: currentUserData.username, createdAt: FieldValue.serverTimestamp(), edited:false
   });
 }
-
 function renderChatMessages(msgs, ctx){
   const box = document.getElementById('chatMessages');
   box.innerHTML = msgs.map(m=>{
@@ -1263,9 +1590,7 @@ function showMsgContextMenu(e, el){
   menu.style.top = Math.min(e.clientY, window.innerHeight-100) + 'px';
   menu.classList.remove('hidden-force');
 }
-document.addEventListener('click', (e)=>{
-  if(!e.target.closest('#msgContextMenu')) document.getElementById('msgContextMenu').classList.add('hidden-force');
-});
+document.addEventListener('click', (e)=>{ if(!e.target.closest('#msgContextMenu')) document.getElementById('msgContextMenu').classList.add('hidden-force'); });
 document.getElementById('ctxEditBtn').addEventListener('click', ()=>{
   if(!contextMenuTarget) return;
   const mid = contextMenuTarget.getAttribute('data-mid');
@@ -1284,13 +1609,9 @@ document.getElementById('ctxEditBtn').addEventListener('click', ()=>{
   `);
   document.getElementById('editCancelBtn').addEventListener('click', closeModal);
   document.getElementById('editSaveBtn').addEventListener('click', async ()=>{
-    const newText = document.getElementById('editMsgInput').value.trim();
-    if(!newText) return;
-    const ref = kind==='group'
-      ? db.collection('groups').doc(groupId).collection('messages').doc(mid)
-      : db.collection('chats').doc(chatId).collection('messages').doc(mid);
-    await ref.update({ text:newText, edited:true });
-    closeModal();
+    const newText = document.getElementById('editMsgInput').value.trim(); if(!newText) return;
+    const ref = kind==='group' ? db.collection('groups').doc(groupId).collection('messages').doc(mid) : db.collection('chats').doc(chatId).collection('messages').doc(mid);
+    await ref.update({ text:newText, edited:true }); closeModal();
   });
 });
 document.getElementById('ctxDeleteBtn').addEventListener('click', async ()=>{
@@ -1300,14 +1621,12 @@ document.getElementById('ctxDeleteBtn').addEventListener('click', async ()=>{
   const chatId = contextMenuTarget.getAttribute('data-chatid');
   const groupId = contextMenuTarget.getAttribute('data-groupid');
   document.getElementById('msgContextMenu').classList.add('hidden-force');
-  const ref = kind==='group'
-    ? db.collection('groups').doc(groupId).collection('messages').doc(mid)
-    : db.collection('chats').doc(chatId).collection('messages').doc(mid);
+  const ref = kind==='group' ? db.collection('groups').doc(groupId).collection('messages').doc(mid) : db.collection('chats').doc(chatId).collection('messages').doc(mid);
   await ref.delete();
 });
 
 /* -------------------------------------------------------------------------
-   16. GROUP CHAT
+   21. GROUP CHAT
 ------------------------------------------------------------------------- */
 document.getElementById('createGroupBtn').addEventListener('click', ()=>{
   openModal(`
@@ -1316,12 +1635,8 @@ document.getElementById('createGroupBtn').addEventListener('click', ()=>{
       <input id="newGroupName" type="text" placeholder="Nama grup" maxlength="40" class="w-full bg-navy-950 border border-navy-700 rounded-xl px-4 py-2.5 text-sm text-white outline-none focus:border-maroon-500">
       <textarea id="newGroupDesc" rows="2" placeholder="Deskripsi singkat" maxlength="150" class="w-full bg-navy-950 border border-navy-700 rounded-xl px-4 py-2.5 text-sm text-white outline-none focus:border-maroon-500 resize-none"></textarea>
       <div class="flex gap-2">
-        <label class="flex-1 flex items-center gap-2 bg-navy-950 border border-navy-700 rounded-xl px-3 py-2.5 cursor-pointer">
-          <input type="radio" name="gType" value="public" checked> <span class="text-sm text-white">Public</span>
-        </label>
-        <label class="flex-1 flex items-center gap-2 bg-navy-950 border border-navy-700 rounded-xl px-3 py-2.5 cursor-pointer">
-          <input type="radio" name="gType" value="private"> <span class="text-sm text-white">Private</span>
-        </label>
+        <label class="flex-1 flex items-center gap-2 bg-navy-950 border border-navy-700 rounded-xl px-3 py-2.5 cursor-pointer"><input type="radio" name="gType" value="public" checked> <span class="text-sm text-white">Public</span></label>
+        <label class="flex-1 flex items-center gap-2 bg-navy-950 border border-navy-700 rounded-xl px-3 py-2.5 cursor-pointer"><input type="radio" name="gType" value="private"> <span class="text-sm text-white">Private</span></label>
       </div>
       <button id="createGroupSubmit" class="w-full bg-maroon-600 hover:bg-maroon-500 text-white font-semibold py-2.5 rounded-xl text-sm">Buat Grup</button>
     </div>
@@ -1334,21 +1649,19 @@ document.getElementById('createGroupBtn').addEventListener('click', ()=>{
     const ref = await db.collection('groups').add({
       name, nameLower: name.toLowerCase(), description: desc, photoURL:'', type,
       ownerId: currentUser.uid, members: { [currentUser.uid]: 'admin' }, memberIds:[currentUser.uid],
-      pendingRequests: {}, createdAt: FieldValue.serverTimestamp()
+      pendingRequests: {}, activeCall:false, createdAt: FieldValue.serverTimestamp()
     });
     closeModal(); showToast('Grup berhasil dibuat!', 'success');
     loadMyGroups(); openGroupChat(ref.id);
   });
 });
-
 document.getElementById('groupSearchInput').addEventListener('input', (e)=>{
   clearTimeout(searchDebounce);
   const term = e.target.value.trim().toLowerCase();
   const el = document.getElementById('groupPublicResults');
   if(!term){ el.innerHTML=''; return; }
   searchDebounce = setTimeout(async ()=>{
-    const snap = await db.collection('groups').where('type','==','public')
-      .where('nameLower','>=',term).where('nameLower','<=',term+'\uf8ff').limit(8).get();
+    const snap = await db.collection('groups').where('type','==','public').where('nameLower','>=',term).where('nameLower','<=',term+'\uf8ff').limit(8).get();
     const rows = []; snap.forEach(d=>rows.push({id:d.id, ...d.data()}));
     el.innerHTML = rows.length ? rows.map(g=>{
       const isMember = (g.memberIds||[]).includes(currentUser.uid);
@@ -1364,42 +1677,30 @@ document.getElementById('groupSearchInput').addEventListener('input', (e)=>{
       btn.addEventListener('click', async ()=>{
         if(btn.disabled) return;
         const gid = btn.getAttribute('data-id');
-        await db.collection('groups').doc(gid).update({
-          [`pendingRequests.${currentUser.uid}`]: currentUserData.username
-        });
+        await db.collection('groups').doc(gid).update({ [`pendingRequests.${currentUser.uid}`]: currentUserData.username });
         btn.textContent = 'Menunggu'; showToast('Permintaan bergabung dikirim ke admin.', 'success');
       });
     });
   }, 350);
 });
-
 async function loadMyGroups(){
   const snap = await db.collection('groups').where('memberIds','array-contains',currentUser.uid).get();
   const groups = []; snap.forEach(d=>groups.push({id:d.id, ...d.data()}));
   const el = document.getElementById('myGroupsList');
   el.innerHTML = groups.length ? groups.map(g=>`
     <div class="groupItem flex items-center gap-2 p-2 rounded-xl hover:bg-navy-800 cursor-pointer" data-id="${g.id}">
-      <div class="w-9 h-9 rounded-lg bg-navy-700 flex items-center justify-center text-ash-400 overflow-hidden">
-        ${g.photoURL ? `<img src="${g.photoURL}" class="w-full h-full object-cover">` : '<i class="fa-solid fa-users"></i>'}
-      </div>
-      <div class="flex-1 min-w-0">
-        <p class="text-sm font-medium text-white truncate">${escapeHtml(g.name)}</p>
-        <p class="text-[11px] text-ash-500 truncate">${g.type==='public'?'Publik':'Private'} · ${(g.memberIds||[]).length} anggota</p>
-      </div>
+      <div class="w-9 h-9 rounded-lg bg-navy-700 flex items-center justify-center text-ash-400 overflow-hidden">${g.photoURL ? `<img src="${g.photoURL}" class="w-full h-full object-cover">` : '<i class="fa-solid fa-users"></i>'}</div>
+      <div class="flex-1 min-w-0"><p class="text-sm font-medium text-white truncate">${escapeHtml(g.name)}</p><p class="text-[11px] text-ash-500 truncate">${g.type==='public'?'Publik':'Private'} · ${(g.memberIds||[]).length} anggota</p></div>
     </div>
   `).join('') : `<p class="text-xs text-ash-500 text-center py-4">Belum bergabung dengan grup manapun.</p>`;
-  document.querySelectorAll('.groupItem').forEach(el2=>{
-    el2.addEventListener('click', ()=> openGroupChat(el2.getAttribute('data-id')));
-  });
+  document.querySelectorAll('.groupItem').forEach(el2=>{ el2.addEventListener('click', ()=> openGroupChat(el2.getAttribute('data-id'))); });
 }
-
-let groupMsgUnsub = null;
-let groupDocUnsub = null;
 async function openGroupChat(groupId){
   if(chatMsgUnsub){ chatMsgUnsub(); chatMsgUnsub=null; }
   if(groupMsgUnsub){ groupMsgUnsub(); groupMsgUnsub=null; }
   if(groupDocUnsub){ groupDocUnsub(); groupDocUnsub=null; }
-  activeChat = { type:'group', groupId };
+  if(chatDocUnsub){ chatDocUnsub(); chatDocUnsub=null; }
+  unmountCallIframe();
   document.getElementById('chatEmptyState').classList.add('hidden-force');
   document.getElementById('chatActiveWrap').classList.remove('hidden-force');
 
@@ -1410,55 +1711,45 @@ async function openGroupChat(groupId){
     const pendingCount = g.pendingRequests ? Object.keys(g.pendingRequests).length : 0;
     document.getElementById('chatHeader').innerHTML = `
       <div class="flex items-center gap-2 min-w-0">
-        <div class="w-9 h-9 rounded-lg bg-navy-700 flex items-center justify-center text-ash-400 overflow-hidden shrink-0">
-          ${g.photoURL ? `<img src="${g.photoURL}" class="w-full h-full object-cover">` : '<i class="fa-solid fa-users"></i>'}
-        </div>
-        <div class="min-w-0">
-          <p class="text-sm font-semibold text-white truncate">${escapeHtml(g.name)}</p>
-          <p class="text-[11px] text-ash-500 truncate">${(g.memberIds||[]).length} anggota · ${g.type==='public'?'Publik':'Private'}</p>
-        </div>
+        <div class="w-9 h-9 rounded-lg bg-navy-700 flex items-center justify-center text-ash-400 overflow-hidden shrink-0">${g.photoURL ? `<img src="${g.photoURL}" class="w-full h-full object-cover">` : '<i class="fa-solid fa-users"></i>'}</div>
+        <div class="min-w-0"><p class="text-sm font-semibold text-white truncate">${escapeHtml(g.name)}</p><p class="text-[11px] text-ash-500 truncate">${(g.memberIds||[]).length} anggota · ${g.type==='public'?'Publik':'Private'}</p></div>
       </div>
-      <button id="groupInfoBtn" class="relative w-9 h-9 rounded-lg bg-navy-800 hover:bg-navy-700 flex items-center justify-center text-ash-300 shrink-0">
-        <i class="fa-solid fa-gear"></i>
-        ${myRole==='admin' && pendingCount>0 ? `<span class="absolute -top-1 -right-1 bg-maroon-500 text-white text-[10px] rounded-full w-4 h-4 flex items-center justify-center">${pendingCount}</span>` : ''}
-      </button>
+      <div class="flex items-center gap-2 shrink-0">
+        ${renderCallControl('group', groupId, g.activeCall)}
+        <button id="groupInfoBtn" class="relative w-9 h-9 rounded-lg bg-navy-800 hover:bg-navy-700 flex items-center justify-center text-ash-300">
+          <i class="fa-solid fa-gear"></i>
+          ${myRole==='admin' && pendingCount>0 ? `<span class="absolute -top-1 -right-1 bg-maroon-500 text-white text-[10px] rounded-full w-4 h-4 flex items-center justify-center">${pendingCount}</span>` : ''}
+        </button>
+      </div>
     `;
+    if(g.activeCall) mountCallIframe(`Lockino-Group-${groupId}`); else unmountCallIframe();
+    document.getElementById('callToggleBtn').addEventListener('click', async ()=>{ await db.collection('groups').doc(groupId).update({ activeCall: !g.activeCall }); });
     document.getElementById('groupInfoBtn').addEventListener('click', ()=> openGroupInfoModal(groupId, g, myRole));
   });
 
   const msgBox = document.getElementById('chatMessages');
   msgBox.innerHTML = '<p class="text-center text-xs text-ash-500">Memuat pesan...</p>';
   groupMsgUnsub = db.collection('groups').doc(groupId).collection('messages').orderBy('createdAt','asc').limit(200)
-    .onSnapshot(snap=>{
-      const msgs = []; snap.forEach(d=>msgs.push({id:d.id, ...d.data()}));
-      renderChatMessages(msgs, { kind:'group', groupId });
-    });
+    .onSnapshot(snap=>{ const msgs = []; snap.forEach(d=>msgs.push({id:d.id, ...d.data()})); renderChatMessages(msgs, { kind:'group', groupId }); });
 
   document.getElementById('chatSendBtn').onclick = ()=> sendGroupMessage(groupId);
   document.getElementById('chatInput').onkeydown = (e)=>{ if(e.key==='Enter') sendGroupMessage(groupId); };
 }
 async function sendGroupMessage(groupId){
   const input = document.getElementById('chatInput');
-  const text = input.value.trim();
-  if(!text) return;
+  const text = input.value.trim(); if(!text) return;
   input.value='';
   await db.collection('groups').doc(groupId).collection('messages').add({
-    text, senderId: currentUser.uid, senderUsername: currentUserData.username,
-    createdAt: FieldValue.serverTimestamp(), edited:false
+    text, senderId: currentUser.uid, senderUsername: currentUserData.username, createdAt: FieldValue.serverTimestamp(), edited:false
   });
 }
-
 async function openGroupInfoModal(groupId, g, myRole){
   const memberIds = g.memberIds || [];
   const chunks = []; for(let i=0;i<memberIds.length;i+=10) chunks.push(memberIds.slice(i,i+10));
   let members = [];
-  for(const c of chunks){
-    const snap = await db.collection('users').where(firebase.firestore.FieldPath.documentId(),'in',c).get();
-    snap.forEach(d=>members.push({id:d.id, ...d.data()}));
-  }
+  for(const c of chunks){ const snap = await db.collection('users').where(firebase.firestore.FieldPath.documentId(),'in',c).get(); snap.forEach(d=>members.push({id:d.id, ...d.data()})); }
   const pending = g.pendingRequests || {};
   const isAdmin = myRole === 'admin';
-
   openModal(`
     <h3 class="text-lg font-bold text-white mb-3">${escapeHtml(g.name)}</h3>
     ${isAdmin ? `
@@ -1470,7 +1761,6 @@ async function openGroupInfoModal(groupId, g, myRole){
         <button id="giSaveBtn" class="w-full bg-navy-700 hover:bg-navy-600 text-white text-sm font-semibold py-2 rounded-lg">Simpan Perubahan</button>
       </div>
     ` : `<p class="text-sm text-ash-400 mb-4">${escapeHtml(g.description||'Tidak ada deskripsi.')}</p>`}
-
     ${isAdmin && Object.keys(pending).length>0 ? `
       <p class="text-xs font-semibold text-ash-400 uppercase mb-2">Permintaan Bergabung</p>
       <div class="space-y-1.5 mb-4">
@@ -1479,11 +1769,8 @@ async function openGroupInfoModal(groupId, g, myRole){
             <span class="flex-1 text-sm text-white">${escapeHtml(uname)}</span>
             <button class="approveMember text-xs bg-green-700 hover:bg-green-600 text-white px-2.5 py-1 rounded-lg" data-uid="${uid}">Terima</button>
             <button class="rejectMember text-xs bg-navy-700 hover:bg-navy-600 text-white px-2.5 py-1 rounded-lg" data-uid="${uid}">Tolak</button>
-          </div>
-        `).join('')}
-      </div>
-    ` : ''}
-
+          </div>`).join('')}
+      </div>` : ''}
     <p class="text-xs font-semibold text-ash-400 uppercase mb-2">Anggota (${members.length})</p>
     <div class="space-y-1.5 mb-2">
       ${members.map(m=>`
@@ -1493,30 +1780,21 @@ async function openGroupInfoModal(groupId, g, myRole){
           <span class="text-[11px] text-ash-500">${g.members[m.id]==='admin'?'Admin':'Member'}</span>
           ${isAdmin && m.id!==currentUser.uid ? `
             <button class="toggleAdminBtn text-[11px] text-ash-400 hover:text-white px-1.5" data-uid="${m.id}" data-role="${g.members[m.id]}">${g.members[m.id]==='admin'?'Demosi':'Promosi'}</button>
-            <button class="removeMemberBtn text-[11px] text-maroon-400 hover:text-maroon-300 px-1.5" data-uid="${m.id}">Keluarkan</button>
-          ` : ''}
-        </div>
-      `).join('')}
+            <button class="removeMemberBtn text-[11px] text-maroon-400 hover:text-maroon-300 px-1.5" data-uid="${m.id}">Keluarkan</button>` : ''}
+        </div>`).join('')}
     </div>
     <button id="leaveGroupBtn" class="w-full mt-2 bg-maroon-600/20 hover:bg-maroon-600/30 text-maroon-400 text-sm font-medium py-2 rounded-xl">Keluar dari Grup</button>
   `);
-
   if(isAdmin){
     document.getElementById('giSaveBtn')?.addEventListener('click', async ()=>{
       const name = document.getElementById('giName').value.trim();
-      await db.collection('groups').doc(groupId).update({
-        name, nameLower:name.toLowerCase(), photoURL: document.getElementById('giPhoto').value.trim(), description: document.getElementById('giDesc').value.trim()
-      });
+      await db.collection('groups').doc(groupId).update({ name, nameLower:name.toLowerCase(), photoURL: document.getElementById('giPhoto').value.trim(), description: document.getElementById('giDesc').value.trim() });
       showToast('Grup diperbarui', 'success'); closeModal();
     });
     document.querySelectorAll('.approveMember').forEach(b=>{
       b.addEventListener('click', async ()=>{
         const uid = b.getAttribute('data-uid');
-        await db.collection('groups').doc(groupId).update({
-          [`members.${uid}`]: 'member',
-          memberIds: FieldValue.arrayUnion(uid),
-          [`pendingRequests.${uid}`]: FieldValue.delete()
-        });
+        await db.collection('groups').doc(groupId).update({ [`members.${uid}`]: 'member', memberIds: FieldValue.arrayUnion(uid), [`pendingRequests.${uid}`]: FieldValue.delete() });
         await sendNotification(uid, 'group_invite', `Kamu diterima bergabung ke grup ${g.name}.`);
         closeModal(); openGroupInfoModal(groupId, (await db.collection('groups').doc(groupId).get()).data(), 'admin');
       });
@@ -1537,18 +1815,14 @@ async function openGroupInfoModal(groupId, g, myRole){
     document.querySelectorAll('.removeMemberBtn').forEach(b=>{
       b.addEventListener('click', async ()=>{
         const uid = b.getAttribute('data-uid');
-        await db.collection('groups').doc(groupId).update({
-          memberIds: FieldValue.arrayRemove(uid), [`members.${uid}`]: FieldValue.delete()
-        });
+        await db.collection('groups').doc(groupId).update({ memberIds: FieldValue.arrayRemove(uid), [`members.${uid}`]: FieldValue.delete() });
         closeModal(); openGroupInfoModal(groupId, (await db.collection('groups').doc(groupId).get()).data(), 'admin');
       });
     });
   }
   document.getElementById('leaveGroupBtn').addEventListener('click', ()=>{
     confirmDialog('Keluar dari grup?', 'Kamu perlu bergabung/diundang lagi untuk masuk.', async ()=>{
-      await db.collection('groups').doc(groupId).update({
-        memberIds: FieldValue.arrayRemove(currentUser.uid), [`members.${currentUser.uid}`]: FieldValue.delete()
-      });
+      await db.collection('groups').doc(groupId).update({ memberIds: FieldValue.arrayRemove(currentUser.uid), [`members.${currentUser.uid}`]: FieldValue.delete() });
       loadMyGroups();
       document.getElementById('chatActiveWrap').classList.add('hidden-force');
       document.getElementById('chatEmptyState').classList.remove('hidden-force');
@@ -1557,115 +1831,300 @@ async function openGroupInfoModal(groupId, g, myRole){
 }
 
 /* -------------------------------------------------------------------------
-   17. RESOURCE HUB
+   22. INFO KOMPETISI
 ------------------------------------------------------------------------- */
-let activeSubjectFilter = 'all';
-let allResourcesCache = [];
-function populateSubjectFilters(){
-  const wrap = document.getElementById('subjectFilters');
+function populateCompSubjectFilters(){
+  const wrap = document.getElementById('compSubjectFilters');
   const chips = ['all', ...SUBJECTS];
   wrap.innerHTML = chips.map(s=>`
-    <button class="subjectChip text-xs px-3 py-1.5 rounded-full border ${s==='all'?'bg-maroon-600 border-maroon-600 text-white':'border-navy-700 text-ash-400 hover:border-maroon-600'}" data-subject="${s}">
-      ${s==='all' ? 'Semua Bidang' : s}
-    </button>
+    <button class="compChip text-xs px-3 py-1.5 rounded-full border ${s==='all'?'bg-maroon-600 border-maroon-600 text-white':'border-navy-700 text-ash-400 hover:border-maroon-600'}" data-subject="${s}">${s==='all' ? 'Semua Bidang' : s}</button>
   `).join('');
-  wrap.querySelectorAll('.subjectChip').forEach(chip=>{
+  wrap.querySelectorAll('.compChip').forEach(chip=>{
     chip.addEventListener('click', ()=>{
-      activeSubjectFilter = chip.getAttribute('data-subject');
-      wrap.querySelectorAll('.subjectChip').forEach(c=>{
-        c.classList.remove('bg-maroon-600','border-maroon-600','text-white');
-        c.classList.add('border-navy-700','text-ash-400');
-      });
-      chip.classList.add('bg-maroon-600','border-maroon-600','text-white');
-      chip.classList.remove('border-navy-700','text-ash-400');
-      renderResourceList();
+      activeCompSubjectFilter = chip.getAttribute('data-subject');
+      wrap.querySelectorAll('.compChip').forEach(c=>{ c.classList.remove('bg-maroon-600','border-maroon-600','text-white'); c.classList.add('border-navy-700','text-ash-400'); });
+      chip.classList.add('bg-maroon-600','border-maroon-600','text-white'); chip.classList.remove('border-navy-700','text-ash-400');
+      renderCompList();
+    });
+  });
+}
+function listenToCompetitions(){
+  const unsub = db.collection('competitions').orderBy('createdAt','desc').limit(100).onSnapshot(snap=>{
+    allCompCache = []; snap.forEach(d=>allCompCache.push({id:d.id, ...d.data()}));
+    renderCompList();
+  });
+  trackUnsub(unsub);
+}
+function fmtDate(s){ if(!s) return '-'; const d = new Date(s); return d.toLocaleDateString('id-ID',{day:'numeric',month:'short',year:'numeric'}); }
+function renderCompList(){
+  let list = allCompCache;
+  if(activeCompSubjectFilter !== 'all') list = list.filter(c=>c.subject === activeCompSubjectFilter);
+  document.getElementById('compEmpty').classList.toggle('hidden-force', list.length>0);
+  document.getElementById('compList').innerHTML = list.map(c=>{
+    const liked = (c.likes||[]).includes(currentUser.uid);
+    return `
+    <div class="bg-navy-900 border border-navy-700 rounded-2xl p-4 flex flex-col gap-2">
+      <span class="text-[11px] font-semibold text-maroon-400 uppercase w-fit">${escapeHtml(c.subject)}</span>
+      <h4 class="text-white font-semibold">${escapeHtml(c.name)}</h4>
+      <p class="text-xs text-ash-400"><i class="fa-solid fa-building mr-1"></i>${escapeHtml(c.organizer)}</p>
+      <div class="grid grid-cols-2 gap-2 text-xs text-ash-400 bg-navy-950/50 rounded-xl p-2.5">
+        <div><p class="text-[10px] uppercase text-ash-600">Pendaftaran</p><p class="text-ash-200 font-medium">${fmtDate(c.regDate)}</p></div>
+        <div><p class="text-[10px] uppercase text-ash-600">Pelaksanaan</p><p class="text-ash-200 font-medium">${fmtDate(c.eventDate)}</p></div>
+      </div>
+      <div class="flex items-center gap-3 pt-1 border-t border-navy-800 mt-1">
+        <button class="compLikeBtn flex items-center gap-1.5 text-xs ${liked?'text-maroon-500':'text-ash-400 hover:text-maroon-400'}" data-id="${c.id}" data-liked="${liked}"><i class="fa-${liked?'solid':'regular'} fa-heart"></i> ${(c.likes||[]).length}</button>
+        <button class="compCommentToggleBtn flex items-center gap-1.5 text-xs text-ash-400 hover:text-white" data-id="${c.id}"><i class="fa-regular fa-comment"></i> Diskusi</button>
+        ${c.createdBy===currentUser.uid ? `<button class="compDeleteBtn ml-auto text-xs text-ash-500 hover:text-maroon-400" data-id="${c.id}"><i class="fa-solid fa-trash"></i></button>` : ''}
+      </div>
+      <div class="compCommentSection hidden-force" data-id="${c.id}"></div>
+    </div>`;
+  }).join('');
+  document.querySelectorAll('.compLikeBtn').forEach(btn=>{
+    btn.addEventListener('click', async ()=>{
+      const id = btn.getAttribute('data-id'); const liked = btn.getAttribute('data-liked')==='true';
+      const ref = db.collection('competitions').doc(id);
+      await ref.update({ likes: liked ? FieldValue.arrayRemove(currentUser.uid) : FieldValue.arrayUnion(currentUser.uid) });
+      if(!liked){ const c = allCompCache.find(x=>x.id===id); if(c && c.createdBy) await sendNotification(c.createdBy, 'comp_like', `${currentUserData.username} menyukai info kompetisi "${c.name}".`); }
+    });
+  });
+  document.querySelectorAll('.compDeleteBtn').forEach(btn=>{
+    btn.addEventListener('click', ()=>{
+      confirmDialog('Hapus info kompetisi ini?', 'Tindakan ini tidak dapat dibatalkan.', async ()=>{ await db.collection('competitions').doc(btn.getAttribute('data-id')).delete(); });
+    });
+  });
+  document.querySelectorAll('.compCommentToggleBtn').forEach(btn=>{ btn.addEventListener('click', ()=> toggleCompComments(btn.getAttribute('data-id'))); });
+}
+let openCompCommentUnsubs = {};
+function toggleCompComments(compId){
+  const section = document.querySelector(`.compCommentSection[data-id="${compId}"]`);
+  const isHidden = section.classList.contains('hidden-force');
+  if(!isHidden){ section.classList.add('hidden-force'); section.innerHTML=''; if(openCompCommentUnsubs[compId]){openCompCommentUnsubs[compId](); delete openCompCommentUnsubs[compId];} return; }
+  section.classList.remove('hidden-force');
+  section.innerHTML = `
+    <div class="commentList space-y-2 mb-2 max-h-40 overflow-y-auto scrollbar-thin"></div>
+    <div class="flex gap-2">
+      <input type="text" class="commentInput flex-1 bg-navy-950 border border-navy-700 rounded-lg px-3 py-1.5 text-xs text-white outline-none focus:border-maroon-500" placeholder="Tanya/diskusi tentang kompetisi ini...">
+      <button class="commentSendBtn bg-maroon-600 hover:bg-maroon-500 text-white text-xs px-3 rounded-lg">Kirim</button>
+    </div>`;
+  const unsub = db.collection('competitions').doc(compId).collection('comments').orderBy('createdAt','asc').limit(100).onSnapshot(snap=>{
+    const listEl = section.querySelector('.commentList');
+    const rows = []; snap.forEach(d=>rows.push(d.data()));
+    listEl.innerHTML = rows.map(c=>`<p class="text-xs text-ash-300"><span class="font-semibold text-white">${escapeHtml(c.username)}:</span> ${escapeHtml(c.text)}</p>`).join('') || '<p class="text-xs text-ash-600">Belum ada diskusi.</p>';
+    listEl.scrollTop = listEl.scrollHeight;
+  });
+  openCompCommentUnsubs[compId] = unsub;
+  const send = async ()=>{
+    const input = section.querySelector('.commentInput'); const text = input.value.trim(); if(!text) return; input.value='';
+    await db.collection('competitions').doc(compId).collection('comments').add({ uid: currentUser.uid, username: currentUserData.username, text, createdAt: FieldValue.serverTimestamp() });
+    const c = allCompCache.find(x=>x.id===compId);
+    if(c && c.createdBy) await sendNotification(c.createdBy, 'comp_comment', `${currentUserData.username} mengomentari info kompetisi "${c.name}".`);
+  };
+  section.querySelector('.commentSendBtn').addEventListener('click', send);
+  section.querySelector('.commentInput').addEventListener('keydown', e=>{ if(e.key==='Enter') send(); });
+}
+document.getElementById('addCompBtn').addEventListener('click', ()=>{
+  openModal(`
+    <h3 class="text-lg font-bold text-white mb-1"><i class="fa-solid fa-trophy text-maroon-500 mr-2"></i>Tambah Info Kompetisi</h3>
+    <p class="text-xs text-ash-500 mb-3">Postingan ini akan tampil anonim, tanpa nama pembagi.</p>
+    <div class="space-y-3">
+      <input id="compName" type="text" placeholder="Nama Kompetisi" maxlength="80" class="w-full bg-navy-950 border border-navy-700 rounded-xl px-4 py-2.5 text-sm text-white outline-none focus:border-maroon-500">
+      <input id="compOrganizer" type="text" placeholder="Penyelenggara" maxlength="80" class="w-full bg-navy-950 border border-navy-700 rounded-xl px-4 py-2.5 text-sm text-white outline-none focus:border-maroon-500">
+      <select id="compSubject" class="w-full bg-navy-950 border border-navy-700 rounded-xl px-4 py-2.5 text-sm text-white outline-none focus:border-maroon-500">${SUBJECTS.map(s=>`<option value="${s}">${s}</option>`).join('')}</select>
+      <div>
+        <label class="text-xs text-ash-400">Tanggal Pendaftaran</label>
+        <input id="compRegDate" type="date" class="mt-1 w-full bg-navy-950 border border-navy-700 rounded-xl px-4 py-2.5 text-sm text-white outline-none focus:border-maroon-500">
+      </div>
+      <div>
+        <label class="text-xs text-ash-400">Tanggal Pelaksanaan</label>
+        <input id="compEventDate" type="date" class="mt-1 w-full bg-navy-950 border border-navy-700 rounded-xl px-4 py-2.5 text-sm text-white outline-none focus:border-maroon-500">
+      </div>
+      <button id="compSubmitBtn" class="w-full bg-maroon-600 hover:bg-maroon-500 text-white font-semibold py-2.5 rounded-xl text-sm">Bagikan Info Kompetisi</button>
+    </div>
+  `);
+  document.getElementById('compSubmitBtn').addEventListener('click', async ()=>{
+    const name = document.getElementById('compName').value.trim();
+    const organizer = document.getElementById('compOrganizer').value.trim();
+    const subject = document.getElementById('compSubject').value;
+    const regDate = document.getElementById('compRegDate').value;
+    const eventDate = document.getElementById('compEventDate').value;
+    if(!name || !organizer){ showToast('Nama kompetisi dan penyelenggara wajib diisi.', 'error'); return; }
+    await db.collection('competitions').add({ name, organizer, subject, regDate, eventDate, createdBy: currentUser.uid, likes: [], createdAt: FieldValue.serverTimestamp() });
+    closeModal(); showToast('Info kompetisi berhasil dibagikan!', 'success');
+  });
+});
+
+/* -------------------------------------------------------------------------
+   23. RESOURCE HUB — berbasis folder silabus per topik
+------------------------------------------------------------------------- */
+function populateSubjectFilters(){
+  const wrap = document.getElementById('resSubjectFilters');
+  wrap.innerHTML = SUBJECTS.map(s=>`
+    <button class="resSubjectChip text-xs px-3 py-1.5 rounded-full border ${s===selectedResSubject?'bg-maroon-600 border-maroon-600 text-white':'border-navy-700 text-ash-400 hover:border-maroon-600'}" data-subject="${s}">${s}</button>
+  `).join('');
+  wrap.querySelectorAll('.resSubjectChip').forEach(chip=>{
+    chip.addEventListener('click', ()=>{
+      selectedResSubject = chip.getAttribute('data-subject');
+      expandedTopic = null;
+      wrap.querySelectorAll('.resSubjectChip').forEach(c=>{ c.classList.remove('bg-maroon-600','border-maroon-600','text-white'); c.classList.add('border-navy-700','text-ash-400'); });
+      chip.classList.add('bg-maroon-600','border-maroon-600','text-white'); chip.classList.remove('border-navy-700','text-ash-400');
+      renderTopicFolders();
     });
   });
 }
 function populateSubjectSelect(){
   document.getElementById('profileSubjectInput').innerHTML = SUBJECTS.map(s=>`<option value="${s}">${s}</option>`).join('');
 }
+document.getElementById('resourceSearchInput').addEventListener('input', renderTopicFolders);
+document.getElementById('bookmarkFilterBtn').addEventListener('click', ()=>{
+  bookmarkFilterOn = !bookmarkFilterOn;
+  const btn = document.getElementById('bookmarkFilterBtn');
+  btn.classList.toggle('bg-maroon-600', bookmarkFilterOn);
+  btn.classList.toggle('text-white', bookmarkFilterOn);
+  btn.innerHTML = `<i class="fa-${bookmarkFilterOn?'solid':'regular'} fa-bookmark mr-1.5"></i>${t('res.myBookmarks')}`;
+  renderTopicFolders();
+});
 
 function listenToResources(){
-  const unsub = db.collection('resources').orderBy('createdAt','desc').limit(100).onSnapshot(async (snap)=>{
-    const resources = []; snap.forEach(d=>resources.push({id:d.id, ...d.data()}));
-    // fetch this user's progress status per resource
-    for(const r of resources){
-      try{
-        const pDoc = await db.collection('resources').doc(r.id).collection('progress').doc(currentUser.uid).get();
-        r.myProgress = pDoc.exists ? pDoc.data().status : 'Belum diselesaikan';
-      }catch(e){ r.myProgress = 'Belum diselesaikan'; }
-    }
-    allResourcesCache = resources;
-    renderResourceList();
+  const unsub = db.collection('resources').orderBy('createdAt','desc').limit(300).onSnapshot(snap=>{
+    allResourcesCache = []; snap.forEach(d=>allResourcesCache.push({id:d.id, ...d.data()}));
+    renderTopicFolders();
   });
   trackUnsub(unsub);
 }
-document.getElementById('resourceSearchInput').addEventListener('input', renderResourceList);
-function renderResourceList(){
+async function loadMyProgressForSubject(subject){
+  const topics = SYLLABUS[subject] || [];
+  const results = await Promise.all(topics.map(topic => db.collection('resourceProgress').doc(`${currentUser.uid}_${subject}_${topic}`).get().catch(()=>null)));
+  myProgressCache = {};
+  topics.forEach((topic, i)=>{ myProgressCache[topic] = (results[i] && results[i].exists) ? results[i].data().status : 'Belum Paham'; });
+}
+function statusToScore(status){ return status==='Sudah Dikuasai' ? 100 : status==='Sedang Dipelajari' ? 50 : 0; }
+function statusColorClass(status){ return status==='Sudah Dikuasai' ? 'text-green-400 border-green-700' : status==='Sedang Dipelajari' ? 'text-yellow-400 border-yellow-700' : 'text-ash-400 border-navy-700'; }
+
+async function renderTopicFolders(){
+  if(!currentUserData) return;
+  const subject = selectedResSubject;
+  const topics = SYLLABUS[subject] || [];
   const term = document.getElementById('resourceSearchInput').value.trim().toLowerCase();
-  let list = allResourcesCache;
-  if(activeSubjectFilter !== 'all') list = list.filter(r=>r.subject === activeSubjectFilter);
-  if(term) list = list.filter(r=>r.title.toLowerCase().includes(term));
-  const el = document.getElementById('resourceList');
-  document.getElementById('resourceEmpty').classList.toggle('hidden-force', list.length>0);
-  const statuses = ["Belum diselesaikan","Masih progress","Tandai akan dipelajari","Sudah selesai"];
-  const statusColor = { "Belum diselesaikan":"text-ash-400","Masih progress":"text-yellow-400","Tandai akan dipelajari":"text-blue-400","Sudah selesai":"text-green-400" };
-  el.innerHTML = list.map(r=>{
-    const liked = (r.likes||[]).includes(currentUser.uid);
+  await loadMyProgressForSubject(subject);
+
+  const avgScore = topics.length ? Math.round(topics.reduce((sum,tp)=>sum+statusToScore(myProgressCache[tp]),0)/topics.length) : 0;
+  document.getElementById('resSubjectProgressLabel').textContent = `Progress Silabus ${subject}`;
+  document.getElementById('resSubjectProgressBar').style.width = avgScore + '%';
+  document.getElementById('resSubjectProgressPct').textContent = avgScore + '%';
+
+  const wrap = document.getElementById('topicFolders');
+  wrap.innerHTML = topics.map(topic=>{
+    let resourcesForTopic = allResourcesCache.filter(r=>r.subject===subject && r.topic===topic);
+    if(bookmarkFilterOn) resourcesForTopic = resourcesForTopic.filter(r=>(r.bookmarkedBy||[]).includes(currentUser.uid));
+    if(term) resourcesForTopic = resourcesForTopic.filter(r=>r.title.toLowerCase().includes(term));
+    const isExpanded = expandedTopic === topic || (term && resourcesForTopic.length>0);
+    const status = myProgressCache[topic] || 'Belum Paham';
     return `
-    <div class="bg-navy-900 border border-navy-700 rounded-2xl p-4 flex flex-col gap-2">
-      <div class="flex items-start justify-between gap-2">
-        <div>
-          <span class="text-[11px] font-semibold text-maroon-400 uppercase">${escapeHtml(r.subject)}</span>
-          <h4 class="text-white font-semibold">${escapeHtml(r.title)}</h4>
-          <p class="text-[11px] text-ash-500">oleh ${escapeHtml(r.creatorUsername||'-')}</p>
-        </div>
-        <a href="${escapeHtml(r.link)}" target="_blank" rel="noopener" class="shrink-0 w-8 h-8 rounded-lg bg-navy-800 hover:bg-navy-700 flex items-center justify-center text-ash-300"><i class="fa-solid fa-arrow-up-right-from-square text-xs"></i></a>
+    <div class="bg-navy-900 border border-navy-700 rounded-2xl overflow-hidden">
+      <div class="topicHeader flex items-center gap-3 p-4 cursor-pointer" data-topic="${escapeHtml(topic)}">
+        <i class="fa-solid fa-chevron-${isExpanded?'down':'right'} text-ash-500 text-xs shrink-0"></i>
+        <i class="fa-solid fa-folder${isExpanded?'-open':''} text-maroon-500"></i>
+        <p class="flex-1 text-sm font-semibold text-white truncate">${escapeHtml(topic)}</p>
+        <span class="text-[11px] text-ash-500 shrink-0">${resourcesForTopic.length} materi</span>
+        <select class="topicStatusSelect text-xs bg-navy-950 border ${statusColorClass(status)} rounded-lg px-2 py-1 shrink-0" data-topic="${escapeHtml(topic)}" onclick="event.stopPropagation()">
+          <option value="Belum Paham" ${status==='Belum Paham'?'selected':''}>Belum Paham</option>
+          <option value="Sedang Dipelajari" ${status==='Sedang Dipelajari'?'selected':''}>Sedang Dipelajari</option>
+          <option value="Sudah Dikuasai" ${status==='Sudah Dikuasai'?'selected':''}>Sudah Dikuasai</option>
+        </select>
       </div>
-      <select class="progressSelect ${statusColor[r.myProgress]} bg-navy-950 border border-navy-700 rounded-lg px-2 py-1.5 text-xs" data-id="${r.id}">
-        ${statuses.map(s=>`<option value="${s}" ${r.myProgress===s?'selected':''}>${s}</option>`).join('')}
-      </select>
-      <div class="flex items-center gap-3 pt-1 border-t border-navy-800 mt-1">
-        <button class="likeBtn flex items-center gap-1.5 text-xs ${liked?'text-maroon-500':'text-ash-400 hover:text-maroon-400'}" data-id="${r.id}" data-liked="${liked}">
-          <i class="fa-${liked?'solid':'regular'} fa-heart"></i> ${(r.likes||[]).length}
-        </button>
-        <button class="commentToggleBtn flex items-center gap-1.5 text-xs text-ash-400 hover:text-white" data-id="${r.id}">
-          <i class="fa-regular fa-comment"></i> Komentar
-        </button>
+      <div class="w-full h-1 progress-bar-bg"><div class="h-full bg-maroon-500 progress-bar-fill" style="width:${statusToScore(status)}%"></div></div>
+      <div class="topicBody ${isExpanded?'':'hidden-force'} p-4 pt-3 space-y-3 border-t border-navy-800" data-topic="${escapeHtml(topic)}">
+        ${resourcesForTopic.length ? resourcesForTopic.map(r=>buildResourceCard(r)).join('') : `<p class="text-xs text-ash-500 text-center py-3">Belum ada materi di topik ini.</p>`}
+        <button class="addToTopicBtn w-full text-xs text-maroon-400 hover:text-maroon-300 font-semibold py-2 border border-dashed border-navy-700 rounded-xl" data-subject="${escapeHtml(subject)}" data-topic="${escapeHtml(topic)}"><i class="fa-solid fa-plus mr-1"></i>Tambah Materi di Topik Ini</button>
       </div>
-      <div class="commentSection hidden-force" data-id="${r.id}"></div>
     </div>`;
   }).join('');
 
-  el.querySelectorAll('.progressSelect').forEach(sel=>{
+  wrap.querySelectorAll('.topicHeader').forEach(h=>{
+    h.addEventListener('click', ()=>{
+      const topic = h.getAttribute('data-topic');
+      expandedTopic = expandedTopic === topic ? null : topic;
+      renderTopicFolders();
+    });
+  });
+  wrap.querySelectorAll('.topicStatusSelect').forEach(sel=>{
     sel.addEventListener('change', async ()=>{
-      await db.collection('resources').doc(sel.getAttribute('data-id')).collection('progress').doc(currentUser.uid).set({status: sel.value});
-      showToast('Status progres diperbarui', 'success');
+      const topic = sel.getAttribute('data-topic');
+      await db.collection('resourceProgress').doc(`${currentUser.uid}_${subject}_${topic}`).set({ uid: currentUser.uid, subject, topic, status: sel.value, updatedAt: FieldValue.serverTimestamp() });
+      showToast('Progress topik diperbarui', 'success');
+      renderTopicFolders();
     });
   });
-  el.querySelectorAll('.likeBtn').forEach(btn=>{
-    btn.addEventListener('click', async ()=>{
-      const id = btn.getAttribute('data-id');
-      const liked = btn.getAttribute('data-liked') === 'true';
-      const ref = db.collection('resources').doc(id);
-      await ref.update({ likes: liked ? FieldValue.arrayRemove(currentUser.uid) : FieldValue.arrayUnion(currentUser.uid) });
-      if(!liked){
-        const r = allResourcesCache.find(x=>x.id===id);
-        if(r && r.createdBy) await sendNotification(r.createdBy, 'like', `${currentUserData.username} menyukai materi "${r.title}".`);
-      }
-    });
+  wrap.querySelectorAll('.addToTopicBtn').forEach(btn=>{
+    btn.addEventListener('click', ()=> openAddResourceModal(btn.getAttribute('data-subject'), btn.getAttribute('data-topic')));
   });
-  el.querySelectorAll('.commentToggleBtn').forEach(btn=>{
-    btn.addEventListener('click', ()=> toggleComments(btn.getAttribute('data-id')));
-  });
+  attachResourceCardListeners();
 }
 
-let openCommentUnsubs = {};
-function toggleComments(resourceId){
-  const section = document.querySelector(`.commentSection[data-id="${resourceId}"]`);
+function buildResourceCard(r){
+  const liked = (r.likes||[]).includes(currentUser.uid);
+  const starred = (r.upvotes||[]).includes(currentUser.uid);
+  const bookmarked = (r.bookmarkedBy||[]).includes(currentUser.uid);
+  const isMine = r.createdBy === currentUser.uid;
+  const publisher = r.anonymous ? 'Anonim' : (r.creatorUsername || '-');
+  return `
+    <div class="bg-navy-950/60 border border-navy-800 rounded-xl p-3 space-y-2" data-rid="${r.id}">
+      <div class="flex items-start justify-between gap-2">
+        <div>
+          <h4 class="text-white font-semibold text-sm">${escapeHtml(r.title)}</h4>
+          <p class="text-[11px] text-ash-500">oleh ${escapeHtml(publisher)} · sumber: ${escapeHtml(r.source||'-')}</p>
+        </div>
+        <a href="${escapeHtml(r.link)}" target="_blank" rel="noopener" class="shrink-0 w-7 h-7 rounded-lg bg-navy-800 hover:bg-navy-700 flex items-center justify-center text-ash-300"><i class="fa-solid fa-arrow-up-right-from-square text-xs"></i></a>
+      </div>
+      <div class="flex items-center gap-3 flex-wrap text-xs pt-1 border-t border-navy-800">
+        <button class="resStarBtn flex items-center gap-1 ${starred?'text-yellow-400':'text-ash-400 hover:text-yellow-400'}" data-id="${r.id}" data-active="${starred}"><i class="fa-${starred?'solid':'regular'} fa-star"></i> ${(r.upvotes||[]).length}</button>
+        <button class="resLikeBtn flex items-center gap-1 ${liked?'text-maroon-500':'text-ash-400 hover:text-maroon-400'}" data-id="${r.id}" data-active="${liked}"><i class="fa-${liked?'solid':'regular'} fa-heart"></i> ${(r.likes||[]).length}</button>
+        <button class="resBookmarkBtn flex items-center gap-1 ${bookmarked?'text-blue-400':'text-ash-400 hover:text-blue-400'}" data-id="${r.id}" data-active="${bookmarked}"><i class="fa-${bookmarked?'solid':'regular'} fa-bookmark"></i></button>
+        <button class="resCommentToggleBtn flex items-center gap-1 text-ash-400 hover:text-white" data-id="${r.id}"><i class="fa-regular fa-comment"></i> Komentar</button>
+        ${isMine ? `
+          <button class="resEditBtn ml-auto text-ash-400 hover:text-white" data-id="${r.id}"><i class="fa-solid fa-pen"></i></button>
+          <button class="resDeleteBtn text-ash-400 hover:text-maroon-400" data-id="${r.id}"><i class="fa-solid fa-trash"></i></button>` : ''}
+      </div>
+      <div class="resCommentSection hidden-force" data-id="${r.id}"></div>
+    </div>`;
+}
+function attachResourceCardListeners(){
+  document.querySelectorAll('.resStarBtn').forEach(btn=>{
+    btn.addEventListener('click', async ()=>{
+      const id = btn.getAttribute('data-id'); const active = btn.getAttribute('data-active')==='true';
+      await db.collection('resources').doc(id).update({ upvotes: active ? FieldValue.arrayRemove(currentUser.uid) : FieldValue.arrayUnion(currentUser.uid) });
+    });
+  });
+  document.querySelectorAll('.resLikeBtn').forEach(btn=>{
+    btn.addEventListener('click', async ()=>{
+      const id = btn.getAttribute('data-id'); const active = btn.getAttribute('data-active')==='true';
+      await db.collection('resources').doc(id).update({ likes: active ? FieldValue.arrayRemove(currentUser.uid) : FieldValue.arrayUnion(currentUser.uid) });
+      if(!active){ const r = allResourcesCache.find(x=>x.id===id); if(r && r.createdBy) await sendNotification(r.createdBy, 'like', `${currentUserData.username} menyukai materi "${r.title}".`); }
+    });
+  });
+  document.querySelectorAll('.resBookmarkBtn').forEach(btn=>{
+    btn.addEventListener('click', async ()=>{
+      const id = btn.getAttribute('data-id'); const active = btn.getAttribute('data-active')==='true';
+      await db.collection('resources').doc(id).update({ bookmarkedBy: active ? FieldValue.arrayRemove(currentUser.uid) : FieldValue.arrayUnion(currentUser.uid) });
+    });
+  });
+  document.querySelectorAll('.resDeleteBtn').forEach(btn=>{
+    btn.addEventListener('click', ()=>{
+      confirmDialog('Hapus materi ini?', 'Tindakan ini tidak dapat dibatalkan.', async ()=>{ await db.collection('resources').doc(btn.getAttribute('data-id')).delete(); });
+    });
+  });
+  document.querySelectorAll('.resEditBtn').forEach(btn=>{
+    btn.addEventListener('click', ()=> openEditResourceModal(btn.getAttribute('data-id')));
+  });
+  document.querySelectorAll('.resCommentToggleBtn').forEach(btn=>{
+    btn.addEventListener('click', ()=> toggleResourceComments(btn.getAttribute('data-id')));
+  });
+}
+let openResCommentUnsubs = {};
+function toggleResourceComments(resourceId){
+  const section = document.querySelector(`.resCommentSection[data-id="${resourceId}"]`);
   const isHidden = section.classList.contains('hidden-force');
-  if(!isHidden){ section.classList.add('hidden-force'); section.innerHTML=''; if(openCommentUnsubs[resourceId]){openCommentUnsubs[resourceId](); delete openCommentUnsubs[resourceId];} return; }
+  if(!isHidden){ section.classList.add('hidden-force'); section.innerHTML=''; if(openResCommentUnsubs[resourceId]){openResCommentUnsubs[resourceId](); delete openResCommentUnsubs[resourceId];} return; }
   section.classList.remove('hidden-force');
   section.innerHTML = `
     <div class="commentList space-y-2 mb-2 max-h-40 overflow-y-auto scrollbar-thin"></div>
@@ -1673,20 +2132,16 @@ function toggleComments(resourceId){
       <input type="text" class="commentInput flex-1 bg-navy-950 border border-navy-700 rounded-lg px-3 py-1.5 text-xs text-white outline-none focus:border-maroon-500" placeholder="Tulis komentar...">
       <button class="commentSendBtn bg-maroon-600 hover:bg-maroon-500 text-white text-xs px-3 rounded-lg">Kirim</button>
     </div>`;
-  const unsub = db.collection('resources').doc(resourceId).collection('comments').orderBy('createdAt','asc').limit(100)
-    .onSnapshot(snap=>{
-      const listEl = section.querySelector('.commentList');
-      const rows = []; snap.forEach(d=>rows.push(d.data()));
-      listEl.innerHTML = rows.map(c=>`<p class="text-xs text-ash-300"><span class="font-semibold text-white">${escapeHtml(c.username)}:</span> ${escapeHtml(c.text)}</p>`).join('') || '<p class="text-xs text-ash-600">Belum ada komentar.</p>';
-      listEl.scrollTop = listEl.scrollHeight;
-    });
-  openCommentUnsubs[resourceId] = unsub;
+  const unsub = db.collection('resources').doc(resourceId).collection('comments').orderBy('createdAt','asc').limit(100).onSnapshot(snap=>{
+    const listEl = section.querySelector('.commentList');
+    const rows = []; snap.forEach(d=>rows.push(d.data()));
+    listEl.innerHTML = rows.map(c=>`<p class="text-xs text-ash-300"><span class="font-semibold text-white">${escapeHtml(c.username)}:</span> ${escapeHtml(c.text)}</p>`).join('') || '<p class="text-xs text-ash-600">Belum ada komentar.</p>';
+    listEl.scrollTop = listEl.scrollHeight;
+  });
+  openResCommentUnsubs[resourceId] = unsub;
   const send = async ()=>{
-    const input = section.querySelector('.commentInput');
-    const text = input.value.trim(); if(!text) return; input.value='';
-    await db.collection('resources').doc(resourceId).collection('comments').add({
-      uid: currentUser.uid, username: currentUserData.username, text, createdAt: FieldValue.serverTimestamp()
-    });
+    const input = section.querySelector('.commentInput'); const text = input.value.trim(); if(!text) return; input.value='';
+    await db.collection('resources').doc(resourceId).collection('comments').add({ uid: currentUser.uid, username: currentUserData.username, text, createdAt: FieldValue.serverTimestamp() });
     const r = allResourcesCache.find(x=>x.id===resourceId);
     if(r && r.createdBy) await sendNotification(r.createdBy, 'comment', `${currentUserData.username} mengomentari materi "${r.title}".`);
   };
@@ -1694,33 +2149,76 @@ function toggleComments(resourceId){
   section.querySelector('.commentInput').addEventListener('keydown', e=>{ if(e.key==='Enter') send(); });
 }
 
-document.getElementById('addResourceBtn').addEventListener('click', ()=>{
+function openAddResourceModal(presetSubject, presetTopic){
+  const subj = presetSubject || selectedResSubject;
   openModal(`
     <h3 class="text-lg font-bold text-white mb-3"><i class="fa-solid fa-book text-maroon-500 mr-2"></i>Tambahkan Resource</h3>
     <div class="space-y-3">
       <input id="newResTitle" type="text" placeholder="Judul materi" maxlength="100" class="w-full bg-navy-950 border border-navy-700 rounded-xl px-4 py-2.5 text-sm text-white outline-none focus:border-maroon-500">
-      <input id="newResLink" type="url" placeholder="Link materi (https://...)" class="w-full bg-navy-950 border border-navy-700 rounded-xl px-4 py-2.5 text-sm text-white outline-none focus:border-maroon-500">
-      <select id="newResSubject" class="w-full bg-navy-950 border border-navy-700 rounded-xl px-4 py-2.5 text-sm text-white outline-none focus:border-maroon-500">
-        ${SUBJECTS.map(s=>`<option value="${s}">${s}</option>`).join('')}
-      </select>
+      <select id="newResSubject" class="w-full bg-navy-950 border border-navy-700 rounded-xl px-4 py-2.5 text-sm text-white outline-none focus:border-maroon-500">${SUBJECTS.map(s=>`<option value="${s}" ${s===subj?'selected':''}>${s}</option>`).join('')}</select>
+      <select id="newResTopic" class="w-full bg-navy-950 border border-navy-700 rounded-xl px-4 py-2.5 text-sm text-white outline-none focus:border-maroon-500"></select>
+      <input id="newResLink" type="url" placeholder="Link materi / catatan (https://...)" class="w-full bg-navy-950 border border-navy-700 rounded-xl px-4 py-2.5 text-sm text-white outline-none focus:border-maroon-500">
+      <input id="newResSource" type="text" placeholder="Sumber (Web Kemdikbud, Catatan Pribadi, YouTube, dll)" maxlength="60" class="w-full bg-navy-950 border border-navy-700 rounded-xl px-4 py-2.5 text-sm text-white outline-none focus:border-maroon-500">
+      <div class="flex gap-2">
+        <label class="flex-1 flex items-center gap-2 bg-navy-950 border border-navy-700 rounded-xl px-3 py-2.5 cursor-pointer"><input type="radio" name="pubOption" value="username" checked> <span class="text-sm text-white">Tampilkan Username</span></label>
+        <label class="flex-1 flex items-center gap-2 bg-navy-950 border border-navy-700 rounded-xl px-3 py-2.5 cursor-pointer"><input type="radio" name="pubOption" value="anon"> <span class="text-sm text-white">Anonim</span></label>
+      </div>
       <button id="submitResBtn" class="w-full bg-maroon-600 hover:bg-maroon-500 text-white font-semibold py-2.5 rounded-xl text-sm">Tambahkan</button>
     </div>
   `);
+  function fillTopics(subject, preselect){
+    const topics = SYLLABUS[subject] || [];
+    document.getElementById('newResTopic').innerHTML = topics.map(tp=>`<option value="${escapeHtml(tp)}" ${tp===preselect?'selected':''}>${escapeHtml(tp)}</option>`).join('');
+  }
+  fillTopics(subj, presetTopic);
+  document.getElementById('newResSubject').addEventListener('change', (e)=> fillTopics(e.target.value, null));
   document.getElementById('submitResBtn').addEventListener('click', async ()=>{
     const title = document.getElementById('newResTitle').value.trim();
-    const link = document.getElementById('newResLink').value.trim();
     const subject = document.getElementById('newResSubject').value;
+    const topic = document.getElementById('newResTopic').value;
+    const link = document.getElementById('newResLink').value.trim();
+    const source = document.getElementById('newResSource').value.trim();
+    const anonymous = document.querySelector('input[name="pubOption"]:checked').value === 'anon';
     if(!title || !link){ showToast('Judul dan link wajib diisi', 'error'); return; }
     await db.collection('resources').add({
-      title, link, subject, createdBy: currentUser.uid, creatorUsername: currentUserData.username,
-      likes: [], createdAt: FieldValue.serverTimestamp()
+      title, subject, topic, link, source, anonymous,
+      createdBy: currentUser.uid, creatorUsername: currentUserData.username,
+      likes: [], upvotes: [], bookmarkedBy: [], createdAt: FieldValue.serverTimestamp()
     });
     closeModal(); showToast('Materi berhasil ditambahkan!', 'success');
+    expandedTopic = topic; renderTopicFolders();
   });
-});
+}
+document.getElementById('addResourceBtn').addEventListener('click', ()=> openAddResourceModal(selectedResSubject, null));
+
+function openEditResourceModal(resourceId){
+  const r = allResourcesCache.find(x=>x.id===resourceId); if(!r) return;
+  openModal(`
+    <h3 class="text-lg font-bold text-white mb-3"><i class="fa-solid fa-pen text-maroon-500 mr-2"></i>Edit Materi</h3>
+    <div class="space-y-3">
+      <input id="editResTitle" type="text" value="${escapeHtml(r.title)}" maxlength="100" class="w-full bg-navy-950 border border-navy-700 rounded-xl px-4 py-2.5 text-sm text-white outline-none focus:border-maroon-500">
+      <input id="editResLink" type="url" value="${escapeHtml(r.link)}" class="w-full bg-navy-950 border border-navy-700 rounded-xl px-4 py-2.5 text-sm text-white outline-none focus:border-maroon-500">
+      <input id="editResSource" type="text" value="${escapeHtml(r.source||'')}" maxlength="60" class="w-full bg-navy-950 border border-navy-700 rounded-xl px-4 py-2.5 text-sm text-white outline-none focus:border-maroon-500">
+      <div class="flex gap-2">
+        <label class="flex-1 flex items-center gap-2 bg-navy-950 border border-navy-700 rounded-xl px-3 py-2.5 cursor-pointer"><input type="radio" name="editPubOption" value="username" ${!r.anonymous?'checked':''}> <span class="text-sm text-white">Tampilkan Username</span></label>
+        <label class="flex-1 flex items-center gap-2 bg-navy-950 border border-navy-700 rounded-xl px-3 py-2.5 cursor-pointer"><input type="radio" name="editPubOption" value="anon" ${r.anonymous?'checked':''}> <span class="text-sm text-white">Anonim</span></label>
+      </div>
+      <button id="editResSaveBtn" class="w-full bg-maroon-600 hover:bg-maroon-500 text-white font-semibold py-2.5 rounded-xl text-sm">Simpan Perubahan</button>
+    </div>
+  `);
+  document.getElementById('editResSaveBtn').addEventListener('click', async ()=>{
+    const title = document.getElementById('editResTitle').value.trim();
+    const link = document.getElementById('editResLink').value.trim();
+    const source = document.getElementById('editResSource').value.trim();
+    const anonymous = document.querySelector('input[name="editPubOption"]:checked').value === 'anon';
+    if(!title || !link){ showToast('Judul dan link wajib diisi', 'error'); return; }
+    await db.collection('resources').doc(resourceId).update({ title, link, source, anonymous });
+    closeModal(); showToast('Materi berhasil diperbarui!', 'success');
+  });
+}
 
 /* -------------------------------------------------------------------------
-   18. PROFILE
+   24. PROFILE
 ------------------------------------------------------------------------- */
 function fillProfileForm(){
   if(!currentUserData) return;
@@ -1731,13 +2229,12 @@ function fillProfileForm(){
   document.getElementById('profileUsernameInput').value = currentUserData.username;
   document.getElementById('profileSubjectInput').value = currentUserData.subject || SUBJECTS[0];
   document.getElementById('profileBioInput').value = currentUserData.bio || '';
-
   const history = (currentUserData.usernameChangeHistory || []).filter(ts=>{
-    const days = (Date.now() - (ts.toMillis ? ts.toMillis() : ts)) / 86400000;
-    return days <= 30;
+    const days = (Date.now() - (ts.toMillis ? ts.toMillis() : ts)) / 86400000; return days <= 30;
   });
   const remaining = Math.max(0, 2 - history.length);
   document.getElementById('usernameChangeNote').textContent = `Sisa kesempatan ganti username bulan ini: ${remaining}/2`;
+  if(currentUserData.authProvider === 'google') document.getElementById('googleAccNote').classList.remove('hidden-force');
 }
 document.getElementById('editCoverBtn').addEventListener('click', ()=> promptImageUrl('cover'));
 document.getElementById('editAvatarBtn').addEventListener('click', ()=> promptImageUrl('avatar'));
@@ -1748,34 +2245,25 @@ function promptImageUrl(kind){
     <button id="imgUrlSaveBtn" class="w-full bg-maroon-600 hover:bg-maroon-500 text-white font-semibold py-2.5 rounded-xl text-sm">Simpan</button>
   `);
   document.getElementById('imgUrlSaveBtn').addEventListener('click', async ()=>{
-    const url = document.getElementById('imgUrlInput').value.trim();
-    if(!url) return;
+    const url = document.getElementById('imgUrlInput').value.trim(); if(!url) return;
     await db.collection('users').doc(currentUser.uid).update(kind==='cover' ? {coverURL:url} : {photoURL:url});
     closeModal(); showToast('Foto berhasil diperbarui!', 'success'); fillProfileForm();
   });
 }
-
 document.getElementById('saveProfileBtn').addEventListener('click', async ()=>{
   const newUsername = document.getElementById('profileUsernameInput').value.trim();
   const subject = document.getElementById('profileSubjectInput').value;
   const bio = document.getElementById('profileBioInput').value.trim();
   const updates = { subject, bio };
-
   if(newUsername !== currentUserData.username){
-    if(!/^[a-zA-Z0-9_.]{3,20}$/.test(newUsername)){
-      showToast('Username tidak valid (3-20 karakter, huruf/angka/underscore/titik).', 'error'); return;
-    }
+    if(!/^[a-zA-Z0-9_.]{3,20}$/.test(newUsername)){ showToast('Username tidak valid (3-20 karakter).', 'error'); return; }
     const history = (currentUserData.usernameChangeHistory || []).filter(ts=>{
-      const days = (Date.now() - (ts.toMillis ? ts.toMillis() : ts)) / 86400000;
-      return days <= 30;
+      const days = (Date.now() - (ts.toMillis ? ts.toMillis() : ts)) / 86400000; return days <= 30;
     });
-    if(history.length >= 2){
-      showToast('Kamu sudah mengganti username 2x dalam 30 hari terakhir.', 'error'); return;
-    }
+    if(history.length >= 2){ showToast('Kamu sudah mengganti username 2x dalam 30 hari terakhir.', 'error'); return; }
     const dup = await db.collection('users').where('usernameLower','==',newUsername.toLowerCase()).limit(1).get();
     if(!dup.empty){ showToast('Username sudah digunakan.', 'error'); return; }
-    updates.username = newUsername;
-    updates.usernameLower = newUsername.toLowerCase();
+    updates.username = newUsername; updates.usernameLower = newUsername.toLowerCase();
     updates.usernameChangeHistory = FieldValue.arrayUnion(Timestamp.now());
   }
   await db.collection('users').doc(currentUser.uid).update(updates);
@@ -1783,9 +2271,86 @@ document.getElementById('saveProfileBtn').addEventListener('click', async ()=>{
 });
 
 /* -------------------------------------------------------------------------
-   19. SETTINGS
+   25. EXPORT STUDY CARD (Canvas -> PNG)
+------------------------------------------------------------------------- */
+document.getElementById('exportStudyCardBtn').addEventListener('click', async ()=>{
+  showToast('Menyiapkan Study Card...', 'info');
+  const topics = SYLLABUS[currentUserData.subject] || [];
+  let avgScore = 0;
+  if(topics.length){
+    const results = await Promise.all(topics.map(topic => db.collection('resourceProgress').doc(`${currentUser.uid}_${currentUserData.subject}_${topic}`).get().catch(()=>null)));
+    const scores = topics.map((tp,i)=> (results[i] && results[i].exists) ? statusToScore(results[i].data().status) : 0);
+    avgScore = Math.round(scores.reduce((a,b)=>a+b,0)/topics.length);
+  }
+  drawStudyCard(currentUserData, avgScore);
+});
+function drawStudyCard(data, progressPct){
+  const canvas = document.createElement('canvas');
+  canvas.width = 900; canvas.height = 1100;
+  const ctx = canvas.getContext('2d');
+
+  const grad = ctx.createLinearGradient(0,0,900,1100);
+  grad.addColorStop(0,'#0a0f1e'); grad.addColorStop(1,'#101a33');
+  ctx.fillStyle = grad; ctx.fillRect(0,0,900,1100);
+
+  ctx.fillStyle = '#a81d31';
+  ctx.beginPath(); ctx.arc(450, 130, 55, 0, Math.PI*2); ctx.fill();
+  ctx.fillStyle = '#fff'; ctx.font = 'bold 60px sans-serif'; ctx.textAlign='center';
+  ctx.fillText('🔥', 450, 152);
+
+  ctx.fillStyle = '#fff'; ctx.font = 'bold 46px sans-serif'; ctx.textAlign = 'center';
+  ctx.fillText('LOCKINO', 450, 240);
+  ctx.fillStyle = '#8890a0'; ctx.font = '20px sans-serif';
+  ctx.fillText('Study Card', 450, 275);
+
+  ctx.fillStyle = '#fff'; ctx.font = 'bold 36px sans-serif';
+  ctx.fillText(data.username || 'User', 450, 350);
+  ctx.fillStyle = '#c8394d'; ctx.font = '22px sans-serif';
+  ctx.fillText(data.subject || '-', 450, 385);
+
+  ctx.textAlign = 'left';
+  ctx.fillStyle = '#16233f'; roundRect(ctx, 90, 440, 720, 150, 20); ctx.fill();
+  ctx.fillStyle = '#8890a0'; ctx.font='18px sans-serif'; ctx.fillText('STREAK BELAJAR', 130, 490);
+  ctx.fillStyle = '#fff'; ctx.font='bold 64px sans-serif'; ctx.fillText(`${data.streak||0} hari`, 130, 555);
+
+  ctx.fillStyle = '#16233f'; roundRect(ctx, 90, 620, 720, 180, 20); ctx.fill();
+  ctx.fillStyle = '#8890a0'; ctx.font='18px sans-serif'; ctx.fillText(`PROGRESS SILABUS ${(data.subject||'').toUpperCase()}`, 130, 665);
+  ctx.fillStyle = '#101a33'; roundRect(ctx, 130, 690, 640, 24, 12); ctx.fill();
+  ctx.fillStyle = '#a81d31'; roundRect(ctx, 130, 690, Math.max(24, 640*progressPct/100), 24, 12); ctx.fill();
+  ctx.fillStyle = '#fff'; ctx.font='bold 28px sans-serif'; ctx.fillText(`${progressPct}%`, 130, 760);
+
+  const totalToday = getTodaysStudySeconds(data);
+  ctx.fillStyle = '#16233f'; roundRect(ctx, 90, 830, 720, 150, 20); ctx.fill();
+  ctx.fillStyle = '#8890a0'; ctx.font='18px sans-serif'; ctx.fillText('TOTAL BELAJAR HARI INI', 130, 880);
+  ctx.fillStyle = '#fff'; ctx.font='bold 48px sans-serif'; ctx.fillText(formatHM(totalToday), 130, 935);
+
+  ctx.textAlign='center'; ctx.fillStyle = '#5b6478'; ctx.font='16px sans-serif';
+  ctx.fillText('Dibuat dengan Lockino — Tempatmu Untuk Naik Level Setiap Hari', 450, 1050);
+
+  const dataUrl = canvas.toDataURL('image/png');
+  openModal(`
+    <h3 class="text-lg font-bold text-white mb-3">Study Card Kamu</h3>
+    <img src="${dataUrl}" class="w-full rounded-xl mb-4 border border-navy-700">
+    <a href="${dataUrl}" download="lockino-study-card.png" class="block w-full text-center bg-maroon-600 hover:bg-maroon-500 text-white font-semibold py-2.5 rounded-xl text-sm"><i class="fa-solid fa-download mr-2"></i>Unduh Study Card</a>
+  `);
+}
+function roundRect(ctx, x, y, w, h, r){
+  ctx.beginPath();
+  ctx.moveTo(x+r, y);
+  ctx.arcTo(x+w, y, x+w, y+h, r);
+  ctx.arcTo(x+w, y+h, x, y+h, r);
+  ctx.arcTo(x, y+h, x, y, r);
+  ctx.arcTo(x, y, x+w, y, r);
+  ctx.closePath();
+}
+
+/* -------------------------------------------------------------------------
+   26. SETTINGS
 ------------------------------------------------------------------------- */
 document.getElementById('changePwBtn').addEventListener('click', async ()=>{
+  if(currentUserData && currentUserData.authProvider === 'google'){
+    showToast('Akun Google tidak menggunakan password di Lockino.', 'error'); return;
+  }
   const currentPw = document.getElementById('currentPwInput').value;
   const newPw = document.getElementById('newPwInput').value;
   if(!currentPw || newPw.length < 6){ showToast('Isi password lama & baru (min 6 karakter).', 'error'); return; }
@@ -1797,20 +2362,19 @@ document.getElementById('changePwBtn').addEventListener('click', async ()=>{
     document.getElementById('currentPwInput').value=''; document.getElementById('newPwInput').value='';
   }catch(err){ showToast(mapAuthError(err), 'error'); }
 });
-
 document.getElementById('resetLocalBtn').addEventListener('click', ()=>{
   confirmDialog('Reset data lokal?', 'Tema dan preferensi bahasa akan dikembalikan ke default.', ()=>{
-    localStorage.removeItem('lockin_theme'); localStorage.removeItem('lockin_lang');
+    localStorage.removeItem('lockino_theme'); localStorage.removeItem('lockino_lang');
     applyTheme('dark'); currentLang='id'; applyI18n();
     showToast('Data lokal direset.', 'success');
   });
 });
-
 document.getElementById('deleteAccountBtn').addEventListener('click', ()=>{
+  const isGoogle = currentUserData && currentUserData.authProvider === 'google';
   openModal(`
     <h3 class="text-lg font-bold text-maroon-400 mb-2"><i class="fa-solid fa-triangle-exclamation mr-2"></i>Hapus Akun Permanen</h3>
-    <p class="text-sm text-ash-400 mb-3">Tindakan ini tidak dapat dibatalkan. Masukkan password untuk konfirmasi.</p>
-    <input id="delPwInput" type="password" placeholder="Password" class="w-full bg-navy-950 border border-navy-700 rounded-xl px-4 py-2.5 text-sm text-white outline-none focus:border-maroon-500 mb-3">
+    <p class="text-sm text-ash-400 mb-3">Tindakan ini tidak dapat dibatalkan. ${isGoogle ? 'Kamu akan diminta masuk ulang dengan Google untuk konfirmasi.' : 'Masukkan password untuk konfirmasi.'}</p>
+    ${isGoogle ? '' : `<input id="delPwInput" type="password" placeholder="Password" class="w-full bg-navy-950 border border-navy-700 rounded-xl px-4 py-2.5 text-sm text-white outline-none focus:border-maroon-500 mb-3">`}
     <div class="flex gap-2 justify-end">
       <button id="delCancelBtn" class="px-4 py-2 rounded-xl bg-navy-800 hover:bg-navy-700 text-sm text-white">Batal</button>
       <button id="delConfirmBtn" class="px-4 py-2 rounded-xl bg-maroon-600 hover:bg-maroon-500 text-sm text-white">Hapus Akun</button>
@@ -1818,10 +2382,13 @@ document.getElementById('deleteAccountBtn').addEventListener('click', ()=>{
   `);
   document.getElementById('delCancelBtn').addEventListener('click', closeModal);
   document.getElementById('delConfirmBtn').addEventListener('click', async ()=>{
-    const pw = document.getElementById('delPwInput').value;
     try{
-      const cred = firebase.auth.EmailAuthProvider.credential(currentUser.email, pw);
-      await currentUser.reauthenticateWithCredential(cred);
+      if(isGoogle){ await currentUser.reauthenticateWithPopup(googleProvider); }
+      else{
+        const pw = document.getElementById('delPwInput').value;
+        const cred = firebase.auth.EmailAuthProvider.credential(currentUser.email, pw);
+        await currentUser.reauthenticateWithCredential(cred);
+      }
       await db.collection('users').doc(currentUser.uid).delete();
       await currentUser.delete();
       closeModal(); showToast('Akun berhasil dihapus.', 'success');
@@ -1831,3 +2398,4 @@ document.getElementById('deleteAccountBtn').addEventListener('click', ()=>{
 </script>
 </body>
 </html>
+
